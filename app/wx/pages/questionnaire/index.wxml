@@ -1,0 +1,82 @@
+<!-- P1 问卷页 — 7题单步表单 -->
+<view class="page">
+
+  <!-- 顶部导航：返回键 + 分段进度 + 计数 -->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navPaddingRight}};">
+    <view class="nav-back-btn" bindtap="goHome" hover-class="nav-btn-hover" hover-stay-time="100">
+      <image src="/assets/icons/home.svg" class="nav-home-icon" mode="aspectFit"/>
+    </view>
+    <view class="progress-segments">
+      <view
+        wx:for="{{progressSegments}}"
+        wx:key="index"
+        class="seg {{item.filled ? 'seg-filled' : 'seg-empty'}}"
+      ></view>
+    </view>
+    <text class="progress-counter">{{currentIndex + 1}}/{{totalQuestions}}</text>
+  </view>
+
+  <!-- 题目加载中占位 -->
+  <view wx:if="{{!questionsReady}}" class="question-area" style="display:flex;align-items:center;justify-content:center;">
+    <text style="color:#A0A0A0;font-size:28rpx;">加载中...</text>
+  </view>
+
+  <!-- 面包屑 -->
+  <view wx:if="{{questionsReady}}" class="breadcrumb-row">
+    <text class="breadcrumb-text">{{entryStateLabel}}</text>
+    <text wx:if="{{currentQuestion.category}}" class="breadcrumb-sep"> › </text>
+    <text wx:if="{{currentQuestion.category}}" class="breadcrumb-text">{{currentQuestion.category}}</text>
+  </view>
+
+  <!-- 题目区域（可滚动） -->
+  <scroll-view wx:if="{{questionsReady}}" class="question-area" scroll-y>
+
+    <text class="question-title">{{currentQuestion.title}}</text>
+    <text wx:if="{{currentQuestion.desc}}" class="question-desc">{{currentQuestion.desc}}</text>
+
+    <!-- 选项列表 -->
+    <view class="options">
+      <view
+        wx:for="{{currentQuestion.options}}"
+        wx:key="value"
+        class="option {{currentAnswer === item.value ? 'option-selected' : ''}}"
+        bindtap="selectOption"
+        data-value="{{item.value}}"
+        hover-class="option-hover"
+        hover-stay-time="80"
+      >
+        <view class="radio {{currentAnswer === item.value ? 'radio-on' : ''}}">
+          <text wx:if="{{currentAnswer === item.value}}" class="radio-check">✓</text>
+        </view>
+        <view class="option-content">
+          <text class="option-label {{currentAnswer === item.value ? 'option-label-on' : ''}}">{{item.label}}</text>
+          <text wx:if="{{item.subDesc}}" class="option-subdesc">{{item.subDesc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 跳过按钮 -->
+    <view class="skip-btn" bindtap="skipQuestion" hover-class="skip-hover" hover-stay-time="80">
+      <text class="skip-text">不想说 / 跳过这题</text>
+    </view>
+
+    <view style="height: 24rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部操作栏：左返回 + 右继续 -->
+  <view class="bottom-bar">
+    <view class="btn-back" bindtap="goPrev" hover-class="btn-back-hover" hover-stay-time="100">
+      <text class="btn-back-text">‹</text>
+    </view>
+    <view
+      class="btn-next {{!currentAnswer && !skipped ? 'btn-disabled' : ''}}"
+      bindtap="goNext"
+      hover-class="{{!currentAnswer && !skipped ? '' : 'btn-hover'}}"
+      hover-stay-time="80"
+    >
+      <text class="btn-text">{{currentIndex === totalQuestions - 1 ? (loading ? '生成中...' : '生成评估') : '继续 →'}}</text>
+    </view>
+  </view>
+  <view class="safe-area-bottom"></view>
+
+</view>

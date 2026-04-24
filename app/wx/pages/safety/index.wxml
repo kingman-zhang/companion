@@ -1,0 +1,49 @@
+<!-- P8 安全拦截页 -->
+<scroll-view class="page" scroll-y type="list">
+
+  <!-- 顶部关怀区域 -->
+  <view class="care-section">
+    <view class="care-icon-wrap">
+      <text class="care-icon">🫂</text>
+    </view>
+    <text class="care-title">我注意到你现在可能很难受</text>
+    <text class="care-subtitle">你的感受非常重要。有时候，和专业的人说说话，会帮助很大。</text>
+  </view>
+
+  <!-- 资源卡片 -->
+  <view class="resources">
+    <text class="section-label">可以联系的支持热线</text>
+
+    <view
+      wx:for="{{hotlines}}"
+      wx:key="name"
+      class="hotline-card"
+      bindtap="callHotline"
+      data-phone="{{item.phone}}"
+      hover-class="card-hover"
+      hover-stay-time="100"
+    >
+      <view class="hotline-info">
+        <text class="hotline-name">{{item.name}}</text>
+        <text class="hotline-desc">{{item.desc}}</text>
+      </view>
+      <view class="hotline-right">
+        <text class="hotline-phone">{{item.phone}}</text>
+        <text class="hotline-arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部信息 -->
+  <view class="bottom-tip">
+    <text class="bottom-tip-text">你并不孤单，我们随时在这里</text>
+  </view>
+
+  <!-- 返回按钮 -->
+  <view class="footer-btn">
+    <view class="btn-ok" bindtap="goHome" hover-class="btn-hover" hover-stay-time="100">
+      <text>我明白了，返回首页</text>
+    </view>
+  </view>
+
+</scroll-view>

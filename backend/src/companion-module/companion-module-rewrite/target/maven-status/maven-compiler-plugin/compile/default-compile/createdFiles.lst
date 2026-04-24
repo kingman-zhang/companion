@@ -1,0 +1,10 @@
+com/kingman/companion/module/rewrite/resp/RewriteResp.class
+com/kingman/companion/module/rewrite/service/impl/RewriteServiceImpl.class
+com/kingman/companion/module/rewrite/entity/RewriteVariant.class
+com/kingman/companion/module/rewrite/repository/RewriteRepository.class
+com/kingman/companion/module/rewrite/resp/RewriteResp$VariantResp$VariantRespBuilder.class
+com/kingman/companion/module/rewrite/entity/RewriteRecord.class
+com/kingman/companion/module/rewrite/req/RewriteReq.class
+com/kingman/companion/module/rewrite/service/RewriteService.class
+com/kingman/companion/module/rewrite/resp/RewriteResp$RewriteRespBuilder.class
+com/kingman/companion/module/rewrite/resp/RewriteResp$VariantResp.class

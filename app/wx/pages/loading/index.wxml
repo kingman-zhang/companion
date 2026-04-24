@@ -1,0 +1,37 @@
+<!-- 评估过渡加载页 -->
+<view class="page">
+
+  <!-- 呼吸圆 -->
+  <view class="circle-wrap">
+    <view class="main-circle"></view>
+  </view>
+
+  <!-- 标题 -->
+  <text class="title">正在为你整理...</text>
+
+  <!-- 步骤列表 -->
+  <view class="steps">
+    <view
+      wx:for="{{steps}}"
+      wx:key="id"
+      class="step-row step-row-{{item.state}}"
+    >
+      <!-- 图标区 -->
+      <view class="step-icon-wrap">
+        <view wx:if="{{item.state === 'done'}}" class="step-icon icon-done">
+          <text class="step-check">✓</text>
+        </view>
+        <view wx:elif="{{item.state === 'loading'}}" class="step-icon icon-loading"></view>
+        <view wx:else class="step-icon icon-pending"></view>
+      </view>
+      <!-- 文字 -->
+      <text class="step-text">{{item.text}}</text>
+    </view>
+  </view>
+
+  <!-- 底部免责 -->
+  <view class="footer">
+    <text class="footer-text">评估基于你提供的信息 · 仅供参考 · 不替代专业心理咨询</text>
+  </view>
+
+</view>

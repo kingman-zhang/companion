@@ -1,0 +1,126 @@
+<!-- P3 情绪急救聊天页 -->
+<view class="page">
+
+  <!-- 顶部导航 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack" hover-class="nav-hover" hover-stay-time="100">
+      <text class="nav-back-icon">‹</text>
+      <text class="nav-back-text">返回</text>
+    </view>
+    <text class="nav-title">情绪急救</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation
+    enhanced
+    bounces="{{false}}"
+  >
+    <!-- 会话初始提示 -->
+    <view class="session-tip" wx:if="{{messages.length === 0 && !loading}}">
+      <text class="session-tip-text">我在，说说你现在的感受吧</text>
+    </view>
+
+    <!-- 消息气泡 -->
+    <view
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="msg-{{item.id}}"
+      class="msg-row {{item.role === 'user' ? 'msg-row-user' : 'msg-row-ai'}}"
+    >
+      <!-- AI 消息 -->
+      <block wx:if="{{item.role === 'assistant'}}">
+        <view class="msg-bubble msg-bubble-ai">
+          <view wx:if="{{item.emotion_label}}" class="emotion-badge emotion-{{item.emotion_label}}">
+            <text class="emotion-text">{{item.emotion_text}}</text>
+          </view>
+          <text class="msg-text">{{item.content}}</text>
+        </view>
+      </block>
+
+      <!-- 用户消息 -->
+      <block wx:else>
+        <view class="msg-bubble msg-bubble-user">
+          <text class="msg-text">{{item.content}}</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- AI 正在输入 -->
+    <view class="msg-row msg-row-ai" wx:if="{{loading}}">
+      <view class="msg-bubble msg-bubble-ai msg-typing">
+        <text class="typing-dot">·</text>
+        <text class="typing-dot">·</text>
+        <text class="typing-dot">·</text>
+      </view>
+    </view>
+
+    <!-- Paywall 提示 -->
+    <view class="paywall-banner" wx:if="{{showPaywall}}">
+      <text class="paywall-title">已用完 10 轮免费对话</text>
+      <text class="paywall-sub">升级会员，无限次倾诉陪伴</text>
+      <view class="paywall-btn" hover-class="btn-hover" hover-stay-time="100">
+        <text>立即升级</text>
+      </view>
+    </view>
+
+    <!-- 底部占位 -->
+    <view class="list-bottom" id="list-bottom"></view>
+  </scroll-view>
+
+  <!-- 微干预卡片 -->
+  <view class="micro-card {{showMicro ? 'micro-card-visible' : ''}}" wx:if="{{microIntervention}}">
+    <view class="micro-header">
+      <text class="micro-title">{{microIntervention.title}}</text>
+      <view class="micro-close" bindtap="closeMicro">
+        <text class="micro-close-icon">✕</text>
+      </view>
+    </view>
+    <text class="micro-body">{{microIntervention.body}}</text>
+    <view class="micro-actions">
+      <view class="micro-btn-primary" bindtap="closeMicro" hover-class="btn-hover" hover-stay-time="100">
+        <text>{{microIntervention.action_label}}</text>
+      </view>
+      <view
+        class="micro-btn-secondary"
+        wx:if="{{microIntervention.secondary_action_label}}"
+        bindtap="goRewrite"
+        hover-class="btn-hover"
+        hover-stay-time="100"
+      >
+        <text>{{microIntervention.secondary_action_label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部输入区 -->
+  <view class="input-bar" wx:if="{{!showPaywall}}">
+    <view class="input-wrap">
+      <input
+        class="chat-input"
+        value="{{inputValue}}"
+        bindinput="onInput"
+        placeholder="说说你现在的感受…"
+        placeholder-class="input-placeholder"
+        confirm-type="send"
+        bindconfirm="sendMessage"
+        adjust-position="{{true}}"
+        maxlength="2000"
+        disabled="{{loading}}"
+      />
+    </view>
+    <view
+      class="send-btn {{(!inputValue || loading) ? 'send-btn-disabled' : ''}}"
+      bindtap="sendMessage"
+      hover-class="btn-hover"
+      hover-stay-time="80"
+    >
+      <text class="send-icon">↑</text>
+    </view>
+  </view>
+
+</view>

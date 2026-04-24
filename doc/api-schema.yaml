@@ -1,0 +1,1168 @@
+openapi: 3.0.3
+info:
+  title: RelationshipAI (伴听) API
+  version: "1.1.0"
+  description: |
+    RelationshipAI 情感陪伴产品后端 API。
+
+    **服务地址：** http://localhost:8080（本地开发）
+
+    **核心原则：**
+    - 所有决策逻辑（评分、等级、置信度）均由规则引擎计算，LLM 仅负责生成文字输出
+    - 安全拦截（HTTP 451）为最高优先级响应，任何模块均可触发
+    - 所有响应统一包裹在 IResult<T> 结构中（见下方"通用响应格式"）
+    - 字段命名：请求体和响应体均使用 **snake_case**（Jackson SNAKE_CASE 策略）
+    - 枚举值：JSON 中使用大写蛇形命名（如 `LESS_THAN_3M`、`GREEN`）
+
+    **通用响应格式：**
+    ```json
+    {
+      "code": 200,
+      "message": "success",
+      "data": { ... },
+      "timestamp": 1700000000000
+    }
+    ```
+    - `code=200` → 业务成功，`data` 为实际数据
+    - `code!=200` → 业务失败，`message` 为错误说明，`data` 为 null
+    - HTTP 状态码只在安全拦截（451）、未授权（401）时非 200
+
+    **MVP 接口：** /assessment、/chat/session、/chat、/rewrite
+    **Phase 2 接口（已定义 Schema）：** /plan、/log
+
+servers:
+  - url: http://localhost:8080
+    description: 本地开发
+  - url: https://api.relationshipai.com
+    description: 生产环境
+
+tags:
+  - name: assessment
+    description: 关系评估 — 问卷提交与结果查询
+  - name: chat
+    description: 情绪急救聊天（MVP）
+  - name: rewrite
+    description: 消息改写（MVP）
+  - name: plan
+    description: 挽回计划（Phase 2）
+  - name: log
+    description: 每日情绪日志（Phase 2）
+
+paths:
+
+  # ────────────────────────────────────────────────
+  # POST /api/v1/assessment
+  # ────────────────────────────────────────────────
+  /api/v1/assessment:
+    post:
+      tags: [assessment]
+      summary: 提交关系评估问卷（7题）
+      description: |
+        提交 7 题问卷，规则引擎计算三维度评分：
+        - **情感联结（EC）**：Q1(30%) + Q2(20%) + Q6(50%)，权重占总分 40%
+        - **沟通质量（CS）**：Q4(100%)，权重占总分 35%
+        - **冲突处理（CF）**：Q5(100%)，权重占总分 25%
+        - **总分** = EC×0.40 + CS×0.35 + CF×0.25
+
+        **分级：** GREEN ≥ 65 / YELLOW 35-64 / RED < 35
+
+        **置信度：** 填写题目数 / 7，精确到小数点后一位（0.0–1.0）
+
+        **session_id 和 entry_state 为可选字段**，其余 7 题必填。
+        entry_state（P0 状态卡）不参与评分，用于埋点。
+        user_primary_intent（Q7）不参与评分，影响 recommended_action 枚举和结果页流向。
+      operationId: submitAssessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentReq'
+            example:
+              session_id: "sess_abc123"
+              entry_state: "BREAKDOWN"
+              relationship_duration: "SIX_MONTHS_TO_2Y"
+              breakup_method: "DURING_ARGUMENT"
+              current_emotion: "SAD"
+              communication_quality: "SURFACE_LEVEL"
+              conflict_style: "AVOID_THEN_IGNORE"
+              partner_love_perception: "UNSURE_CHANGED"
+              user_primary_intent: "RECONCILE"
+      responses:
+        '200':
+          description: 评估成功（business code=200）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultAssessmentResp'
+              example:
+                code: 200
+                message: "success"
+                data:
+                  assessment_id: "1234567890"
+                  score: 63
+                  level: "YELLOW"
+                  confidence: 1.0
+                  emotional_connection_score: 68
+                  communication_score: 62
+                  conflict_score: 58
+                  core_insight: "你们缺的不是感情，是喘息空间。"
+                  llm_reason: "关系处于敏感期，有些因素对挽回有利，但也存在障碍。先稳定自己的情绪。"
+                  recommended_action: "COOL_DOWN"
+                  user_primary_intent: "RECONCILE"
+                  created_at: "2026-04-21 10:30:00"
+                timestamp: 1745241000000
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # GET /api/v1/assessment/{assessmentId}
+  # ────────────────────────────────────────────────
+  /api/v1/assessment/{assessmentId}:
+    get:
+      tags: [assessment]
+      summary: 查询评估结果
+      description: 通过评估 ID 查询已完成的评估结果（用于页面刷新、分享回显等场景）。
+      operationId: getAssessmentById
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 评估记录 ID（来自 POST /assessment 响应的 data.assessment_id）
+          example: "1234567890"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultAssessmentResp'
+        '200_not_found':
+          description: 业务错误——评估不存在（HTTP 200，business code=404001）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultError'
+              example:
+                code: 404001
+                message: "资源不存在"
+                data: null
+                timestamp: 1745241000000
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # POST /api/v1/chat/session
+  # ────────────────────────────────────────────────
+  /api/v1/chat/session:
+    post:
+      tags: [chat]
+      summary: 创建聊天会话
+      description: |
+        进入聊天页前先创建会话，获取 session_id。
+        每次打开聊天页面应先调用此接口创建新会话。
+        session_id 需在后续所有 POST /api/v1/chat 请求中携带。
+      operationId: createChatSession
+      responses:
+        '200':
+          description: 会话创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      session_id:
+                        type: string
+                        description: 会话 ID，后续聊天时作为入参传入
+                        example: "1234567890123456"
+                  timestamp:
+                    type: integer
+                    example: 1745241000000
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # POST /api/v1/chat
+  # ────────────────────────────────────────────────
+  /api/v1/chat:
+    post:
+      tags: [chat]
+      summary: 发送聊天消息
+      description: |
+        用户发送消息，AI 返回情绪共情回复、情绪标签及强度。
+
+        **免费层限制：** 每个 session 最多 10 轮（10 次用户消息），超出返回 business code=429001。
+
+        **微干预触发：** emotion_intensity ≥ 8 时，响应体 data 中附带 micro_intervention 对象。
+
+        **情绪检测（规则）：**
+        - 担心/害怕 → ANXIETY（触发 breathe 微干预）
+        - 愤怒/生气/火 → ANGER（触发 step_away 微干预）
+        - 难过/伤心/痛苦 → SADNESS（触发 delay_send 微干预）
+        - 其他 → OTHER
+
+        **情绪强度：** 基础值 5，每个感叹号 +2（上限 +4），内容超 500 字 +1，最大值 10。
+      operationId: sendChatMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatReq'
+            example:
+              session_id: "1234567890123456"
+              content: "我真的很难受，不知道怎么办"
+      responses:
+        '200':
+          description: 消息发送成功（business code=200 正常；business code=429001 超出上限）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultChatResp'
+              examples:
+                normal:
+                  summary: 正常回复
+                  value:
+                    code: 200
+                    message: "success"
+                    data:
+                      message_id: "1234567890123457"
+                      session_id: "1234567890123456"
+                      role: "assistant"
+                      content: "我听到你了，这种感觉真的很难受。先深吸一口气，我陪着你。"
+                      emotion_label: "SADNESS"
+                      emotion_intensity: 5
+                      safety_flag: false
+                      micro_intervention: null
+                      created_at: "2026-04-21 10:32:00"
+                    timestamp: 1745241120000
+                high_intensity:
+                  summary: 高强度情绪（附带微干预）
+                  value:
+                    code: 200
+                    message: "success"
+                    data:
+                      message_id: "1234567890123458"
+                      session_id: "1234567890123456"
+                      role: "assistant"
+                      content: "我能感受到你现在特别痛。先停下来，我们一起慢慢来。"
+                      emotion_label: "ANXIETY"
+                      emotion_intensity: 9
+                      safety_flag: false
+                      micro_intervention:
+                        type: "breathe"
+                        title: "先深呼吸一下"
+                        body: "4秒吸气 → 4秒屏息 → 4秒呼气，重复3次"
+                        action_label: "好的，我试试"
+                        secondary_action_label: null
+                      created_at: "2026-04-21 10:32:00"
+                    timestamp: 1745241120000
+                rate_limited:
+                  summary: 超出免费层限制
+                  value:
+                    code: 429001
+                    message: "已达免费使用上限，升级会员继续使用"
+                    data: null
+                    timestamp: 1745241120000
+        '451':
+          $ref: '#/components/responses/SafetyBlocked'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # POST /api/v1/rewrite
+  # ────────────────────────────────────────────────
+  /api/v1/rewrite:
+    post:
+      tags: [rewrite]
+      summary: 消息改写
+      description: |
+        输入原始消息，返回 3 个改写版本（gentle / direct / brief）。
+
+        **免费层限制：** 每日 1 次（超出返回 business code=429001）。
+        前端对第 2、3 个版本需加毛玻璃遮罩（Paywall），点击触发付费引导。
+
+        **MVP 实现：** 当前为规则模板，后续替换为 LLM 生成。
+
+        **版本对应前端卡片顺序：** gentle(1) → direct(2, 毛玻璃) → brief(3, 毛玻璃)
+      operationId: rewriteMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewriteReq'
+            example:
+              session_id: "1234567890123456"
+              original_message: "你为什么要这样对我，我真的好失望"
+      responses:
+        '200':
+          description: 改写成功（business code=200 正常；business code=429001 超出上限）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultRewriteResp'
+              example:
+                code: 200
+                message: "success"
+                data:
+                  rewrite_id: "1234567890123459"
+                  variants:
+                    - version: "gentle"
+                      content: "我最近感觉我们之间出现了一些距离，我很在乎你，想和你好好谈谈。"
+                      risk_level: "low"
+                      risk_reason: "表达温和，情绪稳定，适合发送"
+                      send_recommended: true
+                      confidence: 0.85
+                    - version: "direct"
+                      content: "你这样的处理方式让我很失望，我需要知道你的想法。"
+                      risk_level: "medium"
+                      risk_reason: "直接表达可能引起防御，需谨慎"
+                      send_recommended: true
+                      confidence: 0.75
+                    - version: "brief"
+                      content: "我很失望，想谈谈。"
+                      risk_level: "low"
+                      risk_reason: "简洁克制，留有空间"
+                      send_recommended: true
+                      confidence: 0.80
+                  created_at: "2026-04-21 10:35:00"
+                timestamp: 1745241300000
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '451':
+          $ref: '#/components/responses/SafetyBlocked'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # GET /api/v1/plan  （Phase 2，未实现）
+  # ────────────────────────────────────────────────
+  /api/v1/plan:
+    get:
+      tags: [plan]
+      summary: 获取挽回计划（Phase 2，暂未实现）
+      description: 根据评估结果返回分阶段挽回计划（4 阶段 7 天）。免费层仅 Day 1。
+      operationId: getPlan
+      parameters:
+        - name: assessment_id
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "1234567890"
+      responses:
+        '200':
+          description: 计划获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IResultPlanResp'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ────────────────────────────────────────────────
+  # POST /api/v1/log  （Phase 2，未实现）
+  # GET  /api/v1/log  （Phase 2，未实现）
+  # ────────────────────────────────────────────────
+  /api/v1/log:
+    post:
+      tags: [log]
+      summary: 提交每日日志（Phase 2，暂未实现）
+      operationId: submitLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogRequest'
+      responses:
+        '200':
+          description: 日志提交成功
+
+    get:
+      tags: [log]
+      summary: 获取日志历史（Phase 2，暂未实现）
+      operationId: getLogs
+      responses:
+        '200':
+          description: 日志历史获取成功
+
+# ════════════════════════════════════════════════════
+# COMPONENTS
+# ════════════════════════════════════════════════════
+components:
+
+  # ──────────────────────────────────────────────────
+  # Schemas — IResult 包装
+  # ──────────────────────────────────────────────────
+  schemas:
+
+    IResultAssessmentResp:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "success"
+        data:
+          $ref: '#/components/schemas/AssessmentResp'
+        timestamp:
+          type: integer
+          example: 1745241000000
+
+    IResultChatResp:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "success"
+        data:
+          $ref: '#/components/schemas/ChatResp'
+          nullable: true
+        timestamp:
+          type: integer
+          example: 1745241000000
+
+    IResultRewriteResp:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "success"
+        data:
+          $ref: '#/components/schemas/RewriteResp'
+          nullable: true
+        timestamp:
+          type: integer
+          example: 1745241000000
+
+    IResultPlanResp:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/PlanResponse'
+          nullable: true
+        timestamp:
+          type: integer
+
+    IResultError:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 业务错误码（非 200）
+        message:
+          type: string
+          description: 错误描述
+        data:
+          type: object
+          nullable: true
+        timestamp:
+          type: integer
+
+    # ──────────────────────────────────────────────────
+    # Schemas — Request Bodies
+    # ──────────────────────────────────────────────────
+
+    AssessmentReq:
+      type: object
+      description: |
+        7 题问卷请求体。字段使用 snake_case，枚举值使用大写蛇形命名（如 LESS_THAN_3M）。
+        session_id 和 entry_state 可选，其余均必填。
+      required:
+        - relationship_duration
+        - breakup_method
+        - current_emotion
+        - communication_quality
+        - conflict_style
+        - partner_love_perception
+        - user_primary_intent
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID（可选，用于关联上下文）
+          example: "sess_abc123"
+        entry_state:
+          $ref: '#/components/schemas/EntryState'
+          description: P0 首页选择的情绪状态（埋点用，不参与评分）
+        relationship_duration:
+          $ref: '#/components/schemas/RelationshipDuration'
+          description: Q1 — 你们在一起多久了
+        breakup_method:
+          $ref: '#/components/schemas/BreakupMethod'
+          description: Q2 — TA 是怎么提出来的（分手方式）
+        current_emotion:
+          $ref: '#/components/schemas/CurrentEmotion'
+          description: Q3 — 现在你最强烈的感受是
+        communication_quality:
+          $ref: '#/components/schemas/CommunicationQuality'
+          description: Q4 — 分手前3个月，你们的沟通怎样
+        conflict_style:
+          $ref: '#/components/schemas/ConflictStyle'
+          description: Q5 — 你们吵架时，通常会
+        partner_love_perception:
+          $ref: '#/components/schemas/PartnerLovePerception'
+          description: Q6 — 你觉得 TA 还爱你吗
+        user_primary_intent:
+          $ref: '#/components/schemas/UserPrimaryIntent'
+          description: Q7 — 现在你最想要什么（不参与评分，影响结果页流向）
+
+    ChatReq:
+      type: object
+      required:
+        - session_id
+        - content
+      properties:
+        session_id:
+          type: string
+          description: 聊天会话 ID（由 POST /api/v1/chat/session 创建）
+          example: "1234567890123456"
+        content:
+          type: string
+          description: 用户消息内容，1–2000 字
+          minLength: 1
+          maxLength: 2000
+          example: "我真的很难受，不知道怎么办"
+
+    RewriteReq:
+      type: object
+      required:
+        - original_message
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID（可选）
+          example: "1234567890123456"
+        original_message:
+          type: string
+          description: 用户想发送的原始消息
+          minLength: 1
+          maxLength: 1000
+          example: "你为什么要这样对我，我真的好失望"
+
+    LogRequest:
+      type: object
+      required:
+        - date
+        - emotion_score
+        - emotion_label
+        - contacted_ex
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-04-21"
+        emotion_score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+        emotion_label:
+          $ref: '#/components/schemas/EmotionLabel'
+        contacted_ex:
+          type: boolean
+          example: false
+        contact_outcome:
+          $ref: '#/components/schemas/ContactOutcome'
+          nullable: true
+        notes:
+          type: string
+          maxLength: 200
+          nullable: true
+          example: "今天状态稍好一点"
+
+    # ──────────────────────────────────────────────────
+    # Schemas — Response Bodies
+    # ──────────────────────────────────────────────────
+
+    AssessmentResp:
+      type: object
+      description: |
+        评估结果。created_at 格式为 "yyyy-MM-dd HH:mm:ss"（非 ISO 8601，Jackson date-format 配置）。
+      properties:
+        assessment_id:
+          type: string
+          description: 评估记录唯一 ID（Snowflake 数字字符串）
+          example: "1234567890"
+        score:
+          type: integer
+          description: 总分 0–100（规则计算）
+          minimum: 0
+          maximum: 100
+          example: 63
+        level:
+          $ref: '#/components/schemas/AssessmentLevel'
+          description: 评估等级（规则计算）
+        confidence:
+          type: number
+          format: double
+          description: 置信度 0.0–1.0（填写完整率，精确到小数点后一位）
+          minimum: 0.0
+          maximum: 1.0
+          example: 1.0
+        emotional_connection_score:
+          type: integer
+          description: |
+            情感联结维度得分 0–100。
+            计算：Q1(30%) + Q2(20%) + Q6(50%)。
+            结果页进度条对应此字段。
+          example: 68
+        communication_score:
+          type: integer
+          description: |
+            沟通质量维度得分 0–100。
+            计算：Q4(100%)。
+            结果页进度条对应此字段。
+          example: 62
+        conflict_score:
+          type: integer
+          description: |
+            冲突处理维度得分 0–100。
+            计算：Q5(100%)。
+            结果页进度条对应此字段。
+          example: 58
+        core_insight:
+          type: string
+          description: |
+            核心洞察（一句话引用体），规则生成。
+            示例输出：
+            - "你们缺的不是感情，是有效的沟通方式。"（沟通最弱时）
+            - "你们缺的不是感情，是喘息空间。"（冲突最弱且 AVOID_THEN_IGNORE）
+            - "冲突模式在消耗这段关系的能量。"（冲突最弱）
+            - "外部压力是主因，感情基础还在。"（EC 最弱且对方爱 YES_EXTERNAL_PRESSURE）
+            - "这可能是一次情绪爆发，未必是最终决定。"（分手方式 DURING_ARGUMENT）
+            - "关系有修复空间，但需要改变互动模式。"（通用兜底）
+          example: "你们缺的不是感情，是喘息空间。"
+        llm_reason:
+          type: string
+          description: 洞察说明文字（≤80字），规则生成（MVP），后续替换为 LLM
+          example: "关系处于敏感期，有些因素对挽回有利，但也存在障碍。先稳定自己的情绪。"
+        recommended_action:
+          $ref: '#/components/schemas/RecommendedAction'
+          description: |
+            推荐行动（由 level + user_primary_intent 共同决定）：
+            - level=RED → SEEK_PROFESSIONAL_HELP
+            - intent=LEARN_GOODBYE → LET_GO
+            - intent=PROCESS_EMOTION_FIRST 或 CHAT_FIRST → COOL_DOWN
+            - level=GREEN → CONSIDER_RECONCILE
+            - 其余 → COOL_DOWN
+        user_primary_intent:
+          $ref: '#/components/schemas/UserPrimaryIntent'
+          description: 透传用户意图（Q7 的值），用于结果页 CTA 按钮流向
+        created_at:
+          type: string
+          description: 创建时间，格式 "yyyy-MM-dd HH:mm:ss"
+          example: "2026-04-21 10:30:00"
+
+    ChatResp:
+      type: object
+      properties:
+        message_id:
+          type: string
+          description: 消息唯一 ID
+          example: "1234567890123457"
+        session_id:
+          type: string
+          description: 所属会话 ID
+          example: "1234567890123456"
+        role:
+          type: string
+          enum: [assistant]
+          description: 固定为 assistant
+        content:
+          type: string
+          description: AI 回复内容
+          example: "我听到你了，这种感觉真的很难受。先深吸一口气，我陪着你。"
+        emotion_label:
+          $ref: '#/components/schemas/EmotionLabel'
+          description: AI 检测到的用户当前情绪标签
+        emotion_intensity:
+          type: integer
+          description: 情绪强度 0–10。≥ 8 时 micro_intervention 不为 null
+          minimum: 0
+          maximum: 10
+          example: 5
+        safety_flag:
+          type: boolean
+          description: 是否命中安全风险（正常为 false）
+          example: false
+        micro_intervention:
+          $ref: '#/components/schemas/MicroIntervention'
+          description: 微干预卡片（emotion_intensity ≥ 8 时存在，否则为 null）
+          nullable: true
+        created_at:
+          type: string
+          description: 格式 "yyyy-MM-dd HH:mm:ss"
+          example: "2026-04-21 10:32:00"
+
+    MicroIntervention:
+      type: object
+      description: |
+        emotion_intensity ≥ 8 时附带的微干预卡片。
+        - breathe：emotion_label=ANXIETY 时
+        - step_away：emotion_label=ANGER 时
+        - delay_send：其他高强度情绪（附带"帮我改写它"按钮，跳转 /rewrite 页）
+      required:
+        - type
+        - title
+        - body
+        - action_label
+      properties:
+        type:
+          type: string
+          enum: [breathe, step_away, delay_send]
+          example: "breathe"
+        title:
+          type: string
+          example: "先深呼吸一下"
+        body:
+          type: string
+          example: "4秒吸气 → 4秒屏息 → 4秒呼气，重复3次"
+        action_label:
+          type: string
+          example: "好的，我试试"
+        secondary_action_label:
+          type: string
+          description: 仅 delay_send 类型存在（点击跳转 /rewrite 页）
+          example: "帮我改写它"
+          nullable: true
+
+    RewriteResp:
+      type: object
+      properties:
+        rewrite_id:
+          type: string
+          description: 改写记录唯一 ID
+          example: "1234567890123459"
+        variants:
+          type: array
+          description: 固定 3 个版本，顺序固定：gentle → direct → brief
+          items:
+            $ref: '#/components/schemas/RewriteVariant'
+          minItems: 3
+          maxItems: 3
+        created_at:
+          type: string
+          example: "2026-04-21 10:35:00"
+
+    RewriteVariant:
+      type: object
+      properties:
+        version:
+          $ref: '#/components/schemas/RewriteVersion'
+        content:
+          type: string
+          description: 改写后消息内容
+          example: "我最近感觉我们之间出现了一些距离，我很在乎你，想和你好好谈谈。"
+        risk_level:
+          $ref: '#/components/schemas/RiskLevel'
+        risk_reason:
+          type: string
+          description: 风险说明（≤30字）
+          example: "表达较为克制，风险较低"
+        send_recommended:
+          type: boolean
+          description: 是否建议发送（risk_level=high 时强制为 false）
+          example: true
+        confidence:
+          type: number
+          format: double
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.85
+
+    PlanResponse:
+      type: object
+      properties:
+        plan_id:
+          type: string
+          example: "plan_001"
+        assessment_id:
+          type: string
+          example: "1234567890"
+        stage:
+          $ref: '#/components/schemas/PlanStage'
+        current_stage_index:
+          type: integer
+          example: 0
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        created_at:
+          type: string
+          example: "2026-04-21 09:00:00"
+        updated_at:
+          type: string
+          example: "2026-04-21 09:00:00"
+
+    Task:
+      type: object
+      properties:
+        task_id:
+          type: string
+        plan_id:
+          type: string
+        stage:
+          $ref: '#/components/schemas/PlanStage'
+        day_number:
+          type: integer
+          minimum: 1
+          maximum: 7
+        title:
+          type: string
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 300
+        do_list:
+          type: array
+          items:
+            type: string
+        dont_list:
+          type: array
+          items:
+            type: string
+        completed:
+          type: boolean
+        completed_at:
+          type: string
+          nullable: true
+
+    LogResponse:
+      type: object
+      properties:
+        log_id:
+          type: string
+        date:
+          type: string
+          format: date
+        ai_suggestion:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP 状态码（451 时为固定值）
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+        timestamp:
+          type: integer
+
+    SafetyErrorResponse:
+      type: object
+      description: HTTP 451 安全拦截响应体（注意：此响应不走 IResult 包装）
+      properties:
+        code:
+          type: string
+          enum: [SAFETY_BLOCKED]
+          example: "SAFETY_BLOCKED"
+        message:
+          type: string
+          example: "检测到安全风险，已中断当前操作"
+        trigger_type:
+          type: string
+          example: "chat_content"
+        session_cooldown_until:
+          type: string
+          nullable: true
+          example: null
+
+    # ──────────────────────────────────────────────────
+    # Schemas — Enums（枚举值为大写蛇形命名）
+    # ──────────────────────────────────────────────────
+
+    EntryState:
+      type: string
+      enum:
+        - BREAKDOWN
+        - WANT_CONTACT
+        - RUMINATING
+        - WANT_CLARITY
+      description: |
+        P0 首页情绪状态卡片（埋点用，不参与评分）：
+        - BREAKDOWN：情绪崩了，什么都不想管
+        - WANT_CONTACT：很想联系TA，但不知道说什么
+        - RUMINATING：脑子里全是这件事，停不下来
+        - WANT_CLARITY：我想搞清楚，这段关系还有没有可能
+
+    RelationshipDuration:
+      type: string
+      enum:
+        - LESS_THAN_3M
+        - SIX_MONTHS_TO_2Y
+        - TWO_TO_5Y
+        - MORE_THAN_5Y
+      description: |
+        Q1 你们在一起多久了：
+        - LESS_THAN_3M：不到3个月
+        - SIX_MONTHS_TO_2Y：半年到2年
+        - TWO_TO_5Y：2到5年
+        - MORE_THAN_5Y：5年以上
+
+    BreakupMethod:
+      type: string
+      enum:
+        - DURING_ARGUMENT
+        - FACE_TO_FACE_CALM
+        - MESSAGE
+        - GHOSTED
+      description: |
+        Q2 TA 是怎么提出来的（分手方式）：
+        - DURING_ARGUMENT：吵架时说的，情绪激动
+        - FACE_TO_FACE_CALM：当面平静地提出来
+        - MESSAGE：发消息/打电话提的
+        - GHOSTED：突然消失，没有明确提出
+
+    CurrentEmotion:
+      type: string
+      enum:
+        - SHOCKED
+        - ANGRY
+        - SAD
+        - DETERMINED
+      description: |
+        Q3 现在你最强烈的感受是：
+        - SHOCKED：震惊，感觉像在做梦
+        - ANGRY：愤怒，觉得不公平
+        - SAD：难过，很想念TA
+        - DETERMINED：想搞清楚，冷静理性
+
+    CommunicationQuality:
+      type: string
+      enum:
+        - GOOD_DAILY
+        - SURFACE_LEVEL
+        - FREQUENT_CONFLICT
+        - PARTNER_COLD
+      description: |
+        Q4 分手前3个月，你们的沟通怎样（评分权重占总分 35%）：
+        - GOOD_DAILY：日常沟通顺畅，偶有摩擦 → 90分
+        - SURFACE_LEVEL：表面平静，但很少深聊 → 62分
+        - FREQUENT_CONFLICT：频繁争吵或冷战 → 30分
+        - PARTNER_COLD：TA 开始冷漠、回避我 → 25分
+
+    ConflictStyle:
+      type: string
+      enum:
+        - RESOLVE_AFTER_CALM
+        - AVOID_THEN_IGNORE
+        - ONE_SIDED_APOLOGY
+        - ESCALATE_DIG_UP_PAST
+      description: |
+        Q5 你们吵架时，通常会（评分权重占总分 25%）：
+        - RESOLVE_AFTER_CALM：冷静一下，再沟通解决 → 90分
+        - AVOID_THEN_IGNORE：先冷战，慢慢不了了之 → 58分
+        - ONE_SIDED_APOLOGY：一方主动道歉，另一方接受 → 35分
+        - ESCALATE_DIG_UP_PAST：越吵越激烈，翻旧账 → 20分
+
+    PartnerLovePerception:
+      type: string
+      enum:
+        - YES_EXTERNAL_PRESSURE
+        - UNSURE_CHANGED
+        - MAYBE_NOT_CANT_LET_GO
+        - NO_JUST_CANT_MOVE_ON
+      description: |
+        Q6 你觉得 TA 还爱你吗（情感联结维度权重 50%）：
+        - YES_EXTERNAL_PRESSURE：爱，但被压力/现实/家人影响 → 88分
+        - UNSURE_CHANGED：说不准，TA 好像变了 → 60分
+        - MAYBE_NOT_CANT_LET_GO：可能不爱了，但我放不下 → 38分
+        - NO_JUST_CANT_MOVE_ON：不爱了，只是我还没接受 → 20分
+
+    UserPrimaryIntent:
+      type: string
+      enum:
+        - RECONCILE
+        - PROCESS_EMOTION_FIRST
+        - LEARN_GOODBYE
+        - CHAT_FIRST
+      description: |
+        Q7 现在你最想要什么（不参与评分，影响结果页 CTA 和流向）：
+        - RECONCILE：想挽回，重新在一起
+        - PROCESS_EMOTION_FIRST：先处理好自己的情绪
+        - LEARN_GOODBYE：想学会放下
+        - CHAT_FIRST：还没想好，先聊聊
+
+    AssessmentLevel:
+      type: string
+      enum:
+        - GREEN
+        - YELLOW
+        - RED
+      description: |
+        评估等级（规则计算，非 LLM）：
+        - GREEN：总分 ≥ 65，结果页绿色主题
+        - YELLOW：总分 35-64，结果页黄色主题
+        - RED：总分 < 35，结果页红色主题
+
+        前端颜色规范：
+        - GREEN：文字 #3D7A5A，背景 #EDF6F0
+        - YELLOW：文字 #A07830，背景 #FDF6E3
+        - RED：文字 #9B4040，背景 #FBF0F0
+
+    RecommendedAction:
+      type: string
+      enum:
+        - SEEK_PROFESSIONAL_HELP
+        - COOL_DOWN
+        - TRY_COMMUNICATION
+        - CONSIDER_RECONCILE
+        - LET_GO
+      description: |
+        推荐行动（规则计算）：
+        - SEEK_PROFESSIONAL_HELP：寻求专业帮助（level=RED）
+        - COOL_DOWN：先冷静，给彼此空间
+        - TRY_COMMUNICATION：尝试沟通
+        - CONSIDER_RECONCILE：可以考虑主动修复（level=GREEN）
+        - LET_GO：学会放下（intent=LEARN_GOODBYE）
+
+    EmotionLabel:
+      type: string
+      enum:
+        - ANXIETY
+        - ANGER
+        - SADNESS
+        - FEAR
+        - GUILT
+        - CALM
+        - HOPE
+        - OTHER
+      description: |
+        情绪标签（聊天模块 AI 检测）：
+        - ANXIETY：焦虑（触发 breathe 微干预）
+        - ANGER：愤怒（触发 step_away 微干预）
+        - SADNESS：悲伤（触发 delay_send 微干预）
+        - FEAR：恐惧
+        - GUILT：自责
+        - CALM：平静
+        - HOPE：希望
+        - OTHER：其他
+
+    RewriteVersion:
+      type: string
+      enum:
+        - gentle
+        - direct
+        - brief
+      description: |
+        改写版本（注意：此枚举小写，与其他枚举不同）：
+        - gentle：温和版（第1个，正常显示）
+        - direct：直接版（第2个，付费遮罩）
+        - brief：简短版（第3个，付费遮罩）
+
+    RiskLevel:
+      type: string
+      enum:
+        - low
+        - medium
+        - high
+      description: |
+        改写风险等级（注意：此枚举小写）：
+        - low：低风险，可发送
+        - medium：中等，需谨慎
+        - high：高风险，send_recommended 强制为 false
+
+    PlanStage:
+      type: string
+      enum:
+        - stabilize
+        - probe
+        - communicate
+        - rebuild
+      description: |
+        挽回计划阶段（Phase 2）：
+        - stabilize：冷静期
+        - probe：试探期
+        - communicate：沟通期
+        - rebuild：重建期
+
+    ContactOutcome:
+      type: string
+      enum:
+        - positive
+        - neutral
+        - negative
+
+  # ──────────────────────────────────────────────────
+  # Reusable Responses
+  # ──────────────────────────────────────────────────
+  responses:
+
+    BadRequest:
+      description: 请求参数错误（缺少必填字段、类型错误等），HTTP 400
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 400
+            message: "Q1 交往时长不能为空"
+            data: null
+            timestamp: 1745241000000
+
+    SafetyBlocked:
+      description: |
+        HTTP 451 安全拦截。
+        **注意：** 此响应不走 IResult<T> 包装，直接返回 SafetyErrorResponse 结构。
+
+        前端处理：
+        - 立即显示全屏 SafetyInterstitial 覆盖层（最高 z-index）
+        - 禁用所有返回/滑动交互
+        - 展示危机热线资源
+        - 用户点击"我明白了"后跳转 / 并启动 30 分钟冷却计时
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SafetyErrorResponse'
+          example:
+            code: "SAFETY_BLOCKED"
+            message: "检测到安全风险，已中断当前操作"
+            trigger_type: "chat_content"
+            session_cooldown_until: null
+
+    InternalError:
+      description: 服务端内部异常，HTTP 500
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            message: "服务端异常，请稍后重试"
+            data: null
+            timestamp: 1745241000000

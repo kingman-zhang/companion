@@ -1,0 +1,125 @@
+<!-- P2 评估结果页 -->
+<scroll-view class="page" scroll-y>
+
+  <!-- ── 自定义导航栏 ── -->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}}; height: {{navBarHeight}};">
+    <view class="nav-back-btn" bindtap="goHome" hover-class="nav-btn-hover" hover-stay-time="100">
+      <image src="/assets/icons/home.svg" class="nav-home-icon" mode="aspectFit"/>
+    </view>
+    <text class="nav-title">关系评估</text>
+    <view style="width: {{navPaddingRight}};"></view>
+  </view>
+
+  <!-- ── 评分总览卡片 ── -->
+  <view class="score-card">
+
+    <!-- 徽章 + 分数 -->
+    <view class="score-header">
+      <view class="level-badge badge-{{levelClass}}">
+        <text class="level-badge-text">{{levelBadge}}</text>
+      </view>
+      <view class="score-right">
+        <view class="score-num-row">
+          <text class="score-num score-num-{{levelClass}}">{{result.score}}</text>
+          <text class="score-unit">/100</text>
+        </view>
+        <text class="score-label">关系健康度</text>
+      </view>
+    </view>
+
+    <!-- 卡片标题（level 模板文字）-->
+    <text class="score-title">{{scoreTitle}}</text>
+
+    <!-- 三维度进度条 -->
+    <view class="dimensions">
+      <view class="dim-item">
+        <view class="dim-row">
+          <text class="dim-name">情感联结</text>
+          <text class="dim-score dim-score-{{levelClass}}">{{result.emotional_connection_score}}</text>
+        </view>
+        <view class="dim-track">
+          <view class="dim-fill dim-fill-{{levelClass}}" style="width: {{result.emotional_connection_score}}%"></view>
+        </view>
+      </view>
+      <view class="dim-item">
+        <view class="dim-row">
+          <text class="dim-name">沟通质量</text>
+          <text class="dim-score dim-score-{{levelClass}}">{{result.communication_score}}</text>
+        </view>
+        <view class="dim-track">
+          <view class="dim-fill dim-fill-{{levelClass}}" style="width: {{result.communication_score}}%"></view>
+        </view>
+      </view>
+      <view class="dim-item">
+        <view class="dim-row">
+          <text class="dim-name">冲突处理</text>
+          <text class="dim-score dim-score-{{levelClass}}">{{result.conflict_score}}</text>
+        </view>
+        <view class="dim-track">
+          <view class="dim-fill dim-fill-{{levelClass}}" style="width: {{result.conflict_score}}%"></view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ── 核心洞察 ── -->
+  <view class="insight-section">
+    <text class="insight-label">核心洞察</text>
+    <text class="insight-quote">"{{result.core_insight}}"</text>
+    <text class="insight-desc">{{result.llm_reason}}</text>
+  </view>
+
+  <!-- ── 接下来可以 ── -->
+  <view class="actions-section">
+    <text class="actions-title">接下来可以：</text>
+    <view class="action-list">
+
+      <view class="action-card" bindtap="goChat" hover-class="action-hover" hover-stay-time="80">
+        <view class="action-num action-num-primary">
+          <text class="action-num-text">1</text>
+        </view>
+        <view class="action-content">
+          <text class="action-title-text">{{action1Title}}</text>
+          <text class="action-desc-text">和 AI 聊 · 大约 10 分钟</text>
+        </view>
+        <text class="action-arrow">›</text>
+      </view>
+
+      <view class="action-card" bindtap="goRewrite" hover-class="action-hover" hover-stay-time="80">
+        <view class="action-num action-num-secondary">
+          <text class="action-num-text">2</text>
+        </view>
+        <view class="action-content">
+          <text class="action-title-text">生成一条给 TA 的话</text>
+          <text class="action-desc-text">基于你的评估定制 · 3 个版本</text>
+        </view>
+        <text class="action-arrow">›</text>
+      </view>
+
+      <view class="action-card action-card-dim">
+        <view class="action-num action-num-secondary">
+          <text class="action-num-text">3</text>
+        </view>
+        <view class="action-content">
+          <text class="action-title-text">开启 14 天恢复计划</text>
+          <text class="action-desc-text">每日任务 · 可随时暂停</text>
+        </view>
+        <text class="action-arrow">›</text>
+      </view>
+
+    </view>
+  </view>
+
+  <!-- ── 免责声明 ── -->
+  <view class="disclaimer-row">
+    <text class="disclaimer-icon">ⓘ</text>
+    <text class="disclaimer-text">此评估基于你提供的信息。仅供参考 · 不替代专业心理咨询。如果你有自伤念头，请拨打 400-161-9995。</text>
+  </view>
+
+  <!-- ── 底部文字链接 ── -->
+  <view class="page-footer">
+    <text class="footer-link" bindtap="goRedo" hover-class="footer-hover" hover-stay-time="80">重新评估 / 修改答案</text>
+  </view>
+
+</scroll-view>

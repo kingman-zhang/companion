@@ -8,9 +8,9 @@
 
 本说明书明确每个功能的详细交互、数据结构、接口标准、异常处理、验收标准（AC），便于开发、测试、设计团队按标准拆解与协作。  
 
-文档版本：v1.0  
+文档版本：v1.1  
 
-编制日期：2024.06  
+编制日期：2026.04  
 
 阅读指引：务必结合相关原型、接口文档、业务流程图一并查阅，如发现实现性或歧义问题，优先以此 FRD 约束为准。
 
@@ -23,6 +23,7 @@
 | 评估 | 评估页P2 | MVP | 免费 | POST /assessment |
 | 聊天 | 聊天页P3 | MVP | 免费/付费 | POST /chat |
 | 改写 | 改写页P4 | MVP | 免费/付费 | POST /rewrite |
+| 放下模式 | 放下页P7 | Phase 2 | 免费/付费 | POST /rewrite (复用) |
 | 计划 | 计划页P5 | Phase 2 | 付费 | GET /plan |
 | 日志 | 日志页P6 | Phase 2 | 付费 | POST,GET /log |
 | 安全 | 覆盖全局 | MVP | 免费 | (全模块拦截) |
@@ -39,13 +40,13 @@
 
 | Q编号 | 题目内容 | 选项类型 | 前端控件 | 字段名 |
 | --- | --- | --- | --- | --- |
-| Q1 | 你们交往了多久？ | enum | 单选 | relationship_len |
-| Q2 | 谁先提出分手/冷淡？ | enum | 单选 | who_break |
+| Q1 | 你们交往了多久？ | enum | 单选 | relationship_duration |
+| Q2 | 谁先提出分手/冷淡？ | enum | 单选 | who_initiated |
 | Q3 | 现在的联系状态？ | enum | 单选 | contact_status |
-| Q4 | 是否出现冷暴力、家暴、威胁、出轨、谎言等？ | enum\[\] | 多选 | serious_events |
-| Q5 | 你现在最想做什么？ | enum | 单选 | user_intent |
-| Q6 | 你的主要心情？ | enum | 单选 | main_emotion |
-| Q7 | 你年龄/性别？ | enum | 下拉 | user_profile |
+| Q4 | 是否存在出轨或疑似出轨？ | enum | 单选 | infidelity_present |
+| Q5 | 是否出现过冷暴力、威胁、控制、肢体冲突等？ | enum\[\] | 多选 | abuse_flags |
+| Q6 | 你现在最想做什么？ | enum | 单选 | user_primary_intent |
+| Q7 | 这次事情发生多久了？ | enum | 单选 | time_since_incident |
 
 ### 展示与进度
 
@@ -57,7 +58,7 @@
 
 * 所有题目必填，未填时"下一题"禁用
 * enum、enum\[\] 字段有固定取值范围，非法值直接报错
-* 如 serious_events 选中"自伤/自杀/暴力"自动触发 abuse_flags，前端联动安全拦截
+* 如 abuse_flags 选中自伤/自杀/暴力/家暴/威胁等严重项，自动触发安全拦截
 
 ### 提交行为
 
@@ -87,7 +88,7 @@
 ### 验收标准（AC）
 
 * 全部题目均必填，字段不合法无法提交
-* serious_events 触发自伤/自杀/暴力，自动打断填报，进入安全页
+* abuse_flags 触发自伤/自杀/暴力/家暴/威胁，自动打断填报，进入安全页
 * 7 题展示&进度显示无误，动画无残影
 * 前端题目切换、按钮状态严格按规范可重现
 
@@ -101,24 +102,25 @@
 
 | 因子 | 字段名 | 权重（W） |
 | --- | --- | --- |
-| 交往时长 | relationship_len | 0.15 |
+| 交往时长 | relationship_duration | 0.15 |
 | 联系状况 | contact_status | 0.15 |
-| 分手主动 | who_break | 0.10 |
-| 严重事件 | serious_events | 0.25 |
-| 用户主观意向 | user_intent | 0.20 |
-| 主心情 | main_emotion | 0.15 |
+| 分手主动 | who_initiated | 0.10 |
+| 出轨情况 | infidelity_present | 0.20 |
+| 安全风险事件 | abuse_flags | 0.25 |
+| 事件时间 | time_since_incident | 0.15 |
 
 伪代码
 
 1. 对每枚因子分值(V)打分（0-100，枚举表）
 2. 最终得分 S = Sum(Wi \* Vi)
 3. 红（S<35）、黄（35≤S<65）、绿（S≥65）
-4. OVERRIDE_RED：如 serious_events 中命中自伤、自杀、家暴，level 必为红
+4. OVERRIDE_RED：如 abuse_flags 中命中自伤、自杀、家暴、暴力威胁，level 必为红
 
 ### 置信度公式
 
-* factor_agreement_score = 因子得分方差/均值映射 0-1
-* confidence = 1 - 方差归一化结果，越低说明因子一致性高
+* confidence = 输入完整率 × 关键项明确度 × 枚举合法率
+* confidence 为规则字段，不由 LLM 决定
+* user_primary_intent 仅影响页面 CTA 和后续流向，不参与 score 计算
 
 ### recommended_action 映射
 
@@ -255,7 +257,8 @@
 ### 计划生成规则
 
 * 用户完成评估（非红灯）后自动生成7天/4阶段分步计划
-* stage 根据 assessment_id、user_intent 推导
+* stage 根据 assessment_id 推导，固定为 stabilize/probe/communicate/rebuild 四阶段
+* user_primary_intent = letgo 时，不进入阶段计划，改走 letgo_mode
 
 ### 阶段指示器
 

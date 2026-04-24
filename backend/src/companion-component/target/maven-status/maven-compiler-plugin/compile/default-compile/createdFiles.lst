@@ -1,0 +1,15 @@
+com/kingman/companion/component/enums/AbuseFlag.class
+com/kingman/companion/component/enums/WhoInitiated.class
+com/kingman/companion/component/enums/ConflictStyle.class
+com/kingman/companion/component/enums/EntryState.class
+com/kingman/companion/component/enums/RelationshipDuration.class
+com/kingman/companion/component/enums/BreakupMethod.class
+com/kingman/companion/component/enums/UserPrimaryIntent.class
+com/kingman/companion/component/enums/RecommendedAction.class
+com/kingman/companion/component/enums/CommunicationQuality.class
+com/kingman/companion/component/enums/EmotionLabel.class
+com/kingman/companion/component/enums/TimeSinceIncident.class
+com/kingman/companion/component/enums/CurrentEmotion.class
+com/kingman/companion/component/enums/AssessmentLevel.class
+com/kingman/companion/component/enums/PartnerLovePerception.class
+com/kingman/companion/component/enums/ContactStatus.class

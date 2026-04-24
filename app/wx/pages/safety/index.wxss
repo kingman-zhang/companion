@@ -1,0 +1,140 @@
+/* P8 安全拦截页样式 */
+
+.page {
+  min-height: 100vh;
+  background: #F5F3F0;
+  padding-bottom: 80rpx;
+}
+
+/* ── 关怀区域 ── */
+.care-section {
+  padding: 120rpx 40rpx 48rpx;
+  text-align: center;
+}
+
+.care-icon-wrap {
+  margin-bottom: 32rpx;
+}
+
+.care-icon {
+  font-size: 96rpx;
+}
+
+.care-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #1C1C1E;
+  line-height: 1.4;
+  margin-bottom: 16rpx;
+}
+
+.care-subtitle {
+  display: block;
+  font-size: 30rpx;
+  color: #6B6B6B;
+  line-height: 1.7;
+}
+
+/* ── 资源区 ── */
+.resources {
+  padding: 0 40rpx;
+}
+
+.section-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #6B6B6B;
+  letter-spacing: 1rpx;
+  margin-bottom: 20rpx;
+}
+
+.hotline-card {
+  background: #FAFAF8;
+  border: 1rpx solid #E8E4DE;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 16rpx rgba(0,0,0,0.05);
+}
+
+.card-hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.hotline-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hotline-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1C1C1E;
+  margin-bottom: 6rpx;
+}
+
+.hotline-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #ABABAB;
+}
+
+.hotline-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+  margin-left: 20rpx;
+}
+
+.hotline-phone {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #4A7B7B;
+}
+
+.hotline-arrow {
+  font-size: 28rpx;
+  color: #4A7B7B;
+}
+
+/* ── 底部提示 ── */
+.bottom-tip {
+  text-align: center;
+  padding: 40rpx 40rpx 16rpx;
+}
+
+.bottom-tip-text {
+  font-size: 26rpx;
+  color: #ABABAB;
+  line-height: 1.6;
+}
+
+/* ── 按钮 ── */
+.footer-btn {
+  padding: 0 40rpx;
+}
+
+.btn-ok {
+  background: #4A7B7B;
+  height: 104rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-ok text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.btn-hover { opacity: 0.85; }

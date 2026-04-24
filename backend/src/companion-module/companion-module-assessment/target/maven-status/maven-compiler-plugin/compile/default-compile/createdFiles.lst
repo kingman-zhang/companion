@@ -1,0 +1,10 @@
+com/kingman/companion/module/assessment/req/AssessmentReq.class
+com/kingman/companion/module/assessment/engine/ScoreEngine$ScoreResult.class
+com/kingman/companion/module/assessment/resp/AssessmentResp.class
+com/kingman/companion/module/assessment/entity/Assessment.class
+com/kingman/companion/module/assessment/engine/ScoreEngine$1.class
+com/kingman/companion/module/assessment/resp/AssessmentResp$AssessmentRespBuilder.class
+com/kingman/companion/module/assessment/engine/ScoreEngine.class
+com/kingman/companion/module/assessment/service/impl/AssessmentServiceImpl.class
+com/kingman/companion/module/assessment/repository/AssessmentRepository.class
+com/kingman/companion/module/assessment/service/AssessmentService.class

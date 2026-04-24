@@ -1,0 +1,8 @@
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/repository/ChatMessageRepository.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/service/ChatService.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/resp/ChatResp.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/entity/ChatSession.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/entity/ChatMessage.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/req/ChatReq.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/service/impl/ChatServiceImpl.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-chat/src/main/java/com/kingman/companion/module/chat/repository/ChatSessionRepository.java

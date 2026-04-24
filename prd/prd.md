@@ -5,7 +5,7 @@
 
 ## 产品简介（TL;DR）
 
-RelationshipAI 是一款定位于 22–38 岁成人，聚焦分手、婚姻冲突、第三者介入等高情绪关系危机场景的 AI 情感陪伴产品。产品覆盖从「情绪失控 → 冷静判断 → 挽回规划 → 消息改写 → 过程陪伴 → 放下重建」的全流程，帮助用户获得即时支持、理性评估和可执行建议，全流程数据安全、分层风控，并通过有约束的 LLM 实现精细化输出。
+RelationshipAI 是一款定位于 22–38 岁成人，聚焦分手、婚姻冲突、第三者介入等高情绪关系危机场景的 AI 情感陪伴产品。产品愿景覆盖从「情绪失控 → 冷静判断 → 沟通准备 → 过程陪伴 → 放下重建」的全流程；首版 MVP 聚焦「问卷评估 + 情绪聊天 + 消息改写 + 安全拦截」四条核心能力，帮助用户获得即时支持、理性评估和可执行建议，并通过受约束的 LLM 实现精细化输出。
 
 ---
 
@@ -180,8 +180,8 @@ Plan结构
 | id | string | Y | 计划id |
 | user_id | string | Y | 用户uuid |
 | assessment_id | string | Y | 绑定评估id |
-| stage | enum | Y | stabilize/probe/communicate/rebuild/letgo |
-| current_stage_index | number | Y | 0–4 |
+| stage | enum | Y | stabilize/probe/communicate/rebuild |
+| current_stage_index | number | Y | 0–3 |
 | created_at | string | Y |  |
 | updated_at | string | Y |  |
 
@@ -207,16 +207,18 @@ Task结构
 ### 评分机制
 
 * 六因子加权
-  * 关系时长（10）、谁先提出（20）、联系状态（20）、是否出轨（20）、是否家暴/冷暴力（20）、事件时间（10）
+  * 关系时长（15）、谁先提出/疏远（10）、联系状态（15）、是否出轨/疑似出轨（20）、是否存在家暴/威胁/控制（25）、事件发生时间（15）
 * 评分规则和阈值详见伪代码
-* RED override规约（abuse有值直接红，不继续算分）
+* RED override规约（命中家暴、暴力威胁、自伤自杀等严重安全项时直接红，不继续算分）
 
 ### 评分分级&置信度
 
 * green: 65分及以上
 * yellow: 35-64分
 * red: 0-34分或override
-* 置信度为输入完整率×关键项明确度
+* 置信度为规则产物，计算公式为：`confidence = 输入完整率 × 关键项明确度 × 枚举合法率`
+* 关键项仅包含 relationship_duration、who_initiated、contact_status、infidelity_present、abuse_flags、time_since_incident
+* user_primary_intent 用于后续流向和 CTA，不参与关系得分
 
 ### LLM 权限说明
 
@@ -297,11 +299,12 @@ Task结构
 
 ## 十一、MVP与商业化设计
 
-* 必做：首页状态卡片、7题问卷、红黄绿评估、AI急救聊天、改写工具、风控页（session中断）
-* Phase 2：计划页、放下模式、日志页、趋势图、支付系统、日推送
-* 免费：一套流程、每日一次改写/单variant、情绪聊天10轮
-* 付费：全流程解锁、3个variant、任务全解锁、日志与趋势、放下路径与高级功能
-* 留存：每日打卡、阶段成就/趋势、推送召回
+* 开发MVP（由 Codex 承接）：首页状态卡片、7题问卷、红黄绿评估、AI急救聊天、改写工具、安全拦截页、基础付费拦截
+* 设计扩展稿：在不影响 MVP 开发边界的前提下，可额外探索放下模式、挽回计划、每日日志、趋势图等后续页面，用于验证完整产品体验
+* Phase 2：挽回计划、放下模式增强、日志页、趋势图、支付系统、日推送
+* 免费：可完成一次核心流程、每日一次改写、情绪聊天10轮
+* 付费：更多对话轮次、更多改写版本、后续计划/日志/趋势等增强能力
+* 留存：阶段提醒、日志记录、趋势反馈、消息召回
 
 ---
 
@@ -338,7 +341,7 @@ Task结构
         │
         ├──► \[P5 挽回计划页\]（level=green/yellow + intent=reconcile）
         │
-        └──► \[P7 放下模式页\]（level=red + intent=letgo）
+        └──► \[P7 放下模式页\]（level=red + user_primary_intent=letgo）
 
 \[P8 安全拦截页\] ← 任意页面（安全词触发，session 终止）
 ```
@@ -350,7 +353,7 @@ Task结构
 * P1 → P8：abuse_flags 包含非 "none" 值
 * P2 → P3：用户点击「先处理情绪」
 * P2 → P5：level=green 或 yellow 且 intent=reconcile
-* P2 → P7：level=red 或 intent=letgo
+* P2 → P7：level=red 或 user_primary_intent=letgo
 * P3 → P4：用户点击「帮我改写消息」
 * P3 → P5：用户点击「开始挽回计划」
 * P3 → P7：用户点击「我想放下了」
@@ -485,7 +488,7 @@ recommended_action → 建议文本映射：
 | --- | --- | --- | --- |
 | 「先处理情绪，和 AI 聊聊」 | 主按钮 | 始终显示 | 跳转 P3 |
 | 「开始挽回计划」 | 次按钮 | level = green 或 yellow | 跳转 P5 |
-| 「我想放下这段关系」 | 次按钮 | level = red 或 intent = letgo | 跳转 P7 |
+| 「我想放下这段关系」 | 次按钮 | level = red 或 user_primary_intent = letgo | 跳转 P7 |
 | 「重新填写问卷」 | 文本链接 | 始终显示 | 返回 P1，清空当前评估結果 |
 
 跳转路径
@@ -782,7 +785,7 @@ Header 区
 | --- | --- | --- | --- |
 | 断联建议卡片 | 内容卡片 | 标题：「断联建议」；内容：3–5 条具体行动建议 | 规则固定文本，非 LLM 生成 |
 | 告别信写作入口 | 功能卡片 | 标题：「写一封告别信」；说明：「写出来，然后选择是否发送」；操作按钮：「开始写」 | 点击「开始写」展开 P7-Sub 告别信编辑器（页内展开，非路由跳转） |
-| 恢复日常计划卡片 | 内容卡片 | 标题：「接下来 7 天」；内容：LLM 生成的放下阶段任务（plan stage = letgo）；展示 Day 1 建议，其余折叠显示 | LLM 生成，规则校验 |
+| 恢复日常计划卡片 | 内容卡片 | 标题：「接下来 7 天」；内容：LLM 生成的放下模式任务建议；展示 Day 1 建议，其余折叠显示 | LLM 生成，规则校验 |
 | 日志入口 | 功能卡片 | 「记录你今天的状态 →」 | 点击跳转 P6 |
 
 P7-Sub · 告别信编辑器（页内展开，非独立路由）：

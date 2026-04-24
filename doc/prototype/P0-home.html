@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390px, initial-scale=1.0">
+  <title>RelationshipAI · 首页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-main: #F5F3F0;
+      --bg-card: #FAFAF8;
+      --accent: #4A7B7B;
+      --accent-deep: #2D5A5A;
+      --text-main: #1C1C1E;
+      --text-sub: #6B6B6B;
+      --text-mist: #ABABAB;
+      --border: #E8E4DE;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    html, body {
+      width: 390px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--bg-main);
+      font-family: 'PingFang SC', 'Noto Sans SC', 'DM Sans', -apple-system, sans-serif;
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: 390px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px;
+      padding-bottom: 40px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 56px 0 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .logo-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .privacy-link {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: inherit;
+    }
+
+    .privacy-link:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding-top: 40px;
+      padding-bottom: 32px;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-subtitle {
+      margin-top: 10px;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* ── State Cards ── */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .state-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 80ms ease, box-shadow 80ms ease, border-color 80ms ease;
+      text-decoration: none;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .state-card:active {
+      transform: scale(0.985);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .state-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px rgba(74, 123, 123, 0.12);
+    }
+
+    .card-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-mist);
+      background: var(--bg-main);
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      line-height: 1.4;
+    }
+
+    .card-arrow {
+      flex-shrink: 0;
+      margin-left: 12px;
+      width: 20px;
+      height: 20px;
+      color: var(--text-mist);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-arrow svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 80ms ease;
+    }
+
+    .state-card:hover .card-arrow svg {
+      stroke: var(--accent);
+    }
+
+    /* Card accent line on hover */
+    .state-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 3px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 0 3px 3px 0;
+      transition: transform 120ms ease;
+    }
+
+    .state-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .state-card:hover::before {
+      transform: translateY(-50%) scaleY(1);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-mist);
+      line-height: 1.6;
+    }
+
+    .footer-text a {
+      color: var(--text-mist);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* ── Privacy Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 390px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px 40px;
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .modal-body p + p {
+      margin-top: 12px;
+    }
+
+    .modal-close {
+      margin-top: 24px;
+      width: 100%;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Responsive: center on larger screens */
+    @media (min-width: 430px) {
+      html, body {
+        background: #E8E4DE;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+      }
+      .page {
+        background: var(--bg-main);
+        box-shadow: 0 0 40px rgba(0,0,0,0.12);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <!-- Heart/connection icon -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 21C12 21 4 14.5 4 9a4 4 0 0 1 8 0 4 4 0 0 1 8 0c0 5.5-8 12-8 12z"/>
+        </svg>
+      </div>
+      <span class="logo-text">RelationshipAI</span>
+    </div>
+    <button class="privacy-link" onclick="openModal()">你的对话不会被分享</button>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1 class="hero-title">你现在不需要一个人扛</h1>
+    <p class="hero-subtitle">告诉我你现在的状态，我陪你理清楚</p>
+  </section>
+
+  <!-- State Cards -->
+  <main class="cards">
+
+    <a class="state-card" href="P1-questionnaire.html?entry=just_dumped" onclick="setEntry('just_dumped')">
+      <div class="card-left">
+        <div class="card-title">刚被分手，我很难受</div>
+        <div class="card-tags">
+          <span class="tag">崩溃</span>
+          <span class="tag">茫然</span>
+          <span class="tag">不甘心</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <a class="state-card" href="P1-questionnaire.html?entry=third_party" onclick="setEntry('third_party')">
+      <div class="card-left">
+        <div class="card-title">发现对方有第三者</div>
+        <div class="card-tags">
+          <span class="tag">愤怒</span>
+          <span class="tag">受伤</span>
+          <span class="tag">不知所措</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <a class="state-card" href="P1-questionnaire.html?entry=near_breakup" onclick="setEntry('near_breakup')">
+      <div class="card-left">
+        <div class="card-title">吵到快分手了，我想挽回</div>
+        <div class="card-tags">
+          <span class="tag">焦虑</span>
+          <span class="tag">后悔</span>
+          <span class="tag">想挽救</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <a class="state-card" href="P1-questionnaire.html?entry=just_confused" onclick="setEntry('just_confused')">
+      <div class="card-left">
+        <div class="card-title">我只是很乱，想找人说说</div>
+        <div class="card-tags">
+          <span class="tag">迷茫</span>
+          <span class="tag">压抑</span>
+          <span class="tag">需要倾诉</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-text">
+      对话内容加密存储，不会用于广告推送或分享给第三方<br>
+      <a onclick="openModal()">了解我们的隐私承诺</a>
+    </p>
+  </footer>
+
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal-overlay" id="privacyModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">我们如何保护你的隐私</div>
+    <div class="modal-body">
+      <p>你在 RelationshipAI 中分享的所有内容，包括情绪状态、问卷答案和对话，均经过加密存储，仅用于为你提供个性化支持。</p>
+      <p>我们不会将你的数据出售、出租或分享给任何第三方，不用于广告定向，也不用于训练公开模型。</p>
+      <p>你可以随时在设置中申请删除你的所有数据。使用本产品即表示你同意上述隐私处理方式。</p>
+    </div>
+    <button class="modal-close" onclick="closeModal()">我知道了</button>
+  </div>
+</div>
+
+<script>
+  function openModal() {
+    document.getElementById('privacyModal').classList.add('active');
+  }
+  function closeModal() {
+    document.getElementById('privacyModal').classList.remove('active');
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('privacyModal')) {
+      closeModal();
+    }
+  }
+  function setEntry(state) {
+    sessionStorage.setItem('entry_state', state);
+  }
+</script>
+
+</body>
+</html>

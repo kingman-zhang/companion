@@ -1,0 +1,148 @@
+/* 评估过渡加载页 */
+
+.page {
+  height: 100vh;
+  background: #EDE8DC;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60rpx;
+  box-sizing: border-box;
+}
+
+/* ── 呼吸圆 ── */
+.circle-wrap {
+  margin-bottom: 64rpx;
+}
+
+.main-circle {
+  width: 160rpx;
+  height: 160rpx;
+  background: #4A7B7B;
+  border-radius: 50%;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.10);
+    opacity: 0.80;
+  }
+}
+
+/* ── 标题 ── */
+.title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1C1C1E;
+  margin-bottom: 48rpx;
+  letter-spacing: 0.5rpx;
+}
+
+/* ── 步骤列表 ── */
+.steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  transition: opacity 300ms ease;
+}
+
+/* pending 状态淡显 */
+.step-row-pending {
+  opacity: 0.35;
+}
+
+.step-row-loading,
+.step-row-done {
+  opacity: 1;
+}
+
+/* ── 步骤图标 ── */
+.step-icon-wrap {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-icon {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* 完成：实心绿圆 */
+.icon-done {
+  background: #4A7B7B;
+}
+
+.step-check {
+  color: #FFFFFF;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 加载中：旋转描边圆 */
+.icon-loading {
+  border: 3rpx solid #4A7B7B;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 等待中：细描边空圆 */
+.icon-pending {
+  border: 2rpx solid #C8C4BC;
+}
+
+/* ── 步骤文字 ── */
+.step-text {
+  font-size: 28rpx;
+  color: #3A3A3A;
+  line-height: 1.4;
+}
+
+.step-row-pending .step-text {
+  color: #B8B3AA;
+}
+
+/* ── 底部免责 ── */
+.footer {
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 40rpx);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 48rpx);
+  left: 0;
+  right: 0;
+  padding: 0 60rpx;
+}
+
+.footer-text {
+  display: block;
+  text-align: center;
+  font-size: 20rpx;
+  color: #B8B3AA;
+  line-height: 1.6;
+}

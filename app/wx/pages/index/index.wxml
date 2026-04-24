@@ -1,0 +1,131 @@
+<!-- P0 首页 -->
+<view class="page">
+
+  <!-- ── 顶部 Header ── -->
+  <view class="header">
+    <view class="logo-icon">
+      <view class="logo-dot-lg"></view>
+      <view class="logo-dot-sm"></view>
+    </view>
+    <view class="logo-text-block">
+      <text class="brand-name">伴听</text>
+      <view class="encrypt-row">
+        <text class="encrypt-lock">🔒</text>
+        <text class="encrypt-text">端到端加密</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ── 可滚动内容 ── -->
+  <scroll-view class="content" scroll-y type="list" enhanced bounces="{{false}}">
+
+    <!-- 问候语 -->
+    <view class="greeting-wrap">
+      <text class="greeting-meta">{{greeting}} · {{todayStr}}</text>
+      <text class="greeting-title">你现在，怎么样？</text>
+    </view>
+
+    <!-- 快速输入卡片 -->
+    <view class="quick-card">
+      <textarea
+        class="quick-input"
+        value="{{quickText}}"
+        bindinput="onQuickInput"
+        placeholder="简单说两句，我先听着..."
+        placeholder-class="quick-placeholder"
+        auto-height
+        adjust-position="{{true}}"
+        maxlength="500"
+      />
+      <view class="quick-bar">
+        <view
+          class="start-btn {{quickText.length > 0 ? 'start-btn-on' : 'start-btn-off'}}"
+          bindtap="startQuickChat"
+          hover-class="{{quickText.length > 0 ? 'start-hover' : ''}}"
+          hover-stay-time="80"
+        >
+          <text class="start-text {{quickText.length > 0 ? 'start-text-on' : 'start-text-off'}}">开始 →</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 场景区 header -->
+    <view class="section-hd">
+      <text class="section-hd-title">或者，从一个场景开始</text>
+      <view hover-class="more-hover" hover-stay-time="80">
+        <text class="section-hd-more">全部 ›</text>
+      </view>
+    </view>
+
+    <!-- 场景卡片 -->
+    <view class="scenario-list">
+      <view
+        wx:for="{{scenarios}}"
+        wx:key="scene"
+        class="scenario-card"
+        bindtap="selectScenario"
+        data-scene="{{item.scene}}"
+        hover-class="card-active"
+        hover-stay-time="80"
+      >
+        <!-- 左侧色条：每个卡片颜色不同，且有上下间距 -->
+        <view
+          class="accent-bar"
+          style="background-color: {{item.accentColor}};"
+        ></view>
+
+        <!-- 主内容 -->
+        <view class="card-body">
+          <view class="card-title-row">
+            <text class="card-title">{{item.title}}</text>
+            <view
+              wx:if="{{item.badge}}"
+              class="badge"
+              style="background-color: {{item.badgeBgColor}};"
+            >
+              <text class="badge-text" style="color: {{item.badgeTextColor}};">{{item.badge}}</text>
+            </view>
+          </view>
+          <text class="card-desc">{{item.desc}}</text>
+        </view>
+
+        <!-- 右侧箭头 -->
+        <text class="card-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 免责声明 -->
+    <view class="disclaimer">
+      <text class="disclaimer-text">不记录身份 · 不用于训练 · 随时删除</text>
+    </view>
+
+    <view style="height: 24rpx;"></view>
+  </scroll-view>
+
+  <!-- ── 底部 Tab 栏 ── -->
+  <view class="tab-bar">
+    <!-- 首页（当前激活） -->
+    <view class="tab-item">
+      <text class="tab-icon tab-icon-active">⌂</text>
+      <text class="tab-label tab-label-active">首页</text>
+    </view>
+    <!-- 我的 -->
+    <view class="tab-item" bindtap="navMy">
+      <text class="tab-icon">◑</text>
+      <text class="tab-label">我的</text>
+    </view>
+    <!-- 工具箱 -->
+    <view class="tab-item" bindtap="navTools">
+      <view class="tab-tools-icon-wrap">
+        <text class="tab-icon tab-icon-tools">✦</text>
+      </view>
+      <text class="tab-label">工具箱</text>
+    </view>
+    <!-- 我 -->
+    <view class="tab-item" bindtap="navProfile">
+      <text class="tab-icon">⊙</text>
+      <text class="tab-label">我</text>
+    </view>
+  </view>
+
+</view>
