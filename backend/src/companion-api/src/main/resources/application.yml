@@ -2,24 +2,6 @@ spring:
   application:
     name: companion-api
 
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://root:abc123456@localhost:27017/companion?authSource=admin&authMechanism=SCRAM-SHA-256&retryWrites=true&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000}
-      auto-index-creation: false
-
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password: abc123456
-    timeout: 5000ms
-    redisson:
-      config: |
-        singleServerConfig:
-          address: "redis://127.0.0.1:6379"
-          password: "abc123456"
-          connectionPoolSize: 10
-          connectionMinimumIdleSize: 2
-
   jackson:
     default-property-inclusion: non_null
     date-format: yyyy-MM-dd HH:mm:ss
@@ -32,12 +14,6 @@ server:
   servlet:
     context-path: /
 
-logging:
-  level:
-    com.kingman.companion: DEBUG
-    org.springframework.data.mongodb: INFO
-
 companion:
   jwt:
-    secret: ${JWT_SECRET:companion-secret-key-must-be-at-least-32-chars-long}
-    expiration: 86400000  # 24 小时
+    expiration: 86400000  # 24 小时，各环境统一

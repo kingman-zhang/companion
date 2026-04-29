@@ -1,7 +1,9 @@
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/resp/QuestionDef.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/repository/AssessmentRepository.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/service/impl/AssessmentServiceImpl.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/engine/ScoreEngine.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/entity/Assessment.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/resp/QuestionOption.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/resp/AssessmentResp.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/req/AssessmentReq.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-assessment/src/main/java/com/kingman/companion/module/assessment/service/AssessmentService.java

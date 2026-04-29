@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:6
+    restart: always
+    privileged: true
+    container_name: mongo
+    networks:
+      - app-net
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=hpHhEHmtt7v*
+    volumes:
+      - ./mongo/data:/data/db
+    ports:
+      - "30001:27017"
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass vmQvyBHUKEgx --bind 0.0.0.0
+    volumes:
+      - ./redis/data:/data
+    networks:
+      - app-net
+    ports:
+      - "30002:6379"
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+      - ./caddy/web:/srv/web
+    networks:
+      - app-net
+networks:
+  app-net:
+    driver: bridge
