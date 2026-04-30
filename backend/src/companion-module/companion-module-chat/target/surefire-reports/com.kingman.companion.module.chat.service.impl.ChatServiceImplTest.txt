@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.kingman.companion.module.chat.service.impl.ChatServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.765 s - in com.kingman.companion.module.chat.service.impl.ChatServiceImplTest
