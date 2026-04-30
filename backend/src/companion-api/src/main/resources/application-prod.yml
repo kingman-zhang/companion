@@ -18,19 +18,11 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
       auto-index-creation: false
-
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD}
-    timeout: 5000ms
-    redisson:
-      config: |
-        singleServerConfig:
-          address: "redis://${REDIS_HOST}:${REDIS_PORT:6379}"
-          password: "${REDIS_PASSWORD}"
-          connectionPoolSize: 20
-          connectionMinimumIdleSize: 5
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: 5000ms
 
 logging:
   level:

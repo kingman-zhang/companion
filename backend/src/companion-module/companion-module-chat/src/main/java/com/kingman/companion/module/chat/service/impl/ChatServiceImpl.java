@@ -1,6 +1,11 @@
 package com.kingman.companion.module.chat.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingman.companion.component.enums.EmotionLabel;
+import com.kingman.companion.component.llm.AnthropicClient;
+import com.kingman.companion.component.llm.AnthropicMessage;
+import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.util.DistributeID;
@@ -16,24 +21,62 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 聊天服务实现
- * MVP 阶段：LLM 调用使用占位实现，返回模板回复
+ *
+ * <p>调用 Claude 生成情感陪伴回复，解析 JSON 响应获取回复内容、情绪标签和情绪强度。
+ * 历史消息加载后反转为时间正序，拼接当前用户消息后传入 LLM。
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
+    // ── Prompt ──────────────────────────────────────────────────────────────
+
+    static final String SYSTEM_PROMPT = """
+            你是"伴听"，一位专注于关系危机场景的 AI 情感陪伴助手。目标用户是 22–38 岁、正经历关系危机的人。
+            你的定位是：帮助用户在关系危机时刻冷静下来，做出更理性的判断和表达。不做心理治疗，不给建议，只是陪伴和疏导。
+
+            回复原则：
+            - 语气温暖、简洁，≤150 字
+            - 优先反映用户情绪（共情），不急于给方案
+            - 不评判用户或其对方
+            - 不鼓励冲动行为（如立即质问对方）
+
+            情绪标签（emotion_label）从以下枚举中选一个最贴近的：
+            ANXIETY（焦虑）、ANGER（愤怒）、SADNESS（悲伤）、FEAR（恐惧）、GUILT（内疚）、CALM（平静）、HOPE（希望）、OTHER（其他）
+
+            情绪强度（emotion_intensity）：0–10 整数，10 最强烈。
+
+            严格只输出以下 JSON，不要有任何前缀、解释或额外内容：
+            {"reply":"...","emotion_label":"ANXIETY","emotion_intensity":5}
+            """;
+
     private static final int FREE_TIER_ROUND_LIMIT = 10;
+    /** 加载的历史消息条数上限（每条包含 user + assistant，共 10 条消息 = 5 轮） */
+    private static final int HISTORY_LIMIT = 10;
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    // ── Dependencies ─────────────────────────────────────────────────────────
 
     private final ChatSessionRepository sessionRepository;
     private final ChatMessageRepository messageRepository;
+    private final AnthropicClient llmClient;
+    private final SafetyChecker safetyChecker;
+
+    // ── Public API ────────────────────────────────────────────────────────────
 
     @Override
     public ChatResp sendMessage(ChatReq req) {
+        // 安全检测（前置，命中则 HTTP 451）
+        safetyChecker.check(req.getContent()).throwIfBlocked();
+
         // 加载会话
         ChatSession session = sessionRepository.findByIdAndDeletedFalse(req.getSessionId())
                 .orElseThrow(() -> new ApiException(CodeEnum.NOT_FOUND));
@@ -42,6 +85,12 @@ public class ChatServiceImpl implements ChatService {
         if (session.getRoundCount() >= FREE_TIER_ROUND_LIMIT) {
             throw new ApiException(CodeEnum.FREE_TIER_LIMIT_REACHED);
         }
+
+        // 加载历史（DESC，取最近几条；反转为时间正序再传给 LLM）
+        List<ChatMessage> historyDesc = messageRepository.findTop10BySessionIdAndDeletedFalse(
+                req.getSessionId(), Sort.by(Sort.Direction.DESC, "createTime"));
+        List<ChatMessage> history = new ArrayList<>(historyDesc);
+        Collections.reverse(history);
 
         // 保存用户消息
         ChatMessage userMsg = new ChatMessage();
@@ -52,25 +101,21 @@ public class ChatServiceImpl implements ChatService {
         userMsg.setSafetyFlag(false);
         messageRepository.save(userMsg);
 
-        // 加载最近 10 条历史（用于 LLM 上下文，MVP 中暂未接入）
-        List<ChatMessage> history = messageRepository.findTop10BySessionIdAndDeletedFalse(
-                req.getSessionId(), Sort.by(Sort.Direction.DESC, "createTime"));
+        // 构建 LLM 消息列表：历史 + 当前用户消息
+        List<AnthropicMessage> messages = buildMessages(history, req.getContent());
+        String llmText = llmClient.completeWithHistory(SYSTEM_PROMPT, messages);
 
-        // 情绪检测（MVP 使用简单规则）
-        EmotionLabel emotionLabel = detectEmotion(req.getContent());
-        int emotionIntensity = detectIntensity(req.getContent());
-
-        // AI 回复（MVP 使用模板）
-        String aiContent = generateReply(emotionLabel, emotionIntensity);
+        // 解析 LLM 响应
+        LlmResult result = parseLlmResult(llmText);
 
         // 保存 AI 消息
         ChatMessage aiMsg = new ChatMessage();
         aiMsg.setId(DistributeID.generate());
         aiMsg.setSessionId(req.getSessionId());
         aiMsg.setRole("assistant");
-        aiMsg.setContent(aiContent);
-        aiMsg.setEmotionLabel(emotionLabel);
-        aiMsg.setEmotionIntensity(emotionIntensity);
+        aiMsg.setContent(result.reply());
+        aiMsg.setEmotionLabel(result.emotionLabel());
+        aiMsg.setEmotionIntensity(result.emotionIntensity());
         aiMsg.setSafetyFlag(false);
         ChatMessage savedAiMsg = messageRepository.save(aiMsg);
 
@@ -82,15 +127,15 @@ public class ChatServiceImpl implements ChatService {
                 .messageId(savedAiMsg.getId())
                 .sessionId(req.getSessionId())
                 .role("assistant")
-                .content(aiContent)
-                .emotionLabel(emotionLabel)
-                .emotionIntensity(emotionIntensity)
+                .content(result.reply())
+                .emotionLabel(result.emotionLabel())
+                .emotionIntensity(result.emotionIntensity())
                 .safetyFlag(false)
                 .createdAt(savedAiMsg.getCreateTime());
 
         // 微干预触发规则（intensity ≥ 8）
-        if (emotionIntensity >= 8) {
-            builder.microIntervention(buildMicroIntervention(emotionLabel));
+        if (result.emotionIntensity() >= 8) {
+            builder.microIntervention(buildMicroIntervention(result.emotionLabel()));
         }
 
         return builder.build();
@@ -106,38 +151,66 @@ public class ChatServiceImpl implements ChatService {
         return saved.getId();
     }
 
-    private EmotionLabel detectEmotion(String content) {
-        if (content.contains("焦虑") || content.contains("担心") || content.contains("害怕")) {
-            return EmotionLabel.ANXIETY;
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private List<AnthropicMessage> buildMessages(List<ChatMessage> history, String currentUserContent) {
+        List<AnthropicMessage> messages = new ArrayList<>(history.size() + 1);
+        for (ChatMessage msg : history) {
+            messages.add(new AnthropicMessage(msg.getRole(), msg.getContent()));
         }
-        if (content.contains("愤怒") || content.contains("生气") || content.contains("气死")) {
-            return EmotionLabel.ANGER;
-        }
-        if (content.contains("难过") || content.contains("伤心") || content.contains("哭")) {
-            return EmotionLabel.SADNESS;
-        }
-        return EmotionLabel.OTHER;
+        messages.add(new AnthropicMessage("user", currentUserContent));
+        return messages;
     }
 
-    private int detectIntensity(String content) {
-        int intensity = 5;
-        long exclamations = content.chars().filter(c -> c == '！' || c == '!').count();
-        long ellipsis = content.chars().filter(c -> c == '…').count();
-        intensity += (int) Math.min(exclamations * 2, 4);
-        if (content.length() > 500) intensity += 1;
-        return Math.min(intensity, 10);
+    /**
+     * 解析 LLM 返回的 JSON：{@code {"reply":"...","emotion_label":"...","emotion_intensity":5}}
+     *
+     * <p>容忍 Claude 偶发的前缀文字；emotion_label 无法识别时降级为 OTHER。
+     */
+    LlmResult parseLlmResult(String llmText) {
+        if (llmText == null || llmText.isBlank()) {
+            throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+        }
+        try {
+            JsonNode root = MAPPER.readTree(extractJson(llmText));
+            if (root == null || root.isMissingNode() || root.isNull()) {
+                throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+            }
+
+            String reply = root.path("reply").asText();
+            if (reply.isBlank()) {
+                log.error("LLM 返回的 reply 为空：{}", llmText);
+                throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+            }
+
+            EmotionLabel emotionLabel = parseEmotionLabel(root.path("emotion_label").asText("OTHER"));
+            int emotionIntensity = Math.min(Math.max(root.path("emotion_intensity").asInt(5), 0), 10);
+
+            return new LlmResult(reply, emotionLabel, emotionIntensity);
+
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Chat LLM 响应解析失败，原始输出：{}", llmText, e);
+            throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+        }
     }
 
-    private String generateReply(EmotionLabel emotion, int intensity) {
-        if (intensity >= 8) {
-            return "我听到你了，你现在的感受非常真实。先让自己的情绪有一个出口，不用急着做任何决定。";
+    private EmotionLabel parseEmotionLabel(String raw) {
+        try {
+            return EmotionLabel.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return EmotionLabel.OTHER;
         }
-        return switch (emotion) {
-            case ANXIETY -> "感觉到你很担心。不确定的感觉确实很煎熬，我们可以一步步来梳理一下情况。";
-            case ANGER -> "愤怒说明你在乎，这是完全正常的。先不要发那条消息，等情绪稳定后再做决定会更好。";
-            case SADNESS -> "难过的时候最重要的是照顾好自己。你现在感觉怎么样？";
-            default -> "谢谢你愿意跟我分享。能多说一点是什么让你现在最揪心吗？";
-        };
+    }
+
+    private String extractJson(String text) {
+        int start = text.indexOf('{');
+        int end = text.lastIndexOf('}');
+        if (start < 0 || end <= start) {
+            return text;
+        }
+        return text.substring(start, end + 1);
     }
 
     private ChatResp.MicroIntervention buildMicroIntervention(EmotionLabel emotion) {
@@ -158,4 +231,7 @@ public class ChatServiceImpl implements ChatService {
                     .build();
         };
     }
+
+    /** LLM 解析结果（内部使用） */
+    record LlmResult(String reply, EmotionLabel emotionLabel, int emotionIntensity) {}
 }

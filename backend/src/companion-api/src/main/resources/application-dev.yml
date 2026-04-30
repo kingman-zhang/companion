@@ -8,19 +8,11 @@ spring:
     mongodb:
       uri: mongodb://root:abc123456@localhost:27017/companion?authSource=admin&authMechanism=SCRAM-SHA-256&retryWrites=true&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000
       auto-index-creation: false
-
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password: abc123456
-    timeout: 5000ms
-    redisson:
-      config: |
-        singleServerConfig:
-          address: "redis://127.0.0.1:6379"
-          password: "abc123456"
-          connectionPoolSize: 10
-          connectionMinimumIdleSize: 2
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: abc123456
+      timeout: 5000ms
 
 logging:
   level:

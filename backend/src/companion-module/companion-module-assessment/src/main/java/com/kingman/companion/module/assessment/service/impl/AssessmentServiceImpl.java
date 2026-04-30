@@ -1,5 +1,8 @@
 package com.kingman.companion.module.assessment.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingman.companion.component.llm.AnthropicClient;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.util.DistributeID;
@@ -22,8 +25,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AssessmentServiceImpl implements AssessmentService {
 
+    // ── Prompt ──────────────────────────────────────────────────────────────
+
+    static final String SYSTEM_PROMPT = """
+            你是"伴听"的关系评估分析师。根据用户问卷答案和三维度评分结果，生成两段评估文字：
+            - core_insight：≤15字的核心洞察，直接、精准、有共情感，帮用户一句话看清问题
+            - llm_reason：100-300字的评估说明，从情感联结、沟通质量、冲突处理三个维度分析现状，语气温暖但不回避问题，结尾给出一条具体的下一步建议
+
+            严格只输出以下 JSON，不要有任何前缀、解释或额外内容：
+            {"core_insight":"...","llm_reason":"..."}
+            """;
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    // ── Dependencies ─────────────────────────────────────────────────────────
+
     private final AssessmentRepository assessmentRepository;
     private final ScoreEngine scoreEngine;
+    private final AnthropicClient llmClient;
 
     @Override
     public List<QuestionDef> getQuestionnaire() {
@@ -84,6 +103,9 @@ public class AssessmentServiceImpl implements AssessmentService {
     public AssessmentResp submit(AssessmentReq req) {
         ScoreEngine.ScoreResult result = scoreEngine.calculate(req);
 
+        // LLM 生成 core_insight + llm_reason；失败时降级到规则模板
+        LlmEnrichment enrichment = llmEnrich(result, req);
+
         Assessment a = new Assessment();
         a.setId(DistributeID.generate());
         a.setSessionId(req.getSessionId());
@@ -102,8 +124,8 @@ public class AssessmentServiceImpl implements AssessmentService {
         a.setCommunicationScore(result.communicationScore());
         a.setConflictScore(result.conflictScore());
         a.setRecommendedAction(result.recommendedAction());
-        a.setCoreInsight(result.coreInsight());
-        a.setLlmReason(result.reason());
+        a.setCoreInsight(enrichment.coreInsight());
+        a.setLlmReason(enrichment.llmReason());
 
         Assessment saved = assessmentRepository.save(a);
         log.info("评估完成: id={}, score={}, level={}, EC={}, CS={}, CF={}",
@@ -119,6 +141,94 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .orElseThrow(() -> new ApiException(CodeEnum.NOT_FOUND));
         return toResp(a);
     }
+
+    // ── LLM 增强 ──────────────────────────────────────────────────────────────
+
+    /**
+     * 调用 LLM 生成评估洞察文字。
+     *
+     * <p>任何异常静默降级，使用规则引擎的模板文字兜底，保证主流程不中断。
+     */
+    LlmEnrichment llmEnrich(ScoreEngine.ScoreResult result, AssessmentReq req) {
+        try {
+            String userMessage = buildEnrichPrompt(result, req);
+            String llmText = llmClient.complete(SYSTEM_PROMPT, userMessage);
+            return parseLlmEnrichment(llmText);
+        } catch (Exception e) {
+            log.warn("评估 LLM 增强失败，降级使用规则模板: {}", e.getMessage());
+            return new LlmEnrichment(result.coreInsight(), result.reason());
+        }
+    }
+
+    private String buildEnrichPrompt(ScoreEngine.ScoreResult result, AssessmentReq req) {
+        return """
+                评估等级：%s（综合分 %d）
+                情感联结得分：%d / 100
+                沟通质量得分：%d / 100
+                冲突处理得分：%d / 100
+
+                关键答案：
+                - 关系时长：%s
+                - 分手方式：%s
+                - 对方情感判断：%s
+                - 分手前沟通质量：%s
+                - 冲突处理风格：%s
+                - 用户当前目标：%s
+
+                请根据以上信息生成 core_insight 和 llm_reason。
+                """.formatted(
+                result.level(), result.score(),
+                result.emotionalConnectionScore(),
+                result.communicationScore(),
+                result.conflictScore(),
+                nullSafe(req.getRelationshipDuration()),
+                nullSafe(req.getBreakupMethod()),
+                nullSafe(req.getPartnerLovePerception()),
+                nullSafe(req.getCommunicationQuality()),
+                nullSafe(req.getConflictStyle()),
+                nullSafe(req.getUserPrimaryIntent())
+        );
+    }
+
+    /**
+     * 从 LLM 文本中提取并解析 JSON：{@code {"core_insight":"...","llm_reason":"..."}}
+     */
+    LlmEnrichment parseLlmEnrichment(String llmText) {
+        if (llmText == null || llmText.isBlank()) {
+            throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+        }
+        try {
+            JsonNode root = MAPPER.readTree(extractJson(llmText));
+            if (root == null || root.isMissingNode() || root.isNull()) {
+                throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+            }
+            String coreInsight = root.path("core_insight").asText();
+            String llmReason = root.path("llm_reason").asText();
+            if (coreInsight.isBlank() || llmReason.isBlank()) {
+                throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+            }
+            return new LlmEnrichment(coreInsight, llmReason);
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("评估 LLM 响应解析失败：{}", llmText, e);
+            throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private String extractJson(String text) {
+        int start = text.indexOf('{');
+        int end = text.lastIndexOf('}');
+        if (start < 0 || end <= start) return text;
+        return text.substring(start, end + 1);
+    }
+
+    private String nullSafe(Object o) {
+        return o == null ? "未填写" : o.toString();
+    }
+
+    /** LLM 增强结果 */
+    record LlmEnrichment(String coreInsight, String llmReason) {}
 
     private AssessmentResp toResp(Assessment a) {
         return AssessmentResp.builder()

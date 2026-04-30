@@ -1,4 +1,6 @@
 com/kingman/companion/component/enums/AbuseFlag.class
+com/kingman/companion/component/safety/SafetyChecker.class
+com/kingman/companion/component/llm/AnthropicClient.class
 com/kingman/companion/component/enums/WhoInitiated.class
 com/kingman/companion/component/enums/ConflictStyle.class
 com/kingman/companion/component/enums/EntryState.class
@@ -7,8 +9,12 @@ com/kingman/companion/component/enums/BreakupMethod.class
 com/kingman/companion/component/enums/UserPrimaryIntent.class
 com/kingman/companion/component/enums/RecommendedAction.class
 com/kingman/companion/component/enums/CommunicationQuality.class
+com/kingman/companion/component/safety/SafetyResult.class
+com/kingman/companion/component/llm/AnthropicClientImpl.class
 com/kingman/companion/component/enums/EmotionLabel.class
 com/kingman/companion/component/enums/TimeSinceIncident.class
+com/kingman/companion/component/llm/AnthropicMessage.class
+com/kingman/companion/component/llm/AnthropicProperties.class
 com/kingman/companion/component/enums/CurrentEmotion.class
 com/kingman/companion/component/enums/AssessmentLevel.class
 com/kingman/companion/component/enums/PartnerLovePerception.class

@@ -8,8 +8,14 @@
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/CurrentEmotion.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/ConflictStyle.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/EntryState.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/llm/AnthropicClient.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/llm/AnthropicProperties.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/WhoInitiated.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/safety/SafetyChecker.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/CommunicationQuality.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/llm/AnthropicMessage.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/EmotionLabel.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/AbuseFlag.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/enums/RecommendedAction.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/safety/SafetyResult.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-component/src/main/java/com/kingman/companion/component/llm/AnthropicClientImpl.java
