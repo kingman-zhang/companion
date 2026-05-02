@@ -97,6 +97,37 @@ class SafetyCheckerTest {
         assertThatCode(() -> SafetyResult.pass().throwIfBlocked()).doesNotThrowAnyException();
     }
 
+    @Test
+    void throwIfBlocked_does_nothing_when_concerning() {
+        assertThatCode(() -> SafetyResult.concerning("passive_ideation").throwIfBlocked()).doesNotThrowAnyException();
+    }
+
+    // ── CONCERNING 级别：被动/模糊表达 ───────────────────────────────────────
+
+    @ParameterizedTest
+    @ValueSource(strings = {"想消失", "活得好累", "不想撑了", "撑不下去", "没意思", "心好累"})
+    void check_returns_concerning_for_passive_ideation(String content) {
+        SafetyResult result = checker.check(content);
+        assertThat(result.level()).isEqualTo(SafetyLevel.CONCERNING);
+        assertThat(result.triggerType()).isEqualTo("passive_ideation");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"崩溃了", "喘不过气", "走不下去了", "看不到希望", "失去一切"})
+    void check_returns_concerning_for_emotional_crisis(String content) {
+        SafetyResult result = checker.check(content);
+        assertThat(result.level()).isEqualTo(SafetyLevel.CONCERNING);
+        assertThat(result.triggerType()).isEqualTo("emotional_crisis");
+    }
+
+    @Test
+    void check_prioritizes_blocked_over_concerning() {
+        // "想死" is BLOCKED, "心好累" is CONCERNING → should be BLOCKED
+        SafetyResult result = checker.check("我心好累，我就想死");
+        assertThat(result.level()).isEqualTo(SafetyLevel.BLOCKED);
+        assertThat(result.triggerType()).isEqualTo("self_harm");
+    }
+
     // ── 优先级：自伤优先于其他 ────────────────────────────────────────────────
 
     @Test

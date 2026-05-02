@@ -7,26 +7,37 @@ import com.kingman.companion.framework.exception.SafetyBlockedException;
  *
  * <p>调用方式：
  * <pre>
- *   safetyChecker.check(content).throwIfBlocked();
+ *   SafetyResult result = safetyChecker.check(content);
+ *   result.throwIfBlocked();              // BLOCKED 时抛 HTTP 451，其余无操作
+ *   SafetyLevel level = result.level();   // 供路由决策使用
  * </pre>
  */
-public record SafetyResult(boolean safe, String triggerType) {
+public record SafetyResult(SafetyLevel level, String triggerType) {
 
     /** 内容安全 */
     public static SafetyResult pass() {
-        return new SafetyResult(true, null);
+        return new SafetyResult(SafetyLevel.SAFE, null);
     }
 
-    /** 内容命中安全风险 */
+    /** 内容令人担忧，路由到 SAFETY 模型，不阻断 */
+    public static SafetyResult concerning(String triggerType) {
+        return new SafetyResult(SafetyLevel.CONCERNING, triggerType);
+    }
+
+    /** 明确危险内容，直接 HTTP 451 */
     public static SafetyResult block(String triggerType) {
-        return new SafetyResult(false, triggerType);
+        return new SafetyResult(SafetyLevel.BLOCKED, triggerType);
+    }
+
+    public boolean safe() {
+        return level == SafetyLevel.SAFE;
     }
 
     /**
-     * 不安全时抛出 {@link SafetyBlockedException}（HTTP 451），安全时无操作。
+     * BLOCKED 时抛出 {@link SafetyBlockedException}（HTTP 451），其余无操作。
      */
     public void throwIfBlocked() {
-        if (!safe) {
+        if (level == SafetyLevel.BLOCKED) {
             throw new SafetyBlockedException(triggerType);
         }
     }

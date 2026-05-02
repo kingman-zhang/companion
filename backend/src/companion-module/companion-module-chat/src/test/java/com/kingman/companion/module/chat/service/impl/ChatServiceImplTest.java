@@ -1,8 +1,10 @@
 package com.kingman.companion.module.chat.service.impl;
 
 import com.kingman.companion.component.enums.EmotionLabel;
-import com.kingman.companion.component.llm.AnthropicClient;
-import com.kingman.companion.component.llm.AnthropicMessage;
+import com.kingman.companion.component.llm.LlmGateway;
+import com.kingman.companion.component.llm.LlmMessage;
+import com.kingman.companion.component.llm.RoutingContext;
+import com.kingman.companion.module.chat.config.ChatProperties;
 import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.common.CodeEnum;
@@ -43,10 +45,13 @@ class ChatServiceImplTest {
     private ChatMessageRepository messageRepository;
 
     @Mock
-    private AnthropicClient llmClient;
+    private LlmGateway llmGateway;
 
     @Mock
     private SafetyChecker safetyChecker;
+
+    @Mock
+    private ChatProperties chatProperties;
 
     private ChatServiceImpl service;
 
@@ -57,7 +62,8 @@ class ChatServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new ChatServiceImpl(sessionRepository, messageRepository, llmClient, safetyChecker);
+        lenient().when(chatProperties.getSystemPrompt()).thenReturn("test-system-prompt");
+        service = new ChatServiceImpl(sessionRepository, messageRepository, llmGateway, safetyChecker, chatProperties);
         // 默认所有内容安全（lenient：部分测试直接调用 parseLlmResult，不经过 check）
         lenient().when(safetyChecker.check(anyString())).thenReturn(SafetyResult.pass());
     }
@@ -127,10 +133,10 @@ class ChatServiceImplTest {
 
         service.sendMessage(buildReq("当前用户消息"));
 
-        ArgumentCaptor<List<AnthropicMessage>> messagesCaptor = ArgumentCaptor.forClass(List.class);
-        verify(llmClient).completeWithHistory(eq(ChatServiceImpl.SYSTEM_PROMPT), messagesCaptor.capture());
+        ArgumentCaptor<List<LlmMessage>> messagesCaptor = ArgumentCaptor.forClass(List.class);
+        verify(llmGateway).completeWithHistory(anyString(), messagesCaptor.capture(), any(RoutingContext.class));
 
-        List<AnthropicMessage> msgs = messagesCaptor.getValue();
+        List<LlmMessage> msgs = messagesCaptor.getValue();
         // 历史反转后应为 旧 → 新 → 当前用户消息
         assertThat(msgs).hasSize(3);
         assertThat(msgs.get(0).content()).isEqualTo("第一条消息");
@@ -181,7 +187,7 @@ class ChatServiceImplTest {
         // 拦截后不查 session，不写消息，不调 LLM
         verify(sessionRepository, never()).findByIdAndDeletedFalse(any());
         verify(messageRepository, never()).save(any());
-        verify(llmClient, never()).completeWithHistory(any(), any());
+        verify(llmGateway, never()).completeWithHistory(any(), any(), any());
     }
 
     @Test
@@ -203,7 +209,7 @@ class ChatServiceImplTest {
         assertThatThrownBy(() -> service.sendMessage(buildReq("测试")))
                 .isInstanceOf(ApiException.class);
 
-        verify(llmClient, never()).completeWithHistory(anyString(), anyList());
+        verify(llmGateway, never()).completeWithHistory(anyString(), anyList(), any());
         verify(messageRepository, never()).save(any());
     }
 
@@ -213,7 +219,7 @@ class ChatServiceImplTest {
     void sendMessage_propagates_exception_when_llm_fails() {
         stubSession(0);
         stubNoHistory();
-        when(llmClient.completeWithHistory(anyString(), anyList()))
+        when(llmGateway.completeWithHistory(anyString(), anyList(), any(RoutingContext.class)))
                 .thenThrow(new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE));
 
         assertThatThrownBy(() -> service.sendMessage(buildReq("测试消息")))
@@ -288,7 +294,7 @@ class ChatServiceImplTest {
     }
 
     private void stubLlm(String response) {
-        when(llmClient.completeWithHistory(anyString(), anyList())).thenReturn(response);
+        when(llmGateway.completeWithHistory(anyString(), anyList(), any(RoutingContext.class))).thenReturn(response);
     }
 
     private void stubMessageSave() {

@@ -1,6 +1,7 @@
 package com.kingman.companion.module.rewrite.service.impl;
 
-import com.kingman.companion.component.llm.AnthropicClient;
+import com.kingman.companion.component.llm.LlmGateway;
+import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.exception.ApiException;
@@ -38,7 +39,7 @@ class RewriteServiceImplTest {
     private RewriteRepository rewriteRepository;
 
     @Mock
-    private AnthropicClient llmClient;
+    private LlmGateway llmGateway;
 
     @Mock
     private RewriteDailyUsageRepository dailyUsageRepository;
@@ -63,7 +64,7 @@ class RewriteServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new RewriteServiceImpl(rewriteRepository, llmClient, dailyUsageRepository, safetyChecker);
+        service = new RewriteServiceImpl(rewriteRepository, llmGateway, dailyUsageRepository, safetyChecker);
         // 默认所有内容安全（lenient：部分测试直接调用 parseVariants/checkDailyLimit，不经过 check）
         lenient().when(safetyChecker.check(anyString())).thenReturn(SafetyResult.pass());
     }
@@ -118,7 +119,7 @@ class RewriteServiceImplTest {
         service.rewrite(buildReq("你为什么不回我消息"));
 
         ArgumentCaptor<String> userPromptCaptor = ArgumentCaptor.forClass(String.class);
-        verify(llmClient).complete(eq(RewriteServiceImpl.SYSTEM_PROMPT), userPromptCaptor.capture());
+        verify(llmGateway).complete(eq(RewriteServiceImpl.SYSTEM_PROMPT), userPromptCaptor.capture(), any(RoutingContext.class));
         assertThat(userPromptCaptor.getValue()).contains("你为什么不回我消息");
     }
 
@@ -174,7 +175,7 @@ class RewriteServiceImplTest {
 
     @Test
     void rewrite_propagates_exception_when_llm_call_fails() {
-        when(llmClient.complete(anyString(), anyString()))
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class)))
                 .thenThrow(new ApiException(
                         com.kingman.companion.framework.common.CodeEnum.AI_SERVICE_UNAVAILABLE));
 
@@ -237,14 +238,14 @@ class RewriteServiceImplTest {
                 .isInstanceOf(ApiException.class);
 
         // 超限时不调用 LLM，不写入记录
-        verify(llmClient, never()).complete(any(), any());
+        verify(llmGateway, never()).complete(any(), any(), any());
         verify(rewriteRepository, never()).save(any());
     }
 
     @Test
     void rewrite_does_not_record_usage_when_llm_fails() {
         stubNoUsageToday();
-        when(llmClient.complete(anyString(), anyString()))
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class)))
                 .thenThrow(new ApiException(
                         com.kingman.companion.framework.common.CodeEnum.AI_SERVICE_UNAVAILABLE));
 
@@ -267,7 +268,7 @@ class RewriteServiceImplTest {
                 .isEqualTo("self_harm");
 
         // 安全拦截后不调用 LLM，不写记录
-        verify(llmClient, never()).complete(any(), any());
+        verify(llmGateway, never()).complete(any(), any(), any());
         verify(rewriteRepository, never()).save(any());
     }
 
@@ -312,7 +313,7 @@ class RewriteServiceImplTest {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void stubLlm(String response) {
-        when(llmClient.complete(anyString(), anyString())).thenReturn(response);
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(response);
     }
 
     private void stubSave() {

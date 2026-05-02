@@ -2,7 +2,8 @@ package com.kingman.companion.module.rewrite.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kingman.companion.component.llm.AnthropicClient;
+import com.kingman.companion.component.llm.LlmGateway;
+import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
@@ -68,7 +69,7 @@ public class RewriteServiceImpl implements RewriteService {
     // ── Dependencies ─────────────────────────────────────────────────────────
 
     private final RewriteRepository rewriteRepository;
-    private final AnthropicClient llmClient;
+    private final LlmGateway llmGateway;
     private final RewriteDailyUsageRepository dailyUsageRepository;
     private final SafetyChecker safetyChecker;
 
@@ -85,7 +86,7 @@ public class RewriteServiceImpl implements RewriteService {
         }
 
         String userPrompt = "请改写以下消息：\n\"%s\"".formatted(req.getOriginalMessage());
-        String llmText = llmClient.complete(SYSTEM_PROMPT, userPrompt);
+        String llmText = llmGateway.complete(SYSTEM_PROMPT, userPrompt, RoutingContext.standard());
 
         List<RewriteVariant> variants = parseVariants(llmText);
 

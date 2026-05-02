@@ -1,7 +1,8 @@
 package com.kingman.companion.module.assessment.service.impl;
 
 import com.kingman.companion.component.enums.*;
-import com.kingman.companion.component.llm.AnthropicClient;
+import com.kingman.companion.component.llm.LlmGateway;
+import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.module.assessment.engine.ScoreEngine;
 import com.kingman.companion.module.assessment.entity.Assessment;
@@ -31,7 +32,7 @@ class AssessmentServiceImplTest {
     private AssessmentRepository assessmentRepository;
 
     @Mock
-    private AnthropicClient llmClient;
+    private LlmGateway llmGateway;
 
     private AssessmentServiceImpl service;
     private ScoreEngine scoreEngine;
@@ -42,14 +43,14 @@ class AssessmentServiceImplTest {
     @BeforeEach
     void setUp() {
         scoreEngine = new ScoreEngine();
-        service = new AssessmentServiceImpl(assessmentRepository, scoreEngine, llmClient);
+        service = new AssessmentServiceImpl(assessmentRepository, scoreEngine, llmGateway);
     }
 
     // ── 正常流程 ──────────────────────────────────────────────────────────────
 
     @Test
     void submit_uses_llm_insight_and_reason_when_llm_succeeds() {
-        when(llmClient.complete(anyString(), anyString())).thenReturn(VALID_LLM_RESPONSE);
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(VALID_LLM_RESPONSE);
         stubSave();
 
         AssessmentResp resp = service.submit(buildFullReq());
@@ -60,13 +61,13 @@ class AssessmentServiceImplTest {
 
     @Test
     void submit_passes_score_context_to_llm() {
-        when(llmClient.complete(anyString(), anyString())).thenReturn(VALID_LLM_RESPONSE);
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(VALID_LLM_RESPONSE);
         stubSave();
 
         service.submit(buildFullReq());
 
         ArgumentCaptor<String> userMsgCaptor = ArgumentCaptor.forClass(String.class);
-        verify(llmClient).complete(eq(AssessmentServiceImpl.SYSTEM_PROMPT), userMsgCaptor.capture());
+        verify(llmGateway).complete(eq(AssessmentServiceImpl.SYSTEM_PROMPT), userMsgCaptor.capture(), any(RoutingContext.class));
 
         String prompt = userMsgCaptor.getValue();
         assertThat(prompt).contains("评估等级");
@@ -76,7 +77,7 @@ class AssessmentServiceImplTest {
 
     @Test
     void submit_saves_assessment_to_repository() {
-        when(llmClient.complete(anyString(), anyString())).thenReturn(VALID_LLM_RESPONSE);
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(VALID_LLM_RESPONSE);
         stubSave();
 
         service.submit(buildFullReq());
@@ -94,7 +95,7 @@ class AssessmentServiceImplTest {
 
     @Test
     void submit_falls_back_to_rule_template_when_llm_throws() {
-        when(llmClient.complete(anyString(), anyString()))
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class)))
                 .thenThrow(new ApiException(
                         com.kingman.companion.framework.common.CodeEnum.AI_SERVICE_UNAVAILABLE));
         stubSave();
@@ -109,7 +110,7 @@ class AssessmentServiceImplTest {
 
     @Test
     void submit_falls_back_when_llm_returns_invalid_json() {
-        when(llmClient.complete(anyString(), anyString())).thenReturn("这不是JSON");
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn("这不是JSON");
         stubSave();
 
         AssessmentResp resp = service.submit(buildFullReq());
@@ -123,7 +124,7 @@ class AssessmentServiceImplTest {
 
     @Test
     void llmEnrich_returns_llm_result_on_success() {
-        when(llmClient.complete(anyString(), anyString())).thenReturn(VALID_LLM_RESPONSE);
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(VALID_LLM_RESPONSE);
 
         ScoreEngine.ScoreResult score = scoreEngine.calculate(buildFullReq());
         AssessmentServiceImpl.LlmEnrichment enrichment = service.llmEnrich(score, buildFullReq());
@@ -134,7 +135,7 @@ class AssessmentServiceImplTest {
 
     @Test
     void llmEnrich_returns_fallback_on_llm_failure() {
-        when(llmClient.complete(anyString(), anyString()))
+        when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class)))
                 .thenThrow(new RuntimeException("network error"));
 
         ScoreEngine.ScoreResult score = scoreEngine.calculate(buildFullReq());

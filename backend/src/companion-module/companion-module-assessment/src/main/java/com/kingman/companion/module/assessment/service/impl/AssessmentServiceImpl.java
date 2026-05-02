@@ -2,7 +2,8 @@ package com.kingman.companion.module.assessment.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kingman.companion.component.llm.AnthropicClient;
+import com.kingman.companion.component.llm.LlmGateway;
+import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.util.DistributeID;
@@ -42,7 +43,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
     private final AssessmentRepository assessmentRepository;
     private final ScoreEngine scoreEngine;
-    private final AnthropicClient llmClient;
+    private final LlmGateway llmGateway;
 
     @Override
     public List<QuestionDef> getQuestionnaire() {
@@ -152,7 +153,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     LlmEnrichment llmEnrich(ScoreEngine.ScoreResult result, AssessmentReq req) {
         try {
             String userMessage = buildEnrichPrompt(result, req);
-            String llmText = llmClient.complete(SYSTEM_PROMPT, userMessage);
+            String llmText = llmGateway.complete(SYSTEM_PROMPT, userMessage, RoutingContext.standard());
             return parseLlmEnrichment(llmText);
         } catch (Exception e) {
             log.warn("评估 LLM 增强失败，降级使用规则模板: {}", e.getMessage());
