@@ -4,6 +4,7 @@ import com.kingman.companion.component.enums.*;
 import com.kingman.companion.component.llm.LlmGateway;
 import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.exception.ApiException;
+import com.kingman.companion.module.assessment.config.AssessmentProperties;
 import com.kingman.companion.module.assessment.engine.ScoreEngine;
 import com.kingman.companion.module.assessment.entity.Assessment;
 import com.kingman.companion.module.assessment.repository.AssessmentRepository;
@@ -34,6 +35,9 @@ class AssessmentServiceImplTest {
     @Mock
     private LlmGateway llmGateway;
 
+    @Mock
+    private AssessmentProperties assessmentProperties;
+
     private AssessmentServiceImpl service;
     private ScoreEngine scoreEngine;
 
@@ -43,7 +47,8 @@ class AssessmentServiceImplTest {
     @BeforeEach
     void setUp() {
         scoreEngine = new ScoreEngine();
-        service = new AssessmentServiceImpl(assessmentRepository, scoreEngine, llmGateway);
+        lenient().when(assessmentProperties.getSystemPrompt()).thenReturn("test-assessment-prompt");
+        service = new AssessmentServiceImpl(assessmentRepository, scoreEngine, llmGateway, assessmentProperties);
     }
 
     // ── 正常流程 ──────────────────────────────────────────────────────────────
@@ -67,7 +72,7 @@ class AssessmentServiceImplTest {
         service.submit(buildFullReq());
 
         ArgumentCaptor<String> userMsgCaptor = ArgumentCaptor.forClass(String.class);
-        verify(llmGateway).complete(eq(AssessmentServiceImpl.SYSTEM_PROMPT), userMsgCaptor.capture(), any(RoutingContext.class));
+        verify(llmGateway).complete(anyString(), userMsgCaptor.capture(), any(RoutingContext.class));
 
         String prompt = userMsgCaptor.getValue();
         assertThat(prompt).contains("评估等级");

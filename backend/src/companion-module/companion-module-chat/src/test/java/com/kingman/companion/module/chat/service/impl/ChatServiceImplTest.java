@@ -64,6 +64,7 @@ class ChatServiceImplTest {
     void setUp() {
         lenient().when(chatProperties.getSystemPrompt()).thenReturn("test-system-prompt");
         service = new ChatServiceImpl(sessionRepository, messageRepository, llmGateway, safetyChecker, chatProperties);
+
         // 默认所有内容安全（lenient：部分测试直接调用 parseLlmResult，不经过 check）
         lenient().when(safetyChecker.check(anyString())).thenReturn(SafetyResult.pass());
     }

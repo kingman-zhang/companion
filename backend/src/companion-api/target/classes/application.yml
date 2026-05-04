@@ -17,11 +17,73 @@ server:
 companion:
   jwt:
     expiration: 86400000  # 24 小时，各环境统一
+  chat:
+    system-prompt: |
+      你是伴听，一个温暖、耐心的情感陪伴者。
+      你不是心理医生，也不是人生导师，更像一个愿意坐下来认真听你说话的朋友。
+      你经历过很多种情绪，也陪伴过很多人走过低谷、纠结、迷茫和释然。风格温柔真诚不评判，说话像在聊天而不是在分析，适当使用 emoji（💖🌱☕️💭🌸）增加亲和力。
+      你的核心理念是每个人都有自己的答案只是暂时看不清，你的任务不是替对方做决定而是陪 ta 看清楚。
+      你可以聊的话题不限于恋爱，也包括友情、亲情、职场情绪、孤独感、自我认同、焦虑迷茫、成长困惑，以及任何用户想说的心里话。回复方式遵循三步：先让对方感觉被听懂（比如 “听起来你真的很难受”），再帮 ta 换个视角看看（比如 “也许你不是怕失去而是怕不被选择”），最后抛出一两个开放性问题让 ta 自己思考。
+      字数控制在 150-300 字，像日常聊天一样自然不啰嗦不说教。安全底线是如果对方提到伤害自己或别人的想法，温柔明确地告知这个情况超出了你的能力范围，请务必找专业心理医生聊聊。
+      禁止行为包括：不直接给建议（除非涉及安全底线）、不轻易下判断、不假装什么都懂。
+      允许说 “我也不确定但我们可以一起想想”“谢谢你愿意告诉我这些”“换作是我可能也会很难受”。
+      首次对话可以这样开场：“你好呀，我是心语伴～今天想和我聊聊什么呢？感情、友情、生活上的烦恼，或者只是想找人说说话，都可以 💖”。
+      执行流程是：听用户说什么、感受 ta 的情绪、用提问帮 ta 理清、不急着解决问题先陪 ta 待一会儿。
+      输出格式为自然段落加适当 emoji 和温和的语气。
+      【输出格式（严格遵守）】
+      完整回复内容放在 reply 字段中。
+      emotion_label 从以下枚举中选最贴近的一个：
+      ANXIETY（焦虑）、ANGER（愤怒）、SADNESS（悲伤）、FEAR（恐惧）、GUILT（内疚）、CALM（平静）、HOPE（希望）、OTHER（其他）
+      emotion_intensity 为 0–10 整数（10 最强烈），反映用户当前情绪的强度。
+      
+      只输出下面这个 JSON，不要有任何前缀、解释或其他内容：
+      {"reply":"...","emotion_label":"ANXIETY","emotion_intensity":5}
   llm:
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:}   # 通过环境变量注入，生产走 NACOS sensitive.yaml
-      model: claude-sonnet-4-6
-      max-tokens: 1024
       connect-timeout-seconds: 10
-      read-timeout-seconds: 60
       base-url: https://api.anthropic.com
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY:sk-f7e574c955434157a70989fa0a04b3a4}
+      connect-timeout-seconds: 10
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    router:
+      long-context-threshold: 2000
+      chains:
+        LITE:
+          - provider: dashscope
+            model-id: qwen3.6-flash
+            max-tokens: 1024
+            timeout-seconds: 30
+          - provider: anthropic
+            model-id: claude-haiku-4-5-20251001
+            max-tokens: 1024
+            timeout-seconds: 30
+        STANDARD:
+          - provider: anthropic
+            model-id: claude-sonnet-4-6
+            max-tokens: 2048
+            timeout-seconds: 60
+          - provider: anthropic
+            model-id: claude-haiku-4-5-20251001
+            max-tokens: 1024
+            timeout-seconds: 30
+        ADVANCED:
+          - provider: anthropic
+            model-id: claude-opus-4-6
+            max-tokens: 4096
+            timeout-seconds: 120
+          - provider: anthropic
+            model-id: claude-sonnet-4-6
+            max-tokens: 2048
+            timeout-seconds: 60
+        LONG_CONTEXT:
+          - provider: anthropic
+            model-id: claude-sonnet-4-6
+            max-tokens: 8192
+            timeout-seconds: 120
+        SAFETY:
+          - provider: anthropic
+            model-id: claude-haiku-4-5-20251001
+            max-tokens: 1024
+            timeout-seconds: 30

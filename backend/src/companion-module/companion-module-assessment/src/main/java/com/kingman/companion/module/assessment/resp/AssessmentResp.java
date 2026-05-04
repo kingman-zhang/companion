@@ -1,8 +1,6 @@
 package com.kingman.companion.module.assessment.resp;
 
-import com.kingman.companion.component.enums.AssessmentLevel;
-import com.kingman.companion.component.enums.RecommendedAction;
-import com.kingman.companion.component.enums.UserPrimaryIntent;
+import com.kingman.companion.component.enums.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,6 +14,20 @@ import java.time.LocalDateTime;
 public class AssessmentResp {
 
     private String assessmentId;
+
+    // ---- 问卷原始答案 ----
+    /** Q1: 交往时长 */
+    private RelationshipDuration relationshipDuration;
+    /** Q2: 分手方式 */
+    private BreakupMethod breakupMethod;
+    /** Q3: 当前情绪 */
+    private CurrentEmotion currentEmotion;
+    /** Q4: 分手前沟通质量 */
+    private CommunicationQuality communicationQuality;
+    /** Q5: 冲突处理风格 */
+    private ConflictStyle conflictStyle;
+    /** Q6: 对方情感判断 */
+    private PartnerLovePerception partnerLovePerception;
 
     /** 总分 0–100（规则计算） */
     private Integer score;

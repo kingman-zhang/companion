@@ -7,6 +7,7 @@ import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.util.DistributeID;
+import com.kingman.companion.module.assessment.config.AssessmentProperties;
 import com.kingman.companion.module.assessment.engine.ScoreEngine;
 import com.kingman.companion.module.assessment.entity.Assessment;
 import com.kingman.companion.module.assessment.repository.AssessmentRepository;
@@ -26,17 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AssessmentServiceImpl implements AssessmentService {
 
-    // ── Prompt ──────────────────────────────────────────────────────────────
-
-    static final String SYSTEM_PROMPT = """
-            你是"伴听"的关系评估分析师。根据用户问卷答案和三维度评分结果，生成两段评估文字：
-            - core_insight：≤15字的核心洞察，直接、精准、有共情感，帮用户一句话看清问题
-            - llm_reason：100-300字的评估说明，从情感联结、沟通质量、冲突处理三个维度分析现状，语气温暖但不回避问题，结尾给出一条具体的下一步建议
-
-            严格只输出以下 JSON，不要有任何前缀、解释或额外内容：
-            {"core_insight":"...","llm_reason":"..."}
-            """;
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // ── Dependencies ─────────────────────────────────────────────────────────
@@ -44,6 +34,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final AssessmentRepository assessmentRepository;
     private final ScoreEngine scoreEngine;
     private final LlmGateway llmGateway;
+    private final AssessmentProperties assessmentProperties;
 
     @Override
     public List<QuestionDef> getQuestionnaire() {
@@ -153,7 +144,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     LlmEnrichment llmEnrich(ScoreEngine.ScoreResult result, AssessmentReq req) {
         try {
             String userMessage = buildEnrichPrompt(result, req);
-            String llmText = llmGateway.complete(SYSTEM_PROMPT, userMessage, RoutingContext.standard());
+            String llmText = llmGateway.complete(assessmentProperties.getSystemPrompt(), userMessage, RoutingContext.standard());
             return parseLlmEnrichment(llmText);
         } catch (Exception e) {
             log.warn("评估 LLM 增强失败，降级使用规则模板: {}", e.getMessage());
@@ -234,6 +225,12 @@ public class AssessmentServiceImpl implements AssessmentService {
     private AssessmentResp toResp(Assessment a) {
         return AssessmentResp.builder()
                 .assessmentId(a.getId())
+                .relationshipDuration(a.getRelationshipDuration())
+                .breakupMethod(a.getBreakupMethod())
+                .currentEmotion(a.getCurrentEmotion())
+                .communicationQuality(a.getCommunicationQuality())
+                .conflictStyle(a.getConflictStyle())
+                .partnerLovePerception(a.getPartnerLovePerception())
                 .score(a.getScore())
                 .level(a.getLevel())
                 .confidence(a.getConfidence())

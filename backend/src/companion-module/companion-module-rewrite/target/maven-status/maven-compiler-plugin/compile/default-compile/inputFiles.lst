@@ -6,4 +6,5 @@
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-rewrite/src/main/java/com/kingman/companion/module/rewrite/resp/RewriteResp.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-rewrite/src/main/java/com/kingman/companion/module/rewrite/req/RewriteReq.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-rewrite/src/main/java/com/kingman/companion/module/rewrite/service/RewriteService.java
+/Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-rewrite/src/main/java/com/kingman/companion/module/rewrite/config/RewriteProperties.java
 /Users/zhangjianwen/Documents/Kingman/code/companion/backend/src/companion-module/companion-module-rewrite/src/main/java/com/kingman/companion/module/rewrite/repository/RewriteRepository.java

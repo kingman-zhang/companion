@@ -6,6 +6,7 @@ import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.exception.SafetyBlockedException;
+import com.kingman.companion.module.rewrite.config.RewriteProperties;
 import com.kingman.companion.module.rewrite.entity.RewriteDailyUsage;
 import com.kingman.companion.module.rewrite.entity.RewriteRecord;
 import com.kingman.companion.module.rewrite.entity.RewriteVariant;
@@ -47,6 +48,9 @@ class RewriteServiceImplTest {
     @Mock
     private SafetyChecker safetyChecker;
 
+    @Mock
+    private RewriteProperties rewriteProperties;
+
     private RewriteServiceImpl service;
 
     private static final String DEVICE_ID = "device-abc-123";
@@ -64,7 +68,8 @@ class RewriteServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new RewriteServiceImpl(rewriteRepository, llmGateway, dailyUsageRepository, safetyChecker);
+        lenient().when(rewriteProperties.getSystemPrompt()).thenReturn("test-rewrite-prompt");
+        service = new RewriteServiceImpl(rewriteRepository, llmGateway, dailyUsageRepository, safetyChecker, rewriteProperties);
         // 默认所有内容安全（lenient：部分测试直接调用 parseVariants/checkDailyLimit，不经过 check）
         lenient().when(safetyChecker.check(anyString())).thenReturn(SafetyResult.pass());
     }
@@ -119,7 +124,7 @@ class RewriteServiceImplTest {
         service.rewrite(buildReq("你为什么不回我消息"));
 
         ArgumentCaptor<String> userPromptCaptor = ArgumentCaptor.forClass(String.class);
-        verify(llmGateway).complete(eq(RewriteServiceImpl.SYSTEM_PROMPT), userPromptCaptor.capture(), any(RoutingContext.class));
+        verify(llmGateway).complete(anyString(), userPromptCaptor.capture(), any(RoutingContext.class));
         assertThat(userPromptCaptor.getValue()).contains("你为什么不回我消息");
     }
 

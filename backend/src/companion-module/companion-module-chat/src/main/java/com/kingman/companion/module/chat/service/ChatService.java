@@ -15,6 +15,8 @@ public interface ChatService {
 
     /**
      * 创建新会话，返回 session_id
+     *
+     * @param assessmentContext 评估上下文摘要（可为 null，表示无评估直接进入聊天）
      */
-    String createSession();
+    String createSession(String assessmentContext);
 }

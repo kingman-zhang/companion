@@ -105,7 +105,8 @@ public class ChatServiceImpl implements ChatService {
         RoutingContext context = buildRoutingContext(req.getContent(), totalInputLength, safety.level());
 
         // 调用 LLM Gateway（路由 + fallback 由 Gateway 处理）
-        String llmText = llmGateway.completeWithHistory(chatProperties.getSystemPrompt(), messages, context);
+        String systemPrompt = buildSystemPrompt(session.getAssessmentContext());
+        String llmText = llmGateway.completeWithHistory(systemPrompt, messages, context);
 
         // 解析响应
         LlmResult result = parseLlmResult(llmText);
@@ -143,12 +144,23 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String createSession() {
+    public String createSession(String assessmentContext) {
         ChatSession session = new ChatSession();
         session.setId(DistributeID.generate());
         session.setRoundCount(0);
         session.setInCooldown(false);
+        session.setAssessmentContext(assessmentContext);
         return sessionRepository.save(session).getId();
+    }
+
+    // ── System Prompt 构建 ────────────────────────────────────────────────────
+
+    private String buildSystemPrompt(String assessmentContext) {
+        String base = chatProperties.getSystemPrompt();
+        if (assessmentContext == null || assessmentContext.isBlank()) {
+            return base;
+        }
+        return assessmentContext + "\n\n" + base;
     }
 
     // ── 路由上下文构建 ────────────────────────────────────────────────────────

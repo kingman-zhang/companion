@@ -8,6 +8,7 @@ import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.util.DistributeID;
+import com.kingman.companion.module.rewrite.config.RewriteProperties;
 import com.kingman.companion.module.rewrite.entity.RewriteDailyUsage;
 import com.kingman.companion.module.rewrite.entity.RewriteRecord;
 import com.kingman.companion.module.rewrite.entity.RewriteVariant;
@@ -28,35 +29,13 @@ import java.util.stream.Stream;
 /**
  * 消息改写服务实现
  *
- * <p>调用 Claude 生成 gentle / direct / brief 三个改写变体，
+ * <p>调用 LLM 生成 gentle / direct / brief 三个改写变体，
  * 要求 LLM 严格返回 JSON，解析后持久化到 MongoDB。
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RewriteServiceImpl implements RewriteService {
-
-    // ── Prompt ──────────────────────────────────────────────────────────────
-
-    static final String SYSTEM_PROMPT = """
-            你是一位专业情感沟通顾问。将用户发来的情绪化消息改写为三个不同风格的版本，帮助降低沟通冲突风险。
-
-            改写版本说明：
-            - gentle（温和版）：语气最柔和，减少对抗性，适合希望修复关系的场景
-            - direct（直接版）：清晰理性地表达诉求，克制情绪，不带攻击性
-            - brief（简短版）：控制在30字以内，轻描淡写，降低对方的防御感
-
-            风险等级（risk_level）评定：
-            - low：措辞温和，对方不易产生防御反应
-            - medium：有一定压力感或明确诉求，总体可接受
-            - high：措辞尖锐或有对抗性，可能激化冲突（此时 send_recommended 必须为 false）
-
-            confidence：你对改写质量的自信程度，范围 0.0–1.0。
-            risk_reason：不超过20字的风险说明。
-
-            严格只输出以下 JSON，不要有任何前缀、解释或额外内容：
-            {"gentle":{"content":"...","risk_level":"...","risk_reason":"...","send_recommended":true,"confidence":0.85},"direct":{"content":"...","risk_level":"...","risk_reason":"...","send_recommended":true,"confidence":0.80},"brief":{"content":"...","risk_level":"...","risk_reason":"...","send_recommended":true,"confidence":0.82}}
-            """;
 
     /** 独立 ObjectMapper，不受全局 SNAKE_CASE 策略影响，直接按 path() 读取 JSON 节点 */
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -72,6 +51,7 @@ public class RewriteServiceImpl implements RewriteService {
     private final LlmGateway llmGateway;
     private final RewriteDailyUsageRepository dailyUsageRepository;
     private final SafetyChecker safetyChecker;
+    private final RewriteProperties rewriteProperties;
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -86,7 +66,7 @@ public class RewriteServiceImpl implements RewriteService {
         }
 
         String userPrompt = "请改写以下消息：\n\"%s\"".formatted(req.getOriginalMessage());
-        String llmText = llmGateway.complete(SYSTEM_PROMPT, userPrompt, RoutingContext.standard());
+        String llmText = llmGateway.complete(rewriteProperties.getSystemPrompt(), userPrompt, RoutingContext.standard());
 
         List<RewriteVariant> variants = parseVariants(llmText);
 

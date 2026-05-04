@@ -1,4 +1,6 @@
+com/kingman/companion/api/service/AssessmentContextBuilder.class
 com/kingman/companion/api/controller/AssessmentController.class
+com/kingman/companion/api/service/AssessmentContextBuilder$1.class
 com/kingman/companion/api/CompanionApplication.class
 com/kingman/companion/api/controller/ChatController.class
 com/kingman/companion/api/controller/RewriteController.class
