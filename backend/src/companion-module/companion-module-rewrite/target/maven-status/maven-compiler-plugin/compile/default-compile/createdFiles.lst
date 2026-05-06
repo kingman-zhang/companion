@@ -1,5 +1,7 @@
 com/kingman/companion/module/rewrite/repository/RewriteDailyUsageRepository.class
+com/kingman/companion/module/rewrite/resp/RewriteHistoryItemResp.class
 com/kingman/companion/module/rewrite/entity/RewriteRecord.class
+com/kingman/companion/module/rewrite/resp/RewriteHistoryItemResp$RewriteHistoryItemRespBuilder.class
 com/kingman/companion/module/rewrite/service/RewriteService.class
 com/kingman/companion/module/rewrite/resp/RewriteResp$RewriteRespBuilder.class
 com/kingman/companion/module/rewrite/resp/RewriteResp.class

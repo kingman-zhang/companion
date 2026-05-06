@@ -7,16 +7,21 @@ import com.kingman.companion.module.assessment.resp.AssessmentResp;
 import com.kingman.companion.module.assessment.service.AssessmentService;
 import com.kingman.companion.module.chat.req.ChatReq;
 import com.kingman.companion.module.chat.req.CreateSessionReq;
+import com.kingman.companion.module.chat.resp.ChatMessageHistoryResp;
 import com.kingman.companion.module.chat.resp.ChatResp;
+import com.kingman.companion.module.chat.resp.ChatSessionSummaryResp;
 import com.kingman.companion.module.chat.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,5 +71,23 @@ public class ChatController {
 
         String sessionId = chatService.createSession(assessmentContext);
         return IResult.success(Map.of("session_id", sessionId));
+    }
+
+    /**
+     * 获取当前用户的会话列表（需登录，最多 20 条）
+     */
+    @GetMapping("/sessions")
+    @SkipCheckLoginAuth
+    public IResult<List<ChatSessionSummaryResp>> listSessions() {
+        return IResult.success(chatService.listSessions());
+    }
+
+    /**
+     * 获取指定会话的消息历史
+     */
+    @GetMapping("/sessions/{sessionId}/messages")
+    @SkipCheckLoginAuth
+    public IResult<List<ChatMessageHistoryResp>> getSessionMessages(@PathVariable String sessionId) {
+        return IResult.success(chatService.getSessionMessages(sessionId));
     }
 }

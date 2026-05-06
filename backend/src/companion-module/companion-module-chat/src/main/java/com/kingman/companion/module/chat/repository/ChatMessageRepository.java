@@ -11,4 +11,6 @@ import java.util.List;
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
 
     List<ChatMessage> findTop10BySessionIdAndDeletedFalse(String sessionId, Sort sort);
+
+    List<ChatMessage> findBySessionIdAndDeletedFalseOrderByCreateTimeAsc(String sessionId);
 }

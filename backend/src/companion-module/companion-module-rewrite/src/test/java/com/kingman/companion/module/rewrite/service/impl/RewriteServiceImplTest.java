@@ -6,6 +6,8 @@ import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.exception.SafetyBlockedException;
+import com.kingman.companion.framework.security.AuthContext;
+import com.kingman.companion.framework.security.LoginUser;
 import com.kingman.companion.module.rewrite.config.RewriteProperties;
 import com.kingman.companion.module.rewrite.entity.RewriteDailyUsage;
 import com.kingman.companion.module.rewrite.entity.RewriteRecord;
@@ -14,6 +16,7 @@ import com.kingman.companion.module.rewrite.repository.RewriteDailyUsageReposito
 import com.kingman.companion.module.rewrite.repository.RewriteRepository;
 import com.kingman.companion.module.rewrite.req.RewriteReq;
 import com.kingman.companion.module.rewrite.resp.RewriteResp;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +56,7 @@ class RewriteServiceImplTest {
 
     private RewriteServiceImpl service;
 
-    private static final String DEVICE_ID = "device-abc-123";
+    private static final String USER_ID = "user-abc-123";
 
     // 标准 LLM 响应（Claude 应原样输出的 JSON）
     private static final String VALID_LLM_RESPONSE = """
@@ -74,6 +77,11 @@ class RewriteServiceImplTest {
         lenient().when(safetyChecker.check(anyString())).thenReturn(SafetyResult.pass());
     }
 
+    @AfterEach
+    void tearDown() {
+        AuthContext.clear();
+    }
+
     // ── 正常流程 ──────────────────────────────────────────────────────────────
 
     @Test
@@ -81,7 +89,7 @@ class RewriteServiceImplTest {
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        RewriteResp resp = service.rewrite(buildReq("你为什么要这样对我，我真的好失望"));
+        RewriteResp resp = service.rewrite(buildReq("你为什么要这样对我，我真的好失望"), null);
 
         assertThat(resp.getVariants()).hasSize(3);
 
@@ -103,7 +111,7 @@ class RewriteServiceImplTest {
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        service.rewrite(buildReq("原始消息内容"));
+        service.rewrite(buildReq("原始消息内容"), null);
 
         ArgumentCaptor<RewriteRecord> captor = ArgumentCaptor.forClass(RewriteRecord.class);
         verify(rewriteRepository).save(captor.capture());
@@ -121,7 +129,7 @@ class RewriteServiceImplTest {
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        service.rewrite(buildReq("你为什么不回我消息"));
+        service.rewrite(buildReq("你为什么不回我消息"), null);
 
         ArgumentCaptor<String> userPromptCaptor = ArgumentCaptor.forClass(String.class);
         verify(llmGateway).complete(anyString(), userPromptCaptor.capture(), any(RoutingContext.class));
@@ -141,7 +149,7 @@ class RewriteServiceImplTest {
         stubLlm(llmWithHighRisk);
         stubSave();
 
-        RewriteResp resp = service.rewrite(buildReq("你根本不爱我！"));
+        RewriteResp resp = service.rewrite(buildReq("你根本不爱我！"), null);
 
         RewriteResp.VariantResp direct = findVariant(resp, "direct");
         assertThat(direct.getRiskLevel()).isEqualTo("high");
@@ -155,7 +163,7 @@ class RewriteServiceImplTest {
         stubLlm(LLM_RESPONSE_WITH_PREFIX);
         stubSave();
 
-        RewriteResp resp = service.rewrite(buildReq("原始消息"));
+        RewriteResp resp = service.rewrite(buildReq("原始消息"), null);
 
         assertThat(resp.getVariants()).hasSize(3);
         assertThat(findVariant(resp, "gentle").getContent()).isEqualTo("温和版内容");
@@ -165,9 +173,20 @@ class RewriteServiceImplTest {
 
     @Test
     void parseVariants_throws_when_llm_returns_malformed_json() {
-        assertThatThrownBy(() -> service.parseVariants("这不是JSON"))
+        // 有大括号结构但内容不合法 → Jackson 解析失败 → ApiException
+        assertThatThrownBy(() -> service.parseVariants("{这不是合法JSON}"))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("AI 服务暂时不可用");
+    }
+
+    @Test
+    void parseVariants_falls_back_to_plain_text_when_no_json_structure() {
+        // LLM 偶发返回纯文本（无 JSON），降级为三版本共用同一内容
+        List<com.kingman.companion.module.rewrite.entity.RewriteVariant> variants =
+                service.parseVariants("我最近一直在想我们的事，想和你好好聊聊。");
+        assertThat(variants).hasSize(3);
+        assertThat(variants).extracting(com.kingman.companion.module.rewrite.entity.RewriteVariant::getContent)
+                .containsOnly("我最近一直在想我们的事，想和你好好聊聊。");
     }
 
     @Test
@@ -184,7 +203,7 @@ class RewriteServiceImplTest {
                 .thenThrow(new ApiException(
                         com.kingman.companion.framework.common.CodeEnum.AI_SERVICE_UNAVAILABLE));
 
-        assertThatThrownBy(() -> service.rewrite(buildReq("测试消息")))
+        assertThatThrownBy(() -> service.rewrite(buildReq("测试消息"), null))
                 .isInstanceOf(ApiException.class);
 
         verify(rewriteRepository, never()).save(any());
@@ -193,53 +212,56 @@ class RewriteServiceImplTest {
     // ── 免费层每日限额 ────────────────────────────────────────────────────────
 
     @Test
-    void rewrite_skips_limit_check_when_no_device_id() {
+    void rewrite_skips_limit_check_when_no_user_id() {
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        // 无 deviceId，不应触碰 dailyUsageRepository
-        service.rewrite(buildReq("无设备ID的请求"));
+        // AuthContext 未设置 → userId 为 null → 跳过限额检查
+        service.rewrite(buildReq("无用户ID的请求"), null);
 
-        verify(dailyUsageRepository, never()).findByDeviceIdAndUsageDate(any(), any());
+        verify(dailyUsageRepository, never()).findByUserIdAndUsageDate(any(), any());
     }
 
     @Test
-    void rewrite_records_usage_after_success_with_device_id() {
+    void rewrite_records_usage_after_success_with_user_id() {
+        setAuthUser(USER_ID);
         stubNoUsageToday();
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        service.rewrite(buildReqWithDevice("今日首次改写", DEVICE_ID));
+        service.rewrite(buildReq("今日首次改写"), null);
 
         ArgumentCaptor<RewriteDailyUsage> captor = ArgumentCaptor.forClass(RewriteDailyUsage.class);
         verify(dailyUsageRepository).save(captor.capture());
 
         RewriteDailyUsage saved = captor.getValue();
-        assertThat(saved.getDeviceId()).isEqualTo(DEVICE_ID);
+        assertThat(saved.getUserId()).isEqualTo(USER_ID);
         assertThat(saved.getUsageDate()).isEqualTo(LocalDate.now());
         assertThat(saved.getCount()).isEqualTo(1);
     }
 
     @Test
     void rewrite_increments_count_when_existing_usage_found() {
-        RewriteDailyUsage existing = buildUsage(DEVICE_ID, LocalDate.now(), 0);
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(DEVICE_ID, LocalDate.now()))
+        setAuthUser(USER_ID);
+        RewriteDailyUsage existing = buildUsage(USER_ID, LocalDate.now(), 0);
+        when(dailyUsageRepository.findByUserIdAndUsageDate(USER_ID, LocalDate.now()))
                 .thenReturn(Optional.of(existing));
         stubLlm(VALID_LLM_RESPONSE);
         stubSave();
 
-        service.rewrite(buildReqWithDevice("再次改写", DEVICE_ID));
+        service.rewrite(buildReq("再次改写"), null);
 
         verify(dailyUsageRepository).save(argThat(u -> u.getCount() == 1));
     }
 
     @Test
     void rewrite_throws_when_daily_limit_reached() {
-        RewriteDailyUsage exhausted = buildUsage(DEVICE_ID, LocalDate.now(), RewriteServiceImpl.DAILY_REWRITE_LIMIT);
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(DEVICE_ID, LocalDate.now()))
+        setAuthUser(USER_ID);
+        RewriteDailyUsage exhausted = buildUsage(USER_ID, LocalDate.now(), RewriteServiceImpl.DAILY_REWRITE_LIMIT);
+        when(dailyUsageRepository.findByUserIdAndUsageDate(USER_ID, LocalDate.now()))
                 .thenReturn(Optional.of(exhausted));
 
-        assertThatThrownBy(() -> service.rewrite(buildReqWithDevice("超限改写", DEVICE_ID)))
+        assertThatThrownBy(() -> service.rewrite(buildReq("超限改写"), null))
                 .isInstanceOf(ApiException.class);
 
         // 超限时不调用 LLM，不写入记录
@@ -249,12 +271,13 @@ class RewriteServiceImplTest {
 
     @Test
     void rewrite_does_not_record_usage_when_llm_fails() {
+        setAuthUser(USER_ID);
         stubNoUsageToday();
         when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class)))
                 .thenThrow(new ApiException(
                         com.kingman.companion.framework.common.CodeEnum.AI_SERVICE_UNAVAILABLE));
 
-        assertThatThrownBy(() -> service.rewrite(buildReqWithDevice("测试消息", DEVICE_ID)))
+        assertThatThrownBy(() -> service.rewrite(buildReq("测试消息"), null))
                 .isInstanceOf(ApiException.class);
 
         // LLM 失败时不记录使用（避免扣除免费次数）
@@ -267,7 +290,7 @@ class RewriteServiceImplTest {
     void rewrite_throws_SafetyBlockedException_when_content_is_unsafe() {
         when(safetyChecker.check(anyString())).thenReturn(SafetyResult.block("self_harm"));
 
-        assertThatThrownBy(() -> service.rewrite(buildReq("我想自杀因为他不爱我了")))
+        assertThatThrownBy(() -> service.rewrite(buildReq("我想自杀因为他不爱我了"), null))
                 .isInstanceOf(SafetyBlockedException.class)
                 .extracting(e -> ((SafetyBlockedException) e).getTriggerType())
                 .isEqualTo("self_harm");
@@ -279,43 +302,48 @@ class RewriteServiceImplTest {
 
     @Test
     void rewrite_checks_safety_before_limit_check() {
-        // 即使 deviceId 存在也应先触发安全检测
+        setAuthUser(USER_ID);
+        // 即使登录也应先触发安全检测
         when(safetyChecker.check(anyString())).thenReturn(SafetyResult.block("violence_threat"));
 
-        assertThatThrownBy(() -> service.rewrite(buildReqWithDevice("危险内容", DEVICE_ID)))
+        assertThatThrownBy(() -> service.rewrite(buildReq("危险内容"), null))
                 .isInstanceOf(SafetyBlockedException.class);
 
-        verify(dailyUsageRepository, never()).findByDeviceIdAndUsageDate(any(), any());
+        verify(dailyUsageRepository, never()).findByUserIdAndUsageDate(any(), any());
     }
 
     // ── checkDailyLimit 单元覆盖 ──────────────────────────────────────────────
 
     @Test
     void checkDailyLimit_passes_when_no_record_exists() {
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(DEVICE_ID, LocalDate.now()))
+        when(dailyUsageRepository.findByUserIdAndUsageDate(USER_ID, LocalDate.now()))
                 .thenReturn(Optional.empty());
 
-        assertThatCode(() -> service.checkDailyLimit(DEVICE_ID)).doesNotThrowAnyException();
+        assertThatCode(() -> service.checkDailyLimit(USER_ID)).doesNotThrowAnyException();
     }
 
     @Test
     void checkDailyLimit_passes_when_count_below_limit() {
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(DEVICE_ID, LocalDate.now()))
-                .thenReturn(Optional.of(buildUsage(DEVICE_ID, LocalDate.now(), 0)));
+        when(dailyUsageRepository.findByUserIdAndUsageDate(USER_ID, LocalDate.now()))
+                .thenReturn(Optional.of(buildUsage(USER_ID, LocalDate.now(), 0)));
 
-        assertThatCode(() -> service.checkDailyLimit(DEVICE_ID)).doesNotThrowAnyException();
+        assertThatCode(() -> service.checkDailyLimit(USER_ID)).doesNotThrowAnyException();
     }
 
     @Test
     void checkDailyLimit_throws_when_count_equals_limit() {
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(DEVICE_ID, LocalDate.now()))
-                .thenReturn(Optional.of(buildUsage(DEVICE_ID, LocalDate.now(), RewriteServiceImpl.DAILY_REWRITE_LIMIT)));
+        when(dailyUsageRepository.findByUserIdAndUsageDate(USER_ID, LocalDate.now()))
+                .thenReturn(Optional.of(buildUsage(USER_ID, LocalDate.now(), RewriteServiceImpl.DAILY_REWRITE_LIMIT)));
 
-        assertThatThrownBy(() -> service.checkDailyLimit(DEVICE_ID))
+        assertThatThrownBy(() -> service.checkDailyLimit(USER_ID))
                 .isInstanceOf(ApiException.class);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void setAuthUser(String userId) {
+        AuthContext.set(LoginUser.builder().userId(userId).subscriptionTier("free").build());
+    }
 
     private void stubLlm(String response) {
         when(llmGateway.complete(anyString(), anyString(), any(RoutingContext.class))).thenReturn(response);
@@ -330,7 +358,7 @@ class RewriteServiceImplTest {
     }
 
     private void stubNoUsageToday() {
-        when(dailyUsageRepository.findByDeviceIdAndUsageDate(eq(DEVICE_ID), any(LocalDate.class)))
+        when(dailyUsageRepository.findByUserIdAndUsageDate(eq(USER_ID), any(LocalDate.class)))
                 .thenReturn(Optional.empty());
     }
 
@@ -340,15 +368,9 @@ class RewriteServiceImplTest {
         return req;
     }
 
-    private RewriteReq buildReqWithDevice(String message, String deviceId) {
-        RewriteReq req = buildReq(message);
-        req.setDeviceId(deviceId);
-        return req;
-    }
-
-    private RewriteDailyUsage buildUsage(String deviceId, LocalDate date, int count) {
+    private RewriteDailyUsage buildUsage(String userId, LocalDate date, int count) {
         RewriteDailyUsage u = new RewriteDailyUsage();
-        u.setDeviceId(deviceId);
+        u.setUserId(userId);
         u.setUsageDate(date);
         u.setCount(count);
         return u;

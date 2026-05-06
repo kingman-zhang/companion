@@ -6,15 +6,19 @@ import com.kingman.companion.framework.common.IResult;
 import com.kingman.companion.module.assessment.resp.AssessmentResp;
 import com.kingman.companion.module.assessment.service.AssessmentService;
 import com.kingman.companion.module.rewrite.req.RewriteReq;
+import com.kingman.companion.module.rewrite.resp.RewriteHistoryItemResp;
 import com.kingman.companion.module.rewrite.resp.RewriteResp;
 import com.kingman.companion.module.rewrite.service.RewriteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 消息改写接口
@@ -49,5 +53,14 @@ public class RewriteController {
             }
         }
         return IResult.success(rewriteService.rewrite(req, assessmentContext));
+    }
+
+    /**
+     * 获取当前用户的改写历史（需登录，最多 20 条）
+     */
+    @GetMapping("/history")
+    @SkipCheckLoginAuth
+    public IResult<List<RewriteHistoryItemResp>> listHistory() {
+        return IResult.success(rewriteService.listHistory());
     }
 }

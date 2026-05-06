@@ -22,4 +22,6 @@ public class ChatSession extends AbstractBaseEntity {
     private int roundCount;
     /** 会话是否在冷却期 */
     private boolean inCooldown;
+    /** 第一条用户消息预览（最多50字） */
+    private String preview;
 }

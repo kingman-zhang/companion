@@ -16,6 +16,7 @@ import com.kingman.companion.module.rewrite.entity.RewriteVariant;
 import com.kingman.companion.module.rewrite.repository.RewriteDailyUsageRepository;
 import com.kingman.companion.module.rewrite.repository.RewriteRepository;
 import com.kingman.companion.module.rewrite.req.RewriteReq;
+import com.kingman.companion.module.rewrite.resp.RewriteHistoryItemResp;
 import com.kingman.companion.module.rewrite.resp.RewriteResp;
 import com.kingman.companion.module.rewrite.service.RewriteService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -213,5 +215,27 @@ public class RewriteServiceImpl implements RewriteService {
                         .toList())
                 .createdAt(record.getCreateTime())
                 .build();
+    }
+
+    @Override
+    public List<RewriteHistoryItemResp> listHistory() {
+        String userId = AuthContext.getCurrentUserId();
+        if (userId == null || userId.isBlank()) return Collections.emptyList();
+        return rewriteRepository.findTop20ByUserIdAndDeletedFalseOrderByCreateTimeDesc(userId)
+                .stream()
+                .map(r -> {
+                    String gentleContent = r.getVariants() != null ? r.getVariants().stream()
+                            .filter(v -> "gentle".equals(v.getVersion()))
+                            .findFirst()
+                            .map(RewriteVariant::getContent)
+                            .orElse("") : "";
+                    return RewriteHistoryItemResp.builder()
+                            .rewriteId(r.getId())
+                            .originalMessage(r.getOriginalMessage())
+                            .gentleContent(gentleContent)
+                            .createdAt(r.getCreateTime())
+                            .build();
+                })
+                .toList();
     }
 }

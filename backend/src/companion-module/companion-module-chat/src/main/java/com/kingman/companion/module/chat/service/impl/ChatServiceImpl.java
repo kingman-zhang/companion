@@ -19,7 +19,9 @@ import com.kingman.companion.module.chat.entity.ChatSession;
 import com.kingman.companion.module.chat.repository.ChatMessageRepository;
 import com.kingman.companion.module.chat.repository.ChatSessionRepository;
 import com.kingman.companion.module.chat.req.ChatReq;
+import com.kingman.companion.module.chat.resp.ChatMessageHistoryResp;
 import com.kingman.companion.module.chat.resp.ChatResp;
+import com.kingman.companion.module.chat.resp.ChatSessionSummaryResp;
 import com.kingman.companion.module.chat.config.ChatProperties;
 import com.kingman.companion.module.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -122,6 +124,12 @@ public class ChatServiceImpl implements ChatService {
         aiMsg.setEmotionIntensity(result.emotionIntensity());
         aiMsg.setSafetyFlag(false);
         ChatMessage savedAiMsg = messageRepository.save(aiMsg);
+
+        // Set preview from first user message
+        if (session.getRoundCount() == 0 && (session.getPreview() == null || session.getPreview().isBlank())) {
+            String previewText = req.getContent();
+            session.setPreview(previewText.substring(0, Math.min(previewText.length(), 50)));
+        }
 
         // 更新会话轮次
         session.setRoundCount(session.getRoundCount() + 1);
@@ -259,4 +267,41 @@ public class ChatServiceImpl implements ChatService {
     }
 
     record LlmResult(String reply, EmotionLabel emotionLabel, int emotionIntensity) {}
+
+    @Override
+    public List<ChatSessionSummaryResp> listSessions() {
+        String userId = AuthContext.getCurrentUserId();
+        if (userId == null || userId.isBlank()) return Collections.emptyList();
+        return sessionRepository.findTop20ByUserIdAndDeletedFalseOrderByCreateTimeDesc(userId)
+                .stream()
+                .map(s -> ChatSessionSummaryResp.builder()
+                        .sessionId(s.getId())
+                        .preview(s.getPreview() != null && !s.getPreview().isBlank() ? s.getPreview() : "新对话")
+                        .roundCount(s.getRoundCount())
+                        .createdAt(s.getCreateTime())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<ChatMessageHistoryResp> getSessionMessages(String sessionId) {
+        ChatSession session = sessionRepository.findByIdAndDeletedFalse(sessionId)
+                .orElseThrow(() -> new ApiException(CodeEnum.NOT_FOUND));
+        String userId = AuthContext.getCurrentUserId();
+        if (userId != null && !userId.isBlank() && session.getUserId() != null
+                && !userId.equals(session.getUserId())) {
+            throw new ApiException(CodeEnum.NOT_FOUND);
+        }
+        return messageRepository.findBySessionIdAndDeletedFalseOrderByCreateTimeAsc(sessionId)
+                .stream()
+                .map(m -> ChatMessageHistoryResp.builder()
+                        .messageId(m.getId())
+                        .role(m.getRole())
+                        .content(m.getContent())
+                        .emotionLabel(m.getEmotionLabel())
+                        .emotionIntensity(m.getEmotionIntensity())
+                        .createdAt(m.getCreateTime())
+                        .build())
+                .toList();
+    }
 }

@@ -268,8 +268,18 @@ class ChatServiceImplTest {
 
     @Test
     void parseLlmResult_throws_on_malformed_json() {
-        assertThatThrownBy(() -> service.parseLlmResult("这不是JSON"))
+        // 有大括号结构但内容不合法 → Jackson 解析失败 → ApiException
+        assertThatThrownBy(() -> service.parseLlmResult("{这不是合法JSON}"))
                 .isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void parseLlmResult_accepts_plain_text_reply_when_no_json_structure() {
+        // LLM 偶发返回纯文本（无 JSON），降级为直接使用文本作为回复
+        ChatServiceImpl.LlmResult result = service.parseLlmResult("我理解你的感受，先深呼吸一下。");
+        assertThat(result.reply()).isEqualTo("我理解你的感受，先深呼吸一下。");
+        assertThat(result.emotionLabel()).isEqualTo(EmotionLabel.OTHER);
+        assertThat(result.emotionIntensity()).isEqualTo(5);
     }
 
     @Test
