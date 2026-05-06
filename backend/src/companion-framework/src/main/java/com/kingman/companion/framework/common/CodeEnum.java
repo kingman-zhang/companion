@@ -15,6 +15,7 @@ public enum CodeEnum {
     // 4xx 客户端错误
     MISSING_REQUIRED_FIELD(400001, "缺少必填字段"),
     INVALID_REQUEST(400002, "请求参数错误"),
+    WX_LOGIN_FAILED(400003, "微信登录失败，请重试"),
     UNAUTHORIZED(401001, "未登录或 Token 已过期"),
     PLAN_PAYWALL(402001, "需要付费解锁"),
     NOT_FOUND(404001, "资源不存在"),

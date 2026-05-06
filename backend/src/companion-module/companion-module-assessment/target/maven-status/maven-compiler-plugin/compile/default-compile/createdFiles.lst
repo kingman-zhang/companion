@@ -6,6 +6,7 @@ com/kingman/companion/module/assessment/service/AssessmentService.class
 com/kingman/companion/module/assessment/engine/ScoreEngine$ScoreResult.class
 com/kingman/companion/module/assessment/resp/AssessmentResp.class
 com/kingman/companion/module/assessment/resp/QuestionDef.class
+com/kingman/companion/module/assessment/service/impl/AssessmentServiceImpl$1.class
 com/kingman/companion/module/assessment/resp/QuestionOption.class
 com/kingman/companion/module/assessment/config/AssessmentProperties.class
 com/kingman/companion/module/assessment/service/impl/AssessmentServiceImpl$LlmEnrichment.class

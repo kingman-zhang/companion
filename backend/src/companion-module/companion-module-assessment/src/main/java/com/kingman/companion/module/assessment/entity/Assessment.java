@@ -16,6 +16,9 @@ public class Assessment extends AbstractBaseEntity {
 
     private String sessionId;
 
+    /** 关联用户 ID（登录用户时有值，匿名时为 null） */
+    private String userId;
+
     // ---- 问卷输入（7题）----
     /** Q0: P0 情绪状态（埋点用） */
     private EntryState entryState;

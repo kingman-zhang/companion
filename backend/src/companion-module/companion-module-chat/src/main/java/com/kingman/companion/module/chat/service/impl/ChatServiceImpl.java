@@ -12,6 +12,7 @@ import com.kingman.companion.component.safety.SafetyLevel;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
+import com.kingman.companion.framework.security.AuthContext;
 import com.kingman.companion.framework.util.DistributeID;
 import com.kingman.companion.module.chat.entity.ChatMessage;
 import com.kingman.companion.module.chat.entity.ChatSession;
@@ -147,6 +148,7 @@ public class ChatServiceImpl implements ChatService {
     public String createSession(String assessmentContext) {
         ChatSession session = new ChatSession();
         session.setId(DistributeID.generate());
+        session.setUserId(AuthContext.getCurrentUserId()); // null if anonymous
         session.setRoundCount(0);
         session.setInCooldown(false);
         session.setAssessmentContext(assessmentContext);

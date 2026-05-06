@@ -106,7 +106,7 @@ echo "查看容器状态..."
 docker ps
 
 echo "查看最近日志..."
-docker logs --tail=50 java-app
+docker logs --tail=50 app-app
 EOF
 
 echo "=============================="

@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.kingman.companion.module.rewrite.service.impl.RewriteServiceImplTest
--------------------------------------------------------------------------------
-Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.708 s - in com.kingman.companion.module.rewrite.service.impl.RewriteServiceImplTest

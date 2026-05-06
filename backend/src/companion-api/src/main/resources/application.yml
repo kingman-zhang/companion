@@ -18,6 +18,10 @@ companion:
   jwt:
     expiration: 86400000  # 24 小时，各环境统一
 
+  wx:
+    app-id: ${WX_APP_ID:wx1292e0ec8966fab5}
+    app-secret: ${WX_APP_SECRET:88b3c1423ca3b4822fab7313badbb4a2}
+
   # ─── Prompt 集中管理区 ───────────────────────────────────────────────────────
   # 所有模块的 system prompt 统一放在这里，改完无需重新编译，重启生效。
 

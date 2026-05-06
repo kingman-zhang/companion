@@ -19,5 +19,6 @@
         <module>companion-module-assessment</module>
         <module>companion-module-chat</module>
         <module>companion-module-rewrite</module>
+        <module>companion-module-user</module>
     </modules>
 </project>

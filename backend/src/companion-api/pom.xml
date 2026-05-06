@@ -36,6 +36,10 @@
             <artifactId>companion-module-rewrite</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.kingman</groupId>
+            <artifactId>companion-module-user</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

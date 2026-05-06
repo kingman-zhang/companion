@@ -7,6 +7,7 @@ import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.component.safety.SafetyChecker;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
+import com.kingman.companion.framework.security.AuthContext;
 import com.kingman.companion.framework.util.DistributeID;
 import com.kingman.companion.module.rewrite.config.RewriteProperties;
 import com.kingman.companion.module.rewrite.entity.RewriteDailyUsage;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * 消息改写服务实现
@@ -60,9 +60,9 @@ public class RewriteServiceImpl implements RewriteService {
         // 安全检测（前置，命中则 HTTP 451）
         safetyChecker.check(req.getOriginalMessage()).throwIfBlocked();
 
-        // 免费层每日限额检查（有 deviceId 时生效）
-        if (hasDeviceId(req)) {
-            checkDailyLimit(req.getDeviceId());
+        // 免费层每日限额检查（登录用户时生效）
+        if (hasUserId()) {
+            checkDailyLimit(AuthContext.getCurrentUserId());
         }
 
         String systemPrompt = assessmentContext != null
@@ -81,8 +81,8 @@ public class RewriteServiceImpl implements RewriteService {
         RewriteRecord saved = rewriteRepository.save(record);
 
         // 限额内成功后记录使用
-        if (hasDeviceId(req)) {
-            recordUsage(req.getDeviceId());
+        if (hasUserId()) {
+            recordUsage(AuthContext.getCurrentUserId());
         }
 
         log.info("改写完成: id={}", saved.getId());
@@ -164,16 +164,16 @@ public class RewriteServiceImpl implements RewriteService {
 
     // ── 免费层限额 ────────────────────────────────────────────────────────────
 
-    private boolean hasDeviceId(RewriteReq req) {
-        return req.getDeviceId() != null && !req.getDeviceId().isBlank();
+    private boolean hasUserId() {
+        return AuthContext.getCurrentUserId() != null && !AuthContext.getCurrentUserId().isBlank();
     }
 
     /**
      * 检查今日是否已达上限，超限则抛出异常。
      */
-    void checkDailyLimit(String deviceId) {
+    void checkDailyLimit(String userId) {
         LocalDate today = LocalDate.now();
-        Optional<RewriteDailyUsage> usage = dailyUsageRepository.findByDeviceIdAndUsageDate(deviceId, today);
+        Optional<RewriteDailyUsage> usage = dailyUsageRepository.findByUserIdAndUsageDate(userId, today);
         if (usage.isPresent() && usage.get().getCount() >= DAILY_REWRITE_LIMIT) {
             throw new ApiException(CodeEnum.FREE_TIER_LIMIT_REACHED);
         }
@@ -182,16 +182,16 @@ public class RewriteServiceImpl implements RewriteService {
     /**
      * 记录本次使用（upsert：当日已有记录则 +1，否则新建）。
      */
-    void recordUsage(String deviceId) {
+    void recordUsage(String userId) {
         LocalDate today = LocalDate.now();
-        Optional<RewriteDailyUsage> existing = dailyUsageRepository.findByDeviceIdAndUsageDate(deviceId, today);
+        Optional<RewriteDailyUsage> existing = dailyUsageRepository.findByUserIdAndUsageDate(userId, today);
         if (existing.isPresent()) {
             existing.get().setCount(existing.get().getCount() + 1);
             dailyUsageRepository.save(existing.get());
         } else {
             RewriteDailyUsage usage = new RewriteDailyUsage();
             usage.setId(DistributeID.generate());
-            usage.setDeviceId(deviceId);
+            usage.setUserId(userId);
             usage.setUsageDate(today);
             usage.setCount(1);
             dailyUsageRepository.save(usage);

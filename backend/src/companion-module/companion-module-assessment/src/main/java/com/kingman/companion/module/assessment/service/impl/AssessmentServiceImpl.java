@@ -6,6 +6,7 @@ import com.kingman.companion.component.llm.LlmGateway;
 import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
+import com.kingman.companion.framework.security.AuthContext;
 import com.kingman.companion.framework.util.DistributeID;
 import com.kingman.companion.module.assessment.config.AssessmentProperties;
 import com.kingman.companion.module.assessment.engine.ScoreEngine;
@@ -101,6 +102,7 @@ public class AssessmentServiceImpl implements AssessmentService {
         Assessment a = new Assessment();
         a.setId(DistributeID.generate());
         a.setSessionId(req.getSessionId());
+        a.setUserId(AuthContext.getCurrentUserId()); // null if anonymous
         a.setEntryState(req.getEntryState());
         a.setRelationshipDuration(req.getRelationshipDuration());
         a.setBreakupMethod(req.getBreakupMethod());

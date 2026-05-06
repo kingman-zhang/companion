@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface RewriteDailyUsageRepository extends MongoRepository<RewriteDailyUsage, String> {
 
-    Optional<RewriteDailyUsage> findByDeviceIdAndUsageDate(String deviceId, LocalDate usageDate);
+    Optional<RewriteDailyUsage> findByUserIdAndUsageDate(String userId, LocalDate usageDate);
 }

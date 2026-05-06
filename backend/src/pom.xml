@@ -121,6 +121,11 @@
                 <artifactId>companion-module-rewrite</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.kingman</groupId>
+                <artifactId>companion-module-user</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

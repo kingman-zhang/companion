@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mxfile host="drawio" version="26.0.0">
   <diagram name="模块交互图">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1350" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -193,6 +193,153 @@
         </mxCell>
         <mxCell id="68" value="蓝色虚线 = 返回/重置导航" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="1090" y="740" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="73" value="外部服务（黄色虚线框）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="790" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 认证流程区域 ===== -->
+
+        <!-- 分隔线 -->
+        <mxCell id="74" value="" style="line;strokeColor=#aaaaaa;fillColor=none;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="838" width="1200" height="10" as="geometry" />
+        </mxCell>
+
+        <!-- 区域标题 -->
+        <mxCell id="75" value="🔐 认证流程（微信 OpenID 静默登录，App 启动时自动执行）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="850" width="700" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- ── 登录阶段子标题 ── -->
+        <mxCell id="76" value="① 登录阶段（首次/Token 过期时）" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="80" y="887" width="280" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- app.js onLaunch / silentLogin (frontend, orange) -->
+        <mxCell id="81" value="app.js&#xa;onLaunch / silentLogin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="908" width="155" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- wx.login() (WeChat SDK, gray) -->
+        <mxCell id="82" value="wx.login()&#xa;获取 code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="277" y="908" width="128" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- AuthController (backend, blue) -->
+        <mxCell id="83" value="AuthController&#xa;POST /api/v1/auth/wx-login" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="908" width="175" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UserServiceImpl (backend, blue) -->
+        <mxCell id="84" value="UserServiceImpl&#xa;loginByCode()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="908" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- WeChat code2Session API (external, yellow dashed) -->
+        <mxCell id="85" value="WeChat&#xa;code2Session API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="908" width="165" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- MongoDB users (cylinder, green) -->
+        <mxCell id="86" value="MongoDB users&#xa;findByOpenId / upsert" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="1010" width="160" height="62" as="geometry" />
+        </mxCell>
+
+        <!-- JWT 签发 (backend, blue) -->
+        <mxCell id="87" value="JwtUtils&#xa;generateToken(userId)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="1015" width="175" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- token 存储 (frontend, orange) -->
+        <mxCell id="88" value="globalData.token&#xa;+ wx.setStorageSync" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1015" width="155" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ── 请求阶段子标题 ── -->
+        <mxCell id="77" value="② 请求阶段（每次 API 调用）" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1082" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- 后续请求 + Authorization header (frontend, orange) -->
+        <mxCell id="89" value="后续请求&#xa;Authorization: Bearer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1103" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- AuthInterceptor (framework, gray) -->
+        <mxCell id="90" value="AuthInterceptor&#xa;解析 Bearer Token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="287" y="1103" width="165" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- AuthContext (framework, gray) -->
+        <mxCell id="91" value="AuthContext&#xa;(ThreadLocal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="503" y="1103" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Business Services (backend, blue) -->
+        <mxCell id="92" value="Chat / Rewrite / Assessment&#xa;Service.getCurrentUserId()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="704" y="1103" width="215" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ===== AUTH FLOW EDGES ===== -->
+
+        <!-- [A1] app.js → wx.login() -->
+        <mxCell id="100" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="81" target="82">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A2] wx.login() → AuthController: POST /api/v1/auth/wx-login {code} -->
+        <mxCell id="101" value="POST /api/v1/auth/wx-login&#xa;{ code } skipAuth=true" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="82" target="83">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A3] AuthController → UserServiceImpl -->
+        <mxCell id="102" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="83" target="84">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A4] UserServiceImpl → WeChat code2Session API: GET code2Session → openid -->
+        <mxCell id="103" value="GET code2Session&#xa;→ openid" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="84" target="85">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A5] UserServiceImpl → MongoDB: findByOpenId / upsert (vertical down) -->
+        <mxCell id="104" value="upsert by openId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="84" target="86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A6] MongoDB → JwtUtils: userId → generateToken (left) -->
+        <mxCell id="105" value="userId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="86" target="87">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A7] JwtUtils → token stored: return JWT (left, green) -->
+        <mxCell id="106" value="返回 JWT token" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;fontColor=#3D7A5A;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="87" target="88">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A8] token stored → 后续请求 (dashed, vertical down) -->
+        <mxCell id="107" value="下次请求自动注入" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;dashed=1;strokeColor=#d79b00;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="88" target="89">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A9] 后续请求 → AuthInterceptor -->
+        <mxCell id="108" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="89" target="90">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A10] AuthInterceptor → AuthContext: set userId -->
+        <mxCell id="109" value="set userId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="90" target="91">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- [A11] AuthContext → Business Services: getCurrentUserId() -->
+        <mxCell id="110" value="getCurrentUserId()" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="91" target="92">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 匿名降级注解 -->
+        <mxCell id="111" value="📝 token 可选：未登录时&#xa;AuthContext.userId = null&#xa;业务功能仍可使用（降级）" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="936" y="1103" width="215" height="55" as="geometry" />
         </mxCell>
 
       </root>

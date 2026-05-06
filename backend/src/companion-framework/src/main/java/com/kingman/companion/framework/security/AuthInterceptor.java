@@ -32,21 +32,30 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 跳过公开接口和第三方回调
-        if (handlerMethod.hasMethodAnnotation(SkipCheckLoginAuth.class)
+        // 判断是否为公开接口或第三方回调
+        boolean isPublic = handlerMethod.hasMethodAnnotation(SkipCheckLoginAuth.class)
                 || handlerMethod.getBeanType().isAnnotationPresent(SkipCheckLoginAuth.class)
-                || handlerMethod.hasMethodAnnotation(CallbackMethod.class)) {
+                || handlerMethod.hasMethodAnnotation(CallbackMethod.class);
+
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+        boolean hasToken = StringUtils.hasText(authHeader) && authHeader.startsWith(TOKEN_PREFIX);
+
+        if (isPublic) {
+            // 公开接口：若携带了有效 Token，顺带解析并设置上下文（方便服务读取 userId）
+            // 解析失败则忽略，不影响请求继续处理
+            if (hasToken) {
+                try {
+                    AuthContext.set(jwtUtils.parseToken(authHeader.substring(TOKEN_PREFIX.length())));
+                } catch (Exception ignored) {}
+            }
             return true;
         }
 
-        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-        if (!StringUtils.hasText(authHeader) || !authHeader.startsWith(TOKEN_PREFIX)) {
+        // 受保护接口：必须携带有效 Token
+        if (!hasToken) {
             throw new UserUnauthorizedException();
         }
-
-        String token = authHeader.substring(TOKEN_PREFIX.length());
-        LoginUser loginUser = jwtUtils.parseToken(token);
-        AuthContext.set(loginUser);
+        AuthContext.set(jwtUtils.parseToken(authHeader.substring(TOKEN_PREFIX.length())));
         return true;
     }
 
