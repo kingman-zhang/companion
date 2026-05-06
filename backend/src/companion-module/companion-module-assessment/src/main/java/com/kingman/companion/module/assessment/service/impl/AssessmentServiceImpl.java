@@ -173,13 +173,73 @@ public class AssessmentServiceImpl implements AssessmentService {
                 result.emotionalConnectionScore(),
                 result.communicationScore(),
                 result.conflictScore(),
-                nullSafe(req.getRelationshipDuration()),
-                nullSafe(req.getBreakupMethod()),
-                nullSafe(req.getPartnerLovePerception()),
-                nullSafe(req.getCommunicationQuality()),
-                nullSafe(req.getConflictStyle()),
-                nullSafe(req.getUserPrimaryIntent())
+                labelOf(req.getRelationshipDuration()),
+                labelOf(req.getBreakupMethod()),
+                labelOf(req.getPartnerLovePerception()),
+                labelOf(req.getCommunicationQuality()),
+                labelOf(req.getConflictStyle()),
+                labelOf(req.getUserPrimaryIntent())
         );
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.RelationshipDuration v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case LESS_THAN_3M -> "不到3个月";
+            case SIX_MONTHS_TO_2Y -> "半年到2年";
+            case TWO_TO_5Y -> "2到5年";
+            case MORE_THAN_5Y -> "5年以上";
+        };
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.BreakupMethod v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case FACE_TO_FACE_CALM -> "当面冷静提出";
+            case DURING_ARGUMENT -> "吵架中爆发提出";
+            case MESSAGE -> "通过消息提出";
+            case GHOSTED -> "直接消失/拉黑";
+        };
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.PartnerLovePerception v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case YES_EXTERNAL_PRESSURE -> "爱，但被现实/家人影响";
+            case UNSURE_CHANGED -> "不确定，对方变了很多";
+            case MAYBE_NOT_CANT_LET_GO -> "可能不爱了，但放不下";
+            case NO_JUST_CANT_MOVE_ON -> "不爱了，只是还没接受";
+        };
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.CommunicationQuality v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case GOOD_DAILY -> "日常沟通顺畅，偶有摩擦";
+            case SURFACE_LEVEL -> "表面平静，但很少深聊";
+            case FREQUENT_CONFLICT -> "频繁争吵或冷战";
+            case PARTNER_COLD -> "对方开始冷漠、回避";
+        };
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.ConflictStyle v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case RESOLVE_AFTER_CALM -> "冷静后会聊清楚";
+            case AVOID_THEN_IGNORE -> "先冷战，慢慢不了了之";
+            case ONE_SIDED_APOLOGY -> "一方道歉，另一方接受";
+            case ESCALATE_DIG_UP_PAST -> "越吵越激烈，翻旧账";
+        };
+    }
+
+    private String labelOf(com.kingman.companion.component.enums.UserPrimaryIntent v) {
+        if (v == null) return "未填写";
+        return switch (v) {
+            case RECONCILE -> "想挽回对方";
+            case PROCESS_EMOTION_FIRST -> "先处理好自己的情绪";
+            case LEARN_GOODBYE -> "想学会放下";
+            case CHAT_FIRST -> "还没想好，先聊聊";
+        };
     }
 
     /**
@@ -190,7 +250,15 @@ public class AssessmentServiceImpl implements AssessmentService {
             throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
         }
         try {
-            JsonNode root = MAPPER.readTree(extractJson(llmText));
+            String json = extractJson(llmText);
+
+            // Model returned plain text (no JSON) — treat it as llm_reason, leave core_insight blank to trigger fallback
+            if (!json.startsWith("{")) {
+                log.warn("评估 LLM 返回纯文本（非 JSON），降级处理: len={}", llmText.length());
+                throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+            }
+
+            JsonNode root = MAPPER.readTree(json);
             if (root == null || root.isMissingNode() || root.isNull()) {
                 throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
             }

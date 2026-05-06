@@ -102,7 +102,7 @@ companion:
       chains:
         LITE:
           - provider: dashscope
-            model-id: qwen3.6-flash
+            model-id: qwen-turbo-latest
             max-tokens: 1024
             timeout-seconds: 30
           - provider: anthropic
@@ -110,6 +110,10 @@ companion:
             max-tokens: 1024
             timeout-seconds: 30
         STANDARD:
+          - provider: dashscope
+            model-id: qwen-turbo-latest
+            max-tokens: 1024
+            timeout-seconds: 30
           - provider: anthropic
             model-id: claude-sonnet-4-6
             max-tokens: 2048
@@ -119,6 +123,10 @@ companion:
             max-tokens: 1024
             timeout-seconds: 30
         ADVANCED:
+          - provider: dashscope
+            model-id: qwen-turbo-latest
+            max-tokens: 1024
+            timeout-seconds: 30
           - provider: anthropic
             model-id: claude-opus-4-6
             max-tokens: 4096
@@ -128,11 +136,19 @@ companion:
             max-tokens: 2048
             timeout-seconds: 60
         LONG_CONTEXT:
+          - provider: dashscope
+            model-id: qwen-turbo-latest
+            max-tokens: 1024
+            timeout-seconds: 30
           - provider: anthropic
             model-id: claude-sonnet-4-6
             max-tokens: 8192
             timeout-seconds: 120
         SAFETY:
+          - provider: dashscope
+            model-id: qwen-turbo-latest
+            max-tokens: 1024
+            timeout-seconds: 30
           - provider: anthropic
             model-id: claude-haiku-4-5-20251001
             max-tokens: 1024

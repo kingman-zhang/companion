@@ -188,7 +188,15 @@ public class ChatServiceImpl implements ChatService {
             throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
         }
         try {
-            JsonNode root = MAPPER.readTree(extractJson(llmText));
+            String json = extractJson(llmText);
+
+            // Model returned plain text (no JSON) — use it directly as the reply
+            if (!json.startsWith("{")) {
+                log.warn("Chat LLM 返回纯文本（非 JSON），降级处理: len={}", llmText.length());
+                return new LlmResult(llmText.trim(), EmotionLabel.OTHER, 5);
+            }
+
+            JsonNode root = MAPPER.readTree(json);
             if (root == null || root.isMissingNode() || root.isNull()) {
                 throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
             }

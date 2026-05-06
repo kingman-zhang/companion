@@ -21,4 +21,11 @@ public class RewriteReq {
      * 未传时跳过限额检查（容错）。
      */
     private String deviceId;
+
+    /**
+     * 评估结果 ID（可选）。
+     * 传入时，Controller 层会将评估摘要注入到改写的 system prompt，
+     * 让 AI 了解用户的关系背景；不传则直接改写。
+     */
+    private String assessmentId;
 }

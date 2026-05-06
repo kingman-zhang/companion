@@ -56,7 +56,7 @@ public class RewriteServiceImpl implements RewriteService {
     // ── Public API ────────────────────────────────────────────────────────────
 
     @Override
-    public RewriteResp rewrite(RewriteReq req) {
+    public RewriteResp rewrite(RewriteReq req, String assessmentContext) {
         // 安全检测（前置，命中则 HTTP 451）
         safetyChecker.check(req.getOriginalMessage()).throwIfBlocked();
 
@@ -65,8 +65,11 @@ public class RewriteServiceImpl implements RewriteService {
             checkDailyLimit(req.getDeviceId());
         }
 
+        String systemPrompt = assessmentContext != null
+                ? assessmentContext + "\n\n" + rewriteProperties.getSystemPrompt()
+                : rewriteProperties.getSystemPrompt();
         String userPrompt = "请改写以下消息：\n\"%s\"".formatted(req.getOriginalMessage());
-        String llmText = llmGateway.complete(rewriteProperties.getSystemPrompt(), userPrompt, RoutingContext.standard());
+        String llmText = llmGateway.complete(systemPrompt, userPrompt, RoutingContext.standard());
 
         List<RewriteVariant> variants = parseVariants(llmText);
 
@@ -99,7 +102,15 @@ public class RewriteServiceImpl implements RewriteService {
             throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
         }
         try {
-            JsonNode root = MAPPER.readTree(extractJson(llmText));
+            String json = extractJson(llmText);
+
+            // Model returned plain text (no JSON) — use it as the gentle variant
+            if (!json.startsWith("{")) {
+                log.warn("改写 LLM 返回纯文本（非 JSON），降级处理: len={}", llmText.length());
+                return plainTextFallback(llmText.trim());
+            }
+
+            JsonNode root = MAPPER.readTree(json);
             if (root == null || root.isMissingNode() || root.isNull()) {
                 throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
             }
@@ -120,10 +131,25 @@ public class RewriteServiceImpl implements RewriteService {
                         return v;
                     })
                     .toList();
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             log.error("改写结果解析失败，LLM 原始输出：{}", llmText, e);
             throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
         }
+    }
+
+    private List<RewriteVariant> plainTextFallback(String content) {
+        return VERSIONS.stream().map(version -> {
+            RewriteVariant v = new RewriteVariant();
+            v.setVersion(version);
+            v.setContent(content);
+            v.setRiskLevel("low");
+            v.setRiskReason("");
+            v.setSendRecommended(true);
+            v.setConfidence(0.6);
+            return v;
+        }).toList();
     }
 
     /** 从可能含前缀文字的字符串中提取第一个完整 JSON 对象 */
