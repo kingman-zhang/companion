@@ -21,8 +21,12 @@ public class DailyLogReq {
 
     private boolean contactedEx;
 
-    /** 仅 contactedEx=true 时有意义 */
+    /** 仅 contactedEx=true 时有意义：POSITIVE / NEUTRAL / NEGATIVE */
     private String contactOutcome;
+
+    /** 联系结果自由补充描述（选填，max 200 字） */
+    @Size(max = 200)
+    private String contactOutcomeNote;
 
     @Size(max = 500)
     private String notes;

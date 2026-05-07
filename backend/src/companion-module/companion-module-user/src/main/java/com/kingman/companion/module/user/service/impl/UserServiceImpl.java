@@ -1,6 +1,7 @@
 package com.kingman.companion.module.user.service.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.security.LoginUser;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtils jwtUtils;
     private final WxAuthProperties wxAuthProperties;
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public String loginByCode(String code) {
@@ -42,7 +44,9 @@ public class UserServiceImpl implements UserService {
 
         WxCode2SessionResp wxResp;
         try {
-            wxResp = restTemplate.getForObject(url, WxCode2SessionResp.class);
+            // 微信接口有时返回 Content-Type: text/plain，用 String 接收再手动解析
+            String raw = restTemplate.getForObject(url, String.class);
+            wxResp = objectMapper.readValue(raw, WxCode2SessionResp.class);
         } catch (Exception e) {
             log.error("调用微信 code2Session 接口失败: {}", e.getMessage(), e);
             throw new ApiException(CodeEnum.WX_LOGIN_FAILED);

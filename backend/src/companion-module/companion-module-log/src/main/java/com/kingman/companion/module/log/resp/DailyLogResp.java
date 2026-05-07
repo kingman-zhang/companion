@@ -17,6 +17,7 @@ public class DailyLogResp {
     private List<String> emotionLabels;
     private boolean contactedEx;
     private String contactOutcome;
+    private String contactOutcomeNote;
     private String notes;
     private String aiSuggestion;
     private LocalDateTime createdAt;

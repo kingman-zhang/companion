@@ -92,6 +92,12 @@ companion:
       严格只输出以下 JSON，不要有任何前缀、解释或额外内容：
       {“gentle”:{“content”:”...”,”risk_level”:”...”,”risk_reason”:”...”,”send_recommended”:true,”confidence”:0.85},”direct”:{“content”:”...”,”risk_level”:”...”,”risk_reason”:”...”,”send_recommended”:true,”confidence”:0.80},”brief”:{“content”:”...”,”risk_level”:”...”,”risk_reason”:”...”,”send_recommended”:true,”confidence”:0.82}}
 
+  log:
+    # 日志 AI 建议提示词 → LogServiceImpl
+    suggestion-system-prompt: |
+      你是一位温和的情感陪伴助手。根据用户今日情绪日志给出一条简短、温暖的鼓励或建议，
+      直接说建议内容，不超过60字，语气亲切，不分析不评判。
+
   llm:
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:}   # 通过环境变量注入，生产走 NACOS sensitive.yaml

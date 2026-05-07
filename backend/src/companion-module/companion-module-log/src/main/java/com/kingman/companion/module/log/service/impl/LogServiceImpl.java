@@ -5,7 +5,10 @@ import com.kingman.companion.component.llm.RoutingContext;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
 import com.kingman.companion.framework.security.AuthContext;
+import com.kingman.companion.module.log.config.LogProperties;
+import com.kingman.companion.module.log.entity.AssessmentSummary;
 import com.kingman.companion.module.log.entity.DailyLog;
+import com.kingman.companion.module.log.repository.AssessmentSummaryRepository;
 import com.kingman.companion.module.log.repository.DailyLogRepository;
 import com.kingman.companion.module.log.req.DailyLogReq;
 import com.kingman.companion.module.log.resp.DailyLogHistoryResp;
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,12 +30,10 @@ public class LogServiceImpl implements LogService {
 
     private static final Logger logger = LoggerFactory.getLogger(LogServiceImpl.class);
 
-    private static final String SUGGESTION_SYSTEM_PROMPT =
-            "你是一位温和的情感陪伴助手。根据用户今日情绪日志给出一条简短、温暖的鼓励或建议，" +
-            "直接说建议内容，不超过60字，语气亲切，不分析不评判。";
-
     private final DailyLogRepository logRepository;
+    private final AssessmentSummaryRepository assessmentSummaryRepository;
     private final LlmGateway llmGateway;
+    private final LogProperties logProperties;
 
     @Override
     public DailyLogResp submit(DailyLogReq req) {
@@ -54,6 +56,7 @@ public class LogServiceImpl implements LogService {
         log.setEmotionLabels(req.getEmotionLabels());
         log.setContactedEx(req.isContactedEx());
         log.setContactOutcome(req.isContactedEx() ? req.getContactOutcome() : null);
+        log.setContactOutcomeNote(req.isContactedEx() ? req.getContactOutcomeNote() : null);
         log.setNotes(req.getNotes());
 
         DailyLog saved = logRepository.save(log);
@@ -99,9 +102,12 @@ public class LogServiceImpl implements LogService {
 
         // 生成并缓存
         try {
-            String userPrompt = buildSuggestionPrompt(log);
+            AssessmentSummary assessment = userId != null
+                    ? assessmentSummaryRepository.findFirstByUserIdOrderByIdDesc(userId).orElse(null)
+                    : null;
+            String userPrompt = buildSuggestionPrompt(log, assessment);
             String suggestion = llmGateway.complete(
-                    SUGGESTION_SYSTEM_PROMPT,
+                    logProperties.getSuggestionSystemPrompt(),
                     userPrompt,
                     RoutingContext.chat(userPrompt.length(), null)
             );
@@ -115,17 +121,41 @@ public class LogServiceImpl implements LogService {
         }
     }
 
-    private String buildSuggestionPrompt(DailyLog log) {
+    private String buildSuggestionPrompt(DailyLog log, AssessmentSummary assessment) {
         StringBuilder sb = new StringBuilder();
+
+        // 关系评估背景（如有）
+        if (assessment != null) {
+            sb.append("【用户关系背景】");
+            if (StringUtils.hasText(assessment.getLevel())) {
+                String levelDesc = switch (assessment.getLevel()) {
+                    case "GREEN"  -> "关系相对乐观";
+                    case "YELLOW" -> "关系需谨慎";
+                    case "RED"    -> "关系需重点关注";
+                    default       -> assessment.getLevel();
+                };
+                sb.append("评估结论：").append(levelDesc).append("。");
+            }
+            if (StringUtils.hasText(assessment.getCoreInsight())) {
+                sb.append("核心洞察：「").append(assessment.getCoreInsight()).append("」。");
+            }
+            sb.append("\n");
+        }
+
+        // 今日日志
+        sb.append("【今日记录】");
         sb.append("情绪评分：").append(log.getEmotionScore()).append("/10，");
         sb.append("情绪：").append(String.join("、", log.getEmotionLabels())).append("。");
         if (log.isContactedEx()) {
-            sb.append("今日有联系对方，结果：").append(
-                    log.getContactOutcome() != null ? log.getContactOutcome() : "未说明").append("。");
+            String outcome = log.getContactOutcome() != null ? log.getContactOutcome() : "未说明";
+            sb.append("今日有联系对方，结果：").append(outcome).append("。");
+            if (StringUtils.hasText(log.getContactOutcomeNote())) {
+                sb.append("补充描述：").append(log.getContactOutcomeNote()).append("。");
+            }
         } else {
             sb.append("今日未联系对方。");
         }
-        if (log.getNotes() != null && !log.getNotes().isBlank()) {
+        if (StringUtils.hasText(log.getNotes())) {
             sb.append("备注：").append(log.getNotes());
         }
         return sb.toString();
@@ -139,6 +169,7 @@ public class LogServiceImpl implements LogService {
                 .emotionLabels(log.getEmotionLabels())
                 .contactedEx(log.isContactedEx())
                 .contactOutcome(log.getContactOutcome())
+                .contactOutcomeNote(log.getContactOutcomeNote())
                 .notes(log.getNotes())
                 .aiSuggestion(log.getAiSuggestion())
                 .createdAt(log.getCreateTime())
@@ -153,6 +184,7 @@ public class LogServiceImpl implements LogService {
                 .emotionLabels(log.getEmotionLabels())
                 .contactedEx(log.isContactedEx())
                 .contactOutcome(log.getContactOutcome())
+                .contactOutcomeNote(log.getContactOutcomeNote())
                 .notes(log.getNotes())
                 .aiSuggestion(log.getAiSuggestion())
                 .build();

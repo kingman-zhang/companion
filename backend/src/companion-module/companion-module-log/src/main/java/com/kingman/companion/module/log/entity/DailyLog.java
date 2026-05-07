@@ -28,6 +28,9 @@ public class DailyLog extends AbstractBaseEntity {
     /** 联系结果：POSITIVE / NEUTRAL / NEGATIVE（contactedEx=true 时有值） */
     private String contactOutcome;
 
+    /** 联系结果自由补充描述（contactedEx=true 时可选填） */
+    private String contactOutcomeNote;
+
     /** 今日备注（可选，max 500 字） */
     private String notes;
 

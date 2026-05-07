@@ -1,0 +1,13 @@
+package com.kingman.companion.module.log.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Data
+@Component
+@ConfigurationProperties(prefix = "companion.log")
+public class LogProperties {
+
+    private String suggestionSystemPrompt = "";
+}
