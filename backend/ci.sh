@@ -106,10 +106,10 @@ echo "查看容器状态..."
 docker ps
 
 echo "查看最近日志..."
-docker logs --tail=50 app-app
+docker logs --tail=50 companion-app
 EOF
 
 echo "=============================="
-echo "部署完成"
+echo "部署完成"˚
 echo "版本：$PACKAGE_NAME"
 echo "=============================="
