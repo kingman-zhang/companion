@@ -20,5 +20,6 @@
         <module>companion-module-chat</module>
         <module>companion-module-rewrite</module>
         <module>companion-module-user</module>
+        <module>companion-module-log</module>
     </modules>
 </project>

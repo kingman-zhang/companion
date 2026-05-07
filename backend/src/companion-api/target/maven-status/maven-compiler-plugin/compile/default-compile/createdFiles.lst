@@ -1,3 +1,4 @@
+com/kingman/companion/api/controller/LogController.class
 com/kingman/companion/api/service/AssessmentContextBuilder.class
 com/kingman/companion/api/controller/AssessmentController.class
 com/kingman/companion/api/CompanionApplication.class
