@@ -1,18 +1,70 @@
 <!-- P3 情绪急救聊天页 -->
 <view class="page">
 
-  <!-- 顶部导航 -->
-  <view class="nav-bar">
-    <view class="nav-back" bindtap="goBack" hover-class="nav-hover" hover-stay-time="100">
+  <!-- ── 顶部导航 ── -->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}};">
+    <view class="nav-back-btn" bindtap="goBack" hover-class="nav-btn-hover" hover-stay-time="100">
       <text class="nav-back-icon">‹</text>
-      <text class="nav-back-text">返回</text>
     </view>
-    <text class="nav-title">情绪急救</text>
-    <view class="nav-placeholder"></view>
+    <view class="nav-center">
+      <text class="nav-title">和 AI 聊聊</text>
+      <text class="nav-subtitle">会话仅保存在你的设备</text>
+    </view>
+    <view class="nav-right">
+      <view wx:if="{{emotionBadge}}" class="emotion-pill emotion-pill-{{emotionLevel}}">
+        <text class="emotion-pill-text">{{emotionBadge}}</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 消息列表 -->
+  <!-- ══════════════════════
+       空状态（用户尚未发送消息）
+  ══════════════════════ -->
+  <view wx:if="{{!userHasSent}}" class="empty-body">
+
+    <!-- 居中内容 -->
+    <view class="empty-center">
+      <!-- AI 头像 -->
+      <view class="empty-avatar-wrap">
+        <view class="empty-avatar">
+          <view class="avatar-dot-l"></view>
+          <view class="avatar-dot-r"></view>
+          <view class="avatar-smile"></view>
+        </view>
+      </view>
+
+      <text class="empty-title">我在这里</text>
+      <text class="empty-desc">不着急。你想说什么都可以， 一个词、一句话、甚至只是发泄都行。</text>
+
+      <!-- 快速发起 chips -->
+      <view class="quick-chips">
+        <view
+          wx:for="{{quickPrompts}}"
+          wx:key="index"
+          class="quick-chip"
+          bindtap="sendQuickPrompt"
+          data-text="{{item}}"
+          hover-class="chip-hover"
+          hover-stay-time="80"
+        >
+          <text class="quick-chip-text">{{item}}</text>
+        </view>
+      </view>
+
+      <!-- 安全声明 -->
+      <view class="empty-safety">
+        <text class="safety-text">我不是心理医生 · 只是一个能帮你理顺思路的 AI</text>
+        <text class="safety-link">如果你有自伤念头，请先拨打 400-161-9995</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ══════════════════════
+       聊天进行中
+  ══════════════════════ -->
   <scroll-view
+    wx:else
     class="msg-list"
     scroll-y
     scroll-into-view="{{scrollToId}}"
@@ -20,38 +72,54 @@
     enhanced
     bounces="{{false}}"
   >
-    <!-- 会话初始提示 -->
-    <view class="session-tip" wx:if="{{messages.length === 0 && !loading}}">
-      <text class="session-tip-text">我在，说说你现在的感受吧</text>
+    <!-- 顶部安全说明 -->
+    <view class="chat-system-tip">
+      <text class="system-tip-text">我不是心理医生 · 只是 AI</text>
+      <text class="system-tip-link">有自伤念头请拨打 400-161-9995</text>
     </view>
 
     <!-- 消息气泡 -->
     <view
       wx:for="{{messages}}"
       wx:key="id"
-      id="msg-{{item.id}}"
+      id="{{item.id}}"
       class="msg-row {{item.role === 'user' ? 'msg-row-user' : 'msg-row-ai'}}"
     >
       <!-- AI 消息 -->
       <block wx:if="{{item.role === 'assistant'}}">
-        <view class="msg-bubble msg-bubble-ai">
-          <view wx:if="{{item.emotion_label}}" class="emotion-badge emotion-{{item.emotion_label}}">
-            <text class="emotion-text">{{item.emotion_text}}</text>
+        <view class="ai-avatar">
+          <view class="ai-avatar-dot-l"></view>
+          <view class="ai-avatar-dot-r"></view>
+        </view>
+        <view class="msg-bubble-wrap">
+          <view class="msg-bubble msg-bubble-ai">
+            <view wx:if="{{item.emotion_label}}" class="emotion-badge emotion-{{item.emotion_label}}">
+              <text class="emotion-text">{{item.emotion_text}}</text>
+            </view>
+            <text class="msg-text">{{item.content}}</text>
           </view>
-          <text class="msg-text">{{item.content}}</text>
         </view>
       </block>
 
       <!-- 用户消息 -->
       <block wx:else>
-        <view class="msg-bubble msg-bubble-user">
-          <text class="msg-text">{{item.content}}</text>
+        <view class="msg-bubble-wrap">
+          <view class="msg-bubble msg-bubble-user">
+            <text class="msg-text msg-text-user">{{item.content}}</text>
+          </view>
+        </view>
+        <view class="user-avatar">
+          <text class="user-avatar-icon">我</text>
         </view>
       </block>
     </view>
 
     <!-- AI 正在输入 -->
     <view class="msg-row msg-row-ai" wx:if="{{loading}}">
+      <view class="ai-avatar">
+        <view class="ai-avatar-dot-l"></view>
+        <view class="ai-avatar-dot-r"></view>
+      </view>
       <view class="msg-bubble msg-bubble-ai msg-typing">
         <text class="typing-dot">·</text>
         <text class="typing-dot">·</text>
@@ -63,48 +131,65 @@
     <view class="paywall-banner" wx:if="{{showPaywall}}">
       <text class="paywall-title">已用完 10 轮免费对话</text>
       <text class="paywall-sub">升级会员，无限次倾诉陪伴</text>
-      <view class="paywall-btn" hover-class="btn-hover" hover-stay-time="100">
-        <text>立即升级</text>
+      <view class="paywall-btn" bindtap="showUpgradeModal" hover-class="btn-hover" hover-stay-time="100">
+        <text class="paywall-btn-text">立即升级</text>
       </view>
     </view>
 
-    <!-- 底部占位 -->
     <view class="list-bottom" id="list-bottom"></view>
   </scroll-view>
 
-  <!-- 微干预卡片 -->
-  <view class="micro-card {{showMicro ? 'micro-card-visible' : ''}}" wx:if="{{microIntervention}}">
+  <!-- ── 微干预卡片 ── -->
+  <view class="micro-card" wx:if="{{showMicro && microIntervention}}">
     <view class="micro-header">
       <text class="micro-title">{{microIntervention.title}}</text>
-      <view class="micro-close" bindtap="closeMicro">
+      <view class="micro-close" bindtap="closeMicro" hover-class="nav-btn-hover" hover-stay-time="80">
         <text class="micro-close-icon">✕</text>
       </view>
     </view>
     <text class="micro-body">{{microIntervention.body}}</text>
     <view class="micro-actions">
       <view class="micro-btn-primary" bindtap="closeMicro" hover-class="btn-hover" hover-stay-time="100">
-        <text>{{microIntervention.action_label}}</text>
+        <text class="micro-btn-text-white">{{microIntervention.action_label}}</text>
       </view>
       <view
-        class="micro-btn-secondary"
         wx:if="{{microIntervention.secondary_action_label}}"
+        class="micro-btn-secondary"
         bindtap="goRewrite"
         hover-class="btn-hover"
         hover-stay-time="100"
       >
-        <text>{{microIntervention.secondary_action_label}}</text>
+        <text class="micro-btn-text-pink">{{microIntervention.secondary_action_label}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 底部输入区 -->
+  <!-- ── 快捷回复条（对话进行中时展示）── -->
+  <scroll-view wx:if="{{userHasSent && !showPaywall}}" class="shortcuts-bar" scroll-x scroll-y="{{false}}">
+    <view class="shortcuts-inner">
+      <view
+        wx:for="{{shortcuts}}"
+        wx:key="index"
+        class="shortcut-chip {{item.nav ? 'shortcut-chip-nav' : ''}}"
+        bindtap="fillShortcut"
+        data-text="{{item.text}}"
+        data-nav="{{item.nav}}"
+        hover-class="chip-hover"
+        hover-stay-time="80"
+      >
+        <text class="shortcut-chip-text">{{item.text}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ── 底部输入区 ── -->
   <view class="input-bar" wx:if="{{!showPaywall}}">
-    <view class="input-wrap">
+    <view class="input-wrap {{inputValue ? 'input-wrap-active' : ''}}">
       <input
         class="chat-input"
         value="{{inputValue}}"
         bindinput="onInput"
-        placeholder="说说你现在的感受…"
+        placeholder="说说你的感受"
         placeholder-class="input-placeholder"
         confirm-type="send"
         bindconfirm="sendMessage"
@@ -114,12 +199,30 @@
       />
     </view>
     <view
-      class="send-btn {{(!inputValue || loading) ? 'send-btn-disabled' : ''}}"
+      class="send-btn {{(!inputValue || loading) ? 'send-btn-off' : 'send-btn-on'}}"
       bindtap="sendMessage"
-      hover-class="btn-hover"
+      hover-class="{{(!inputValue || loading) ? '' : 'btn-hover'}}"
       hover-stay-time="80"
     >
-      <text class="send-icon">↑</text>
+      <view class="send-icon-arrow"></view>
+    </view>
+  </view>
+
+  <!-- ── 升级引导弹窗 ── -->
+  <view wx:if="{{showUpgradeModal}}" class="upgrade-mask" bindtap="closeUpgradeModal">
+    <view class="upgrade-modal" catchtap="noop">
+      <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
+        <text class="upgrade-modal-close-icon">×</text>
+      </view>
+      <text class="upgrade-modal-title">功能开发中</text>
+      <text class="upgrade-modal-body">该功能正在开发中，如需提前使用请联系管理员开通。</text>
+      <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
+        <text class="upgrade-modal-email">diamondiamon@163.com</text>
+        <text class="upgrade-modal-copy-hint">点击复制</text>
+      </view>
+      <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
+        <text class="upgrade-modal-btn-text">我知道了</text>
+      </view>
     </view>
   </view>
 

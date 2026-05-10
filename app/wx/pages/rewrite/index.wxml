@@ -1,89 +1,217 @@
 <!-- P4 消息改写页 -->
-<scroll-view class="page" scroll-y type="list">
+<view class="page">
 
-  <!-- 顶部导航 -->
-  <view class="nav-bar">
-    <view class="nav-back" bindtap="goBack" hover-class="nav-hover" hover-stay-time="100">
+  <!-- ── 顶部导航 ── -->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}};">
+    <view class="nav-back-btn" bindtap="goBack" hover-class="nav-btn-hover" hover-stay-time="100">
       <text class="nav-back-icon">‹</text>
-      <text class="nav-back-text">返回</text>
     </view>
-    <text class="nav-title">消息改写</text>
-    <view class="nav-placeholder"></view>
-  </view>
-
-  <!-- 原文输入区 -->
-  <view class="input-section">
-    <text class="section-label">你想发给TA的消息</text>
-    <view class="original-input-wrap {{inputFocused ? 'focused' : ''}}">
-      <textarea
-        class="original-input"
-        value="{{originalMessage}}"
-        bindinput="onInput"
-        bindfocus="onFocus"
-        bindblur="onBlur"
-        placeholder="把你想说的写在这里，我来帮你表达得更好…"
-        placeholder-class="input-placeholder"
-        auto-height
-        maxlength="500"
-        adjust-position="{{true}}"
-      />
-      <text class="char-count">{{originalMessage.length}} / 500</text>
+    <view class="nav-center">
+      <text class="nav-title">话术改写</text>
+      <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : '发前先过一遍'}}</text>
     </view>
-    <view
-      class="rewrite-btn {{(!originalMessage || loading) ? 'rewrite-btn-disabled' : ''}}"
-      bindtap="doRewrite"
-      hover-class="btn-hover"
-      hover-stay-time="100"
-    >
-      <text>{{loading ? '改写中…' : '帮我改写'}}</text>
+    <view class="nav-right">
+      <text wx:if="{{hasResults}}" class="nav-reset" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重来</text>
     </view>
   </view>
 
-  <!-- 改写结果 -->
-  <view class="results" wx:if="{{variants.length > 0}}">
-    <text class="section-label">改写结果</text>
+  <!-- ══════════════════════
+       输入状态（未生成结果）
+  ══════════════════════ -->
+  <block wx:if="{{!hasResults}}">
+    <scroll-view class="content" scroll-y>
 
-    <view
-      wx:for="{{variants}}"
-      wx:key="version"
-      class="variant-card {{item.locked ? 'locked' : ''}}"
-    >
-      <!-- 卡片头部 -->
-      <view class="variant-header">
-        <view class="version-badge version-{{item.version}}">
-          <text class="version-text">{{item.version_label}}</text>
+      <!-- Hero -->
+      <view class="hero">
+        <text class="hero-title">发消息之前，让我先看看</text>
+        <text class="hero-desc">告诉我你想怎样、粘上原文，我给你三个不同风险的版本，附改写原理。</text>
+      </view>
+
+      <!-- Step 1：目标选择 -->
+      <view class="step-block">
+        <view class="step-label-row">
+          <view class="step-num step-num-on"><text class="step-num-text">1</text></view>
+          <text class="step-label-text">你想达到的效果</text>
         </view>
-        <view class="risk-badge risk-{{item.risk_level}}" wx:if="{{!item.locked}}">
-          <text class="risk-text">{{item.risk_text}}</text>
+        <view class="goal-chips">
+          <view
+            wx:for="{{goals}}"
+            wx:key="id"
+            class="goal-chip {{selectedGoal === item.id ? 'goal-chip-on' : 'goal-chip-off'}}"
+            bindtap="selectGoal"
+            data-id="{{item.id}}"
+            hover-class="chip-hover"
+            hover-stay-time="80"
+          >
+            <text class="goal-chip-text {{selectedGoal === item.id ? 'goal-chip-text-on' : ''}}">{{item.title}}</text>
+          </view>
+        </view>
+        <text class="goal-sub">{{goalSub}}</text>
+      </view>
+
+      <!-- Step 2：原文输入 -->
+      <view class="step-block">
+        <view class="step-label-row">
+          <view class="step-num {{originalMessage ? 'step-num-on' : 'step-num-off'}}">
+            <text class="step-num-text">2</text>
+          </view>
+          <text class="step-label-text">粘上你写的原文</text>
+        </view>
+        <view class="input-card {{originalMessage ? 'input-card-active' : ''}}">
+          <textarea
+            class="original-textarea"
+            value="{{originalMessage}}"
+            bindinput="onInput"
+            placeholder="把你打算发出去的那段话贴在这里..."
+            placeholder-class="textarea-placeholder"
+            auto-height
+            maxlength="500"
+            adjust-position="{{true}}"
+          />
+          <view wx:if="{{originalMessage}}" class="input-footer">
+            <view class="risk-hint">
+              <view class="risk-dot risk-dot-{{riskLevel}}"></view>
+              <text class="risk-label-text risk-label-{{riskLevel}}">{{riskLabel}}</text>
+            </view>
+            <text class="char-count">{{originalMessage.length}} 字</text>
+          </view>
+        </view>
+
+        <!-- 示例文案（输入为空时显示）-->
+        <view wx:if="{{!originalMessage}}" class="examples">
+          <text class="examples-title">{{examplesLabel}}</text>
+          <view
+            wx:for="{{examples}}"
+            wx:key="index"
+            class="example-item"
+            bindtap="fillExample"
+            data-text="{{item}}"
+            hover-class="chip-hover"
+            hover-stay-time="80"
+          >
+            <text class="example-text">{{item}}</text>
+          </view>
         </view>
       </view>
 
-      <!-- 卡片内容 -->
-      <text class="variant-content" wx:if="{{!item.locked}}">{{item.content}}</text>
+      <view style="height: 160rpx;"></view>
+    </scroll-view>
 
-      <!-- 毛玻璃遮罩（付费锁） -->
-      <view class="paywall-overlay" wx:if="{{item.locked}}">
-        <view class="lock-icon-wrap">
-          <text class="lock-icon">🔒</text>
+    <!-- 生成按钮（固定底部）-->
+    <view class="gen-bar">
+      <view
+        class="gen-btn {{(!originalMessage || loading) ? 'gen-btn-off' : 'gen-btn-on'}}"
+        bindtap="doRewrite"
+        hover-class="{{(!originalMessage || loading) ? '' : 'btn-hover'}}"
+        hover-stay-time="80"
+      >
+        <text class="gen-btn-text">{{loading ? '改写中…' : '✦ 改写 3 个版本'}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ══════════════════════
+       结果状态（已生成）
+  ══════════════════════ -->
+  <scroll-view wx:else class="content" scroll-y>
+
+    <!-- 原文回显卡 -->
+    <view class="echo-card">
+      <view class="echo-header">
+        <text class="echo-label">你写的版本</text>
+        <view class="risk-hint">
+          <view class="risk-dot risk-dot-{{riskLevel}}"></view>
+          <text class="risk-label-text risk-label-{{riskLevel}}">{{riskLabel}}</text>
         </view>
-        <text class="lock-title">解锁更多改写方案</text>
-        <text class="lock-sub">升级会员查看直接版和简短版</text>
-        <view class="lock-btn" bindtap="showUpgrade" hover-class="btn-hover" hover-stay-time="100">
-          <text>立即升级</text>
+      </view>
+      <text class="echo-text">{{originalMessage}}</text>
+    </view>
+
+    <!-- Tab 切换 -->
+    <view class="tab-switcher">
+      <view
+        wx:for="{{variants}}"
+        wx:key="version"
+        class="tab-item {{activeTab === index ? 'tab-on' : 'tab-off'}}"
+        bindtap="setTab"
+        data-index="{{index}}"
+        hover-class="chip-hover"
+        hover-stay-time="80"
+      >
+        <text class="tab-label {{activeTab === index ? 'tab-label-on' : ''}}">{{item.version_label}}</text>
+        <text class="tab-sub tab-sub-{{item.risk_level}}">{{item.risk_text}}</text>
+      </view>
+    </view>
+
+    <!-- 当前结果卡 -->
+    <view class="result-card">
+
+      <!-- 锁定态：毛玻璃遮罩 -->
+      <view wx:if="{{currentVariant.locked}}" class="locked-container">
+        <!-- 内容占位（模糊显示，让用户知道有内容） -->
+        <text class="result-text result-text-blurred">{{currentVariant.content}}</text>
+        <!-- 遮罩层 -->
+        <view class="lock-overlay" bindtap="showUpgrade">
+          <view class="lock-badge">
+            <text class="lock-badge-icon">🔒</text>
+          </view>
+          <text class="lock-overlay-title">解锁完整版本</text>
+          <text class="lock-overlay-sub">升级会员，查看全部 3 种改写方案</text>
+          <view class="lock-overlay-btn" hover-class="btn-hover" hover-stay-time="100">
+            <text class="lock-overlay-btn-text">立即升级</text>
+          </view>
         </view>
       </view>
 
-      <!-- 操作按钮（仅已解锁） -->
-      <view class="variant-actions" wx:if="{{!item.locked}}">
-        <view wx:if="{{item.send_recommended}}" class="recommend-badge">
-          <text class="recommend-text">✓ 建议发送</text>
+      <!-- 已解锁 -->
+      <block wx:else>
+        <text class="result-text">{{currentVariant.content}}</text>
+
+        <!-- 操作行 -->
+        <view class="result-actions">
+          <view class="action-copy {{copied ? 'action-copy-done' : ''}}" bindtap="copyResult" hover-class="btn-hover" hover-stay-time="80">
+            <text class="action-copy-text">{{copied ? '✓ 已复制' : '复制'}}</text>
+          </view>
+          <view class="action-icon-btn" bindtap="doRewrite" hover-class="btn-hover" hover-stay-time="80">
+            <text class="action-icon">↻</text>
+          </view>
         </view>
-        <view class="copy-btn" bindtap="copyContent" data-content="{{item.content}}" hover-class="btn-hover" hover-stay-time="100">
-          <text class="copy-text">复制</text>
-        </view>
+      </block>
+    </view>
+
+    <!-- 预测回复 Nudge -->
+    <view class="nudge-banner">
+      <view class="nudge-icon-wrap">
+        <text class="nudge-icon">✦</text>
+      </view>
+      <view class="nudge-body">
+        <text class="nudge-title">预测 TA 可能的回复</text>
+        <text class="nudge-sub">高级功能 · 帮你提前想好接下来的话</text>
+      </view>
+      <view class="nudge-btn" bindtap="showUpgrade" hover-class="btn-hover" hover-stay-time="80">
+        <text class="nudge-btn-text">解锁</text>
+      </view>
+    </view>
+
+    <view style="height: 60rpx;"></view>
+  </scroll-view>
+
+  <!-- ── 升级引导弹窗 ── -->
+  <view wx:if="{{showUpgradeModal}}" class="upgrade-mask" bindtap="closeUpgradeModal">
+    <view class="upgrade-modal" catchtap="noop">
+      <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
+        <text class="upgrade-modal-close-icon">×</text>
+      </view>
+      <text class="upgrade-modal-title">功能开发中</text>
+      <text class="upgrade-modal-body">该功能正在开发中，如需提前使用请联系管理员开通。</text>
+      <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
+        <text class="upgrade-modal-email">diamondiamon@163.com</text>
+        <text class="upgrade-modal-copy-hint">点击复制</text>
+      </view>
+      <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
+        <text class="upgrade-modal-btn-text">我知道了</text>
       </view>
     </view>
   </view>
 
-  <view class="page-bottom"></view>
-</scroll-view>
+</view>

@@ -1,13 +1,50 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/sessions/index",
+    "pages/rewrites/index",
     "pages/questionnaire/index",
     "pages/assessment/index",
     "pages/loading/index",
     "pages/chat/index",
     "pages/rewrite/index",
-    "pages/safety/index"
+    "pages/safety/index",
+    "pages/letgo/index",
+    "pages/log/index",
+    "pages/tools/index"
   ],
+  "tabBar": {
+    "color": "#9E9E9E",
+    "selectedColor": "#E45A7E",
+    "backgroundColor": "#FAF4F1",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/tab-home.png",
+        "selectedIconPath": "assets/icons/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/sessions/index",
+        "text": "聊天",
+        "iconPath": "assets/icons/tab-chat.png",
+        "selectedIconPath": "assets/icons/tab-chat-active.png"
+      },
+      {
+        "pagePath": "pages/rewrites/index",
+        "text": "改写",
+        "iconPath": "assets/icons/tab-rewrite.png",
+        "selectedIconPath": "assets/icons/tab-rewrite-active.png"
+      },
+      {
+        "pagePath": "pages/tools/index",
+        "text": "工具",
+        "iconPath": "assets/icons/tab-tools.png",
+        "selectedIconPath": "assets/icons/tab-tools-active.png"
+      }
+    ]
+  },
   "window": {
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"

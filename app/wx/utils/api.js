@@ -1,21 +1,49 @@
 // RelationshipAI — API 工具函数
 // 统一封装 wx.request，处理通用错误逻辑
 
-const BASE_URL = 'http://localhost:8080'
+const ENV_CONFIG = {
+  develop: 'http://localhost:8080',//'http://localhost:8080',   // 开发者工具本地调试
+  trial:   'https://companion-api.lizigege.com',  // 体验版
+  release: 'https://companion-api.lizigege.com',  // 正式版
+}
+
+const { miniProgram } = wx.getAccountInfoSync()
+const BASE_URL = ENV_CONFIG[miniProgram.envVersion] || ENV_CONFIG.release
+
+function _getToken() {
+  const app = getApp()
+  return (app && app.globalData && app.globalData.token)
+    || wx.getStorageSync('token')
+    || null
+}
 
 /**
  * 发起请求，返回 Promise<IResult>
  * 自动处理：
+ *   - Authorization header（Bearer token）
  *   - HTTP 451 → 跳转安全页
+ *   - HTTP 401 → 清除本地 token，触发重新登录
  *   - network error → toast 提示
+ *
+ * @param {object} options
+ * @param {string} options.url
+ * @param {string} [options.method]
+ * @param {object} [options.data]
+ * @param {boolean} [options.skipAuth] 跳过 token 注入（登录接口本身使用）
  */
-function request({ url, method = 'GET', data = {} }) {
+function request({ url, method = 'GET', data = {}, skipAuth = false }) {
   return new Promise((resolve, reject) => {
+    const header = { 'Content-Type': 'application/json' }
+    if (!skipAuth) {
+      const token = _getToken()
+      if (token) header['Authorization'] = 'Bearer ' + token
+    }
+
     wx.request({
       url: BASE_URL + url,
       method,
       data,
-      header: { 'Content-Type': 'application/json' },
+      header,
       success(res) {
         if (res.statusCode === 451) {
           const safetyData = res.data || {}
@@ -24,6 +52,17 @@ function request({ url, method = 'GET', data = {} }) {
           reject({ safety: true, ...safetyData })
           return
         }
+
+        // Token 失效 → 清除本地凭据，触发重登录（无需阻塞当前请求）
+        if (res.statusCode === 401) {
+          wx.removeStorageSync('token')
+          const app = getApp()
+          if (app) {
+            app.globalData.token = null
+            app.silentLogin()
+          }
+        }
+
         resolve(res.data)
       },
       fail() {

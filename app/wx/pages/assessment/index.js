@@ -26,6 +26,13 @@ const ACTION1_MAP = {
   SEEK_PROFESSIONAL_HELP: '先稳定情绪（最重要）',
 }
 
+// 根据分数推导进度条颜色等级
+function scoreClass(score) {
+  if (score >= 65) return 'green'
+  if (score >= 35) return 'yellow'
+  return 'red'
+}
+
 Page({
   data: {
     result: null,
@@ -33,6 +40,11 @@ Page({
     levelBadge: '需谨慎',
     scoreTitle: '',
     action1Title: '处理现在的情绪（最重要）',
+    showLetgoAction: false,   // 红灯 or letgo 意向时第3张卡激活
+    emoClass: 'yellow',
+    commClass: 'yellow',
+    conflictClass: 'yellow',
+    expandedAction: '',
     navPaddingTop: '44px',
     navBarHeight: '88px',
     navPaddingRight: '120px',
@@ -50,7 +62,7 @@ Page({
 
     const result = app.getAssessmentResult()
     if (!result) {
-      wx.redirectTo({ url: '/pages/index/index' })
+      wx.switchTab({ url: '/pages/index/index' })
       return
     }
 
@@ -58,17 +70,38 @@ Page({
     const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.YELLOW
     const action1Title = ACTION1_MAP[result.recommended_action] || ACTION1_MAP.COOL_DOWN
 
+    const showLetgoAction = level === 'RED' || result.user_primary_intent === 'LEARN_GOODBYE'
+
     this.setData({
       result,
       levelClass: cfg.cls,
       levelBadge: cfg.badge,
       scoreTitle: cfg.title,
       action1Title,
+      showLetgoAction,
+      emoClass: scoreClass(result.emotional_connection_score),
+      commClass: scoreClass(result.communication_score),
+      conflictClass: scoreClass(result.conflict_score),
+    })
+  },
+
+  toggleAction(e) {
+    const { id } = e.currentTarget.dataset
+    const current = this.data.expandedAction
+    this.setData({ expandedAction: current === id ? '' : id })
+  },
+
+  showMore() {
+    wx.showActionSheet({
+      itemList: ['分享评估结果', '重新评估'],
+      success: (res) => {
+        if (res.tapIndex === 1) this.goRedo()
+      },
     })
   },
 
   goHome() {
-    wx.reLaunch({ url: '/pages/index/index' })
+    wx.switchTab({ url: '/pages/index/index' })
   },
 
   goChat() {
@@ -79,8 +112,15 @@ Page({
     wx.navigateTo({ url: '/pages/rewrite/index' })
   },
 
+  goLetgo() {
+    wx.navigateTo({ url: '/pages/letgo/index' })
+  },
+
   goRedo() {
-    // 返回问卷页重新作答
     wx.redirectTo({ url: '/pages/questionnaire/index' })
+  },
+
+  showComingSoon() {
+    wx.showToast({ title: '即将开放，敬请期待', icon: 'none', duration: 2000 })
   },
 })

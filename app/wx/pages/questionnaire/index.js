@@ -125,13 +125,19 @@ Page({
     try {
       const sysInfo = wx.getSystemInfoSync()
       const menuButton = wx.getMenuButtonBoundingClientRect()
-      // padding-top = 状态栏高度，让内容从状态栏下方开始
       const navPaddingTop = `${sysInfo.statusBarHeight + 6}px`
-      // padding-right = 屏幕宽度 - 胶囊左边距 + 安全间距
       const navPaddingRight = `${sysInfo.windowWidth - menuButton.left + 8}px`
       this.setData({ navPaddingTop, navPaddingRight })
     } catch (e) {
       // 降级：使用默认值
+    }
+
+    // 续接模式：从首页续接条进入，恢复上次进度
+    if (options.resume === '1') {
+      const saved = wx.getStorageSync('questionnaire_progress')
+      if (saved && saved.step > 0) {
+        this._resumeData = saved
+      }
     }
 
     const entryState = options.entry_state || app.globalData.entryState || ''
@@ -152,12 +158,27 @@ Page({
     }
     this._questions = questions
     const total = questions.length
-    this.setData({
-      questionsReady: true,
-      totalQuestions: total,
-      currentQuestion: questions[0],
-      progressSegments: buildSegments(0, total),
-    })
+
+    // 有续接数据时，从上次的题目和答案恢复
+    const resume = this._resumeData
+    if (resume && resume.step < total) {
+      this.setData({
+        questionsReady: true,
+        totalQuestions: total,
+        currentIndex: resume.step,
+        currentQuestion: questions[resume.step],
+        answers: resume.answers || {},
+        currentAnswer: (resume.answers || {})[questions[resume.step].key] || '',
+        progressSegments: buildSegments(resume.step, total),
+      })
+    } else {
+      this.setData({
+        questionsReady: true,
+        totalQuestions: total,
+        currentQuestion: questions[0],
+        progressSegments: buildSegments(0, total),
+      })
+    }
   },
 
   goHome() {
@@ -212,12 +233,19 @@ Page({
         skipped: false,
         progressSegments: buildSegments(nextIndex, this._questions.length),
       })
+      // 保存进度，供首页续接条使用
+      wx.setStorageSync('questionnaire_progress', {
+        step: nextIndex,
+        answers: this.data.answers,
+      })
     } else {
       this._submit()
     }
   },
 
   _submit() {
+    // 提交完成，清除进度记录
+    wx.removeStorageSync('questionnaire_progress')
     // 将答案存入 globalData，由加载页统一调用接口
     const requestData = { ...this.data.answers }
     if (this.data.entryState) {

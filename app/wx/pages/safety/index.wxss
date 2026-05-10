@@ -1,8 +1,8 @@
-/* P8 安全拦截页样式 */
+/* P8 安全拦截页 — 玫瑰粉色系 */
 
 .page {
   min-height: 100vh;
-  background: #F5F3F0;
+  background: #FAF4F1;
   padding-bottom: 80rpx;
 }
 
@@ -24,7 +24,7 @@
   display: block;
   font-size: 40rpx;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1F1417;
   line-height: 1.4;
   margin-bottom: 16rpx;
 }
@@ -32,8 +32,23 @@
 .care-subtitle {
   display: block;
   font-size: 30rpx;
-  color: #6B6B6B;
+  color: #52464A;
   line-height: 1.7;
+}
+
+/* 冷静期提示 */
+.cooldown-tip {
+  margin: 28rpx 0 0;
+  padding: 16rpx 28rpx;
+  border-radius: 16rpx;
+  background: #FCE8EE;
+  display: inline-block;
+}
+
+.cooldown-text {
+  font-size: 24rpx;
+  color: #C73E64;
+  line-height: 1.6;
 }
 
 /* ── 资源区 ── */
@@ -43,29 +58,25 @@
 
 .section-label {
   display: block;
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 600;
-  color: #6B6B6B;
+  color: #8F8589;
   letter-spacing: 1rpx;
   margin-bottom: 20rpx;
 }
 
 .hotline-card {
-  background: #FAFAF8;
-  border: 1rpx solid #E8E4DE;
+  background: #FFFFFF;
+  border: 1rpx solid #EFE4E0;
   border-radius: 24rpx;
   padding: 28rpx 32rpx;
   margin-bottom: 16rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2rpx 16rpx rgba(0,0,0,0.05);
 }
 
-.card-hover {
-  opacity: 0.85;
-  transform: scale(0.98);
-}
+.card-hover { opacity: 0.82; }
 
 .hotline-info {
   flex: 1;
@@ -76,14 +87,14 @@
   display: block;
   font-size: 28rpx;
   font-weight: 500;
-  color: #1C1C1E;
+  color: #1F1417;
   margin-bottom: 6rpx;
 }
 
 .hotline-desc {
   display: block;
-  font-size: 24rpx;
-  color: #ABABAB;
+  font-size: 22rpx;
+  color: #8F8589;
 }
 
 .hotline-right {
@@ -97,12 +108,12 @@
 .hotline-phone {
   font-size: 28rpx;
   font-weight: 600;
-  color: #4A7B7B;
+  color: #E45A7E;
 }
 
 .hotline-arrow {
   font-size: 28rpx;
-  color: #4A7B7B;
+  color: #E45A7E;
 }
 
 /* ── 底部提示 ── */
@@ -113,7 +124,7 @@
 
 .bottom-tip-text {
   font-size: 26rpx;
-  color: #ABABAB;
+  color: #BDB3B5;
   line-height: 1.6;
 }
 
@@ -123,18 +134,18 @@
 }
 
 .btn-ok {
-  background: #4A7B7B;
-  height: 104rpx;
+  background: #E45A7E;
+  height: 96rpx;
   border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.btn-ok text {
-  font-size: 32rpx;
+.btn-ok-text {
+  font-size: 30rpx;
   font-weight: 600;
-  color: #ffffff;
+  color: #FFFFFF;
 }
 
-.btn-hover { opacity: 0.85; }
+.btn-hover { opacity: 0.82; }

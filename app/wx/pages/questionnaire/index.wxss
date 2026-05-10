@@ -2,7 +2,7 @@
 
 .page {
   height: 100vh;
-  background: #EDE8DC;
+  background: #FAF4F1;
   display: flex;
   flex-direction: column;
 }
@@ -55,11 +55,11 @@
 }
 
 .seg-filled {
-  background: #4A7B7B;
+  background: #E45A7E;
 }
 
 .seg-empty {
-  background: #C8C3BA;
+  background: #EFE4E0;
 }
 
 /* Caption：10px = 20rpx */
@@ -140,9 +140,9 @@
 }
 
 .option-selected {
-  border-color: #4A7B7B;
+  border-color: #E45A7E;
   border-width: 2rpx;
-  background: #EEF4F4;
+  background: #FCE8EE;
 }
 
 /* 左侧单选圆圈 */
@@ -159,8 +159,8 @@
 }
 
 .radio-on {
-  background: #4A7B7B;
-  border-color: #4A7B7B;
+  background: #E45A7E;
+  border-color: #E45A7E;
 }
 
 .radio-check {
@@ -188,7 +188,7 @@
 }
 
 .option-label-on {
-  color: #2F6060;
+  color: #C73E64;
   font-weight: 600;
 }
 
@@ -255,7 +255,7 @@
 /* 右侧主操作按钮 */
 .btn-next {
   flex: 1;
-  background: #4A7B7B;
+  background: #E45A7E;
   height: 96rpx;
   border-radius: 20rpx;
   display: flex;
@@ -264,7 +264,7 @@
 }
 
 .btn-disabled {
-  background: #C8C3BA;
+  background: #EFE4E0;
 }
 
 .btn-hover {

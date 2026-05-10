@@ -9,10 +9,7 @@
     </view>
     <view class="logo-text-block">
       <text class="brand-name">伴听</text>
-      <view class="encrypt-row">
-        <text class="encrypt-lock">🔒</text>
-        <text class="encrypt-text">端到端加密</text>
-      </view>
+      <text class="brand-tagline">AI 情感陪伴</text>
     </view>
   </view>
 
@@ -22,22 +19,24 @@
     <!-- 问候语 -->
     <view class="greeting-wrap">
       <text class="greeting-meta">{{greeting}} · {{todayStr}}</text>
-      <text class="greeting-title">你现在，怎么样？</text>
+      <text class="greeting-title">在感情上遇到难题了吗？</text>
+      <text class="greeting-sub">告诉我发生了什么，AI 陪你看清楚下一步</text>
     </view>
 
     <!-- 快速输入卡片 -->
-    <view class="quick-card">
+    <view class="quick-card {{quickText.length > 0 ? 'quick-card-active' : ''}}">
       <textarea
         class="quick-input"
         value="{{quickText}}"
         bindinput="onQuickInput"
-        placeholder="简单说两句，我先听着..."
+        placeholder="分手、挽回、冷战、不知道怎么回消息……都可以说"
         placeholder-class="quick-placeholder"
         auto-height
         adjust-position="{{true}}"
         maxlength="500"
       />
       <view class="quick-bar">
+        <view class="quick-bar-left"></view>
         <view
           class="start-btn {{quickText.length > 0 ? 'start-btn-on' : 'start-btn-off'}}"
           bindtap="startQuickChat"
@@ -47,6 +46,51 @@
           <text class="start-text {{quickText.length > 0 ? 'start-text-on' : 'start-text-off'}}">开始 →</text>
         </view>
       </view>
+    </view>
+
+    <!-- 评估结果摘要卡（已完成评估时显示） -->
+    <view
+      wx:if="{{hasAssessment}}"
+      class="assessment-card assessment-card-{{assessmentLevelCls}}"
+      bindtap="goAssessment"
+      hover-class="card-active"
+      hover-stay-time="80"
+    >
+      <view class="acard-top">
+        <view class="acard-score-block">
+          <text class="acard-score">{{assessmentScore}}</text>
+          <text class="acard-score-unit">分</text>
+        </view>
+        <view class="acard-badge acard-badge-{{assessmentLevelCls}}">
+          <text class="acard-badge-text acard-badge-text-{{assessmentLevelCls}}">{{assessmentBadge}}</text>
+        </view>
+        <text class="acard-label">你的关系评估</text>
+      </view>
+      <text class="acard-insight" wx:if="{{assessmentInsight}}">"{{assessmentInsight}}"</text>
+      <view class="acard-actions">
+        <view class="acard-btn-primary" catchtap="goChat" hover-class="acard-btn-primary-hover" hover-stay-time="80">
+          <text class="acard-btn-primary-text">继续聊天</text>
+        </view>
+        <view class="acard-btn-ghost">
+          <text class="acard-btn-ghost-text">查看详情 ›</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 续接条（有未完成问卷时显示） -->
+    <view
+      wx:if="{{hasResume}}"
+      class="resume-strip"
+      bindtap="resumeQuestionnaire"
+      hover-class="resume-hover"
+      hover-stay-time="80"
+    >
+      <view class="resume-dot"></view>
+      <view class="resume-body">
+        <text class="resume-title">继续上次的评估</text>
+        <text class="resume-sub">第 {{resumeStep}} / 7 题 · 进度已保存</text>
+      </view>
+      <text class="resume-arrow">›</text>
     </view>
 
     <!-- 场景区 header -->
@@ -68,13 +112,7 @@
         hover-class="card-active"
         hover-stay-time="80"
       >
-        <!-- 左侧色条：每个卡片颜色不同，且有上下间距 -->
-        <view
-          class="accent-bar"
-          style="background-color: {{item.accentColor}};"
-        ></view>
-
-        <!-- 主内容 -->
+        <view class="accent-bar" style="background-color: {{item.accentColor}};"></view>
         <view class="card-body">
           <view class="card-title-row">
             <text class="card-title">{{item.title}}</text>
@@ -88,44 +126,17 @@
           </view>
           <text class="card-desc">{{item.desc}}</text>
         </view>
-
-        <!-- 右侧箭头 -->
         <text class="card-arrow">›</text>
       </view>
     </view>
 
     <!-- 免责声明 -->
     <view class="disclaimer">
-      <text class="disclaimer-text">不记录身份 · 不用于训练 · 随时删除</text>
+      <text class="disclaimer-text">🔒 端到端加密 · 不记录身份 · 不用于训练 · 随时删除</text>
     </view>
 
     <view style="height: 24rpx;"></view>
   </scroll-view>
 
-  <!-- ── 底部 Tab 栏 ── -->
-  <view class="tab-bar">
-    <!-- 首页（当前激活） -->
-    <view class="tab-item">
-      <text class="tab-icon tab-icon-active">⌂</text>
-      <text class="tab-label tab-label-active">首页</text>
-    </view>
-    <!-- 我的 -->
-    <view class="tab-item" bindtap="navMy">
-      <text class="tab-icon">◑</text>
-      <text class="tab-label">我的</text>
-    </view>
-    <!-- 工具箱 -->
-    <view class="tab-item" bindtap="navTools">
-      <view class="tab-tools-icon-wrap">
-        <text class="tab-icon tab-icon-tools">✦</text>
-      </view>
-      <text class="tab-label">工具箱</text>
-    </view>
-    <!-- 我 -->
-    <view class="tab-item" bindtap="navProfile">
-      <text class="tab-icon">⊙</text>
-      <text class="tab-label">我</text>
-    </view>
-  </view>
 
 </view>

@@ -1,39 +1,49 @@
 // P0 首页
 const app = getApp()
 
+const ASSESSMENT_LEVEL_CFG = {
+  GREEN:  { badge: '可乐观', cls: 'green' },
+  YELLOW: { badge: '需谨慎', cls: 'yellow' },
+  RED:    { badge: '需关注', cls: 'red' },
+}
+
 Page({
   data: {
     greeting: '早上好',
     todayStr: '',
     quickText: '',
+    hasResume: false,
+    resumeStep: 1,
+    hasAssessment: false,
+    assessmentScore: 0,
+    assessmentBadge: '',
+    assessmentInsight: '',
+    assessmentLevelCls: 'yellow',
     scenarios: [
       {
         scene: 'BREAKDOWN',
         title: '刚被分手',
         badge: '最紧急',
-        badgeType: 'urgent',
         desc: '稳住情绪 · 看清下一步',
-        accentColor: '#C85A5A',   // 红色
-        badgeTextColor: '#C84040',
-        badgeBgColor: '#FEEAEA',
+        accentColor: '#A65151',
+        badgeTextColor: '#A65151',
+        badgeBgColor: '#F4E0E0',
       },
       {
         scene: 'WANT_CONTACT',
         title: '怀疑 TA 出轨',
         badge: '高频',
-        badgeType: 'frequent',
         desc: '辨别信号 · 取证与对话',
-        accentColor: '#C87830',   // 橙色
-        badgeTextColor: '#C07020',
-        badgeBgColor: '#FEF0E0',
+        accentColor: '#C88A3F',
+        badgeTextColor: '#C88A3F',
+        badgeBgColor: '#FAF0DC',
       },
       {
         scene: 'WANT_CLARITY',
         title: '想挽回一段关系',
         badge: '',
-        badgeType: '',
         desc: '评估可能性 · 制定 30 天计划',
-        accentColor: '#4A8878',   // 青绿
+        accentColor: '#E45A7E',
         badgeTextColor: '',
         badgeBgColor: '',
       },
@@ -41,19 +51,17 @@ Page({
         scene: 'RUMINATING',
         title: '冷战 / 沟通崩了',
         badge: '',
-        badgeType: '',
         desc: '打破僵局的话术',
-        accentColor: '#5870A8',   // 蓝紫
+        accentColor: '#E45A7E',
         badgeTextColor: '',
         badgeBgColor: '',
       },
       {
-        scene: 'WANT_CONTACT',
+        scene: 'MARRIED_TIRED',
         title: '婚姻里很累',
         badge: '',
-        badgeType: '',
         desc: '整理自己 · 考虑去留',
-        accentColor: '#8C8478',   // 暖灰
+        accentColor: '#8F8589',
         badgeTextColor: '',
         badgeBgColor: '',
       },
@@ -66,17 +74,45 @@ Page({
 
   onShow() {
     this._refresh()
+    this._checkResume()
+    this._checkAssessment()
   },
 
   _refresh() {
     const hour = new Date().getHours()
     let greeting = '早上好'
-    if (hour >= 12 && hour < 18) greeting = '下午好'
+    if (hour < 6) greeting = '深夜了'
+    else if (hour >= 12 && hour < 18) greeting = '下午好'
     else if (hour >= 18) greeting = '晚上好'
 
     const now = new Date()
     const todayStr = `${now.getMonth() + 1}月${now.getDate()}日`
     this.setData({ greeting, todayStr })
+  },
+
+  _checkResume() {
+    const progress = wx.getStorageSync('questionnaire_progress')
+    if (progress && progress.step > 0 && progress.step < 7) {
+      this.setData({ hasResume: true, resumeStep: progress.step })
+    } else {
+      this.setData({ hasResume: false })
+    }
+  },
+
+  _checkAssessment() {
+    const result = app.getAssessmentResult()
+    if (result && result.assessment_id) {
+      const cfg = ASSESSMENT_LEVEL_CFG[result.level] || ASSESSMENT_LEVEL_CFG.YELLOW
+      this.setData({
+        hasAssessment: true,
+        assessmentScore: result.score || 0,
+        assessmentBadge: cfg.badge,
+        assessmentInsight: result.core_insight || '',
+        assessmentLevelCls: cfg.cls,
+      })
+    } else {
+      this.setData({ hasAssessment: false })
+    }
   },
 
   onQuickInput(e) {
@@ -85,7 +121,7 @@ Page({
 
   startQuickChat() {
     const text = this.data.quickText.trim()
-    if (!text || this.data.quickText.length === 0) return
+    if (!text) return
     wx.setStorageSync('chatInitText', text)
     this.setData({ quickText: '' })
     wx.navigateTo({ url: '/pages/chat/index?init=1' })
@@ -97,7 +133,15 @@ Page({
     wx.navigateTo({ url: `/pages/questionnaire/index?entry_state=${scene}` })
   },
 
-  navMy() { wx.showToast({ title: '开发中', icon: 'none' }) },
-  navTools() { wx.showToast({ title: '开发中', icon: 'none' }) },
-  navProfile() { wx.showToast({ title: '开发中', icon: 'none' }) },
+  resumeQuestionnaire() {
+    wx.navigateTo({ url: '/pages/questionnaire/index?resume=1' })
+  },
+
+  goAssessment() {
+    wx.navigateTo({ url: '/pages/assessment/index' })
+  },
+
+  goChat() {
+    wx.navigateTo({ url: '/pages/chat/index' })
+  },
 })

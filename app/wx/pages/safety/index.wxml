@@ -8,6 +8,11 @@
     </view>
     <text class="care-title">我注意到你现在可能很难受</text>
     <text class="care-subtitle">你的感受非常重要。有时候，和专业的人说说话，会帮助很大。</text>
+
+    <!-- 冷静期提示（有 cooldown 时显示）-->
+    <view wx:if="{{cooldownTip}}" class="cooldown-tip">
+      <text class="cooldown-text">{{cooldownTip}}</text>
+    </view>
   </view>
 
   <!-- 资源卡片 -->
@@ -42,8 +47,10 @@
   <!-- 返回按钮 -->
   <view class="footer-btn">
     <view class="btn-ok" bindtap="goHome" hover-class="btn-hover" hover-stay-time="100">
-      <text>我明白了，返回首页</text>
+      <text class="btn-ok-text">我明白了，返回首页</text>
     </view>
   </view>
+
+  <view style="height: env(safe-area-inset-bottom, 40rpx);"></view>
 
 </scroll-view>

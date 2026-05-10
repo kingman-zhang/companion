@@ -1,9 +1,9 @@
-/* P0 首页 — 精细还原设计稿 */
+/* P0 首页 — 玫瑰粉色系 */
 
 /* 页面容器 */
 .page {
   height: 100vh;
-  background: #EDE8DC;
+  background: #FAF4F1;
   display: flex;
   flex-direction: column;
 }
@@ -19,31 +19,31 @@
   padding: 104rpx 40rpx 20rpx;
 }
 
-/* Logo 图标：深绿色圆角正方形，内有两个白色圆点 */
+/* Logo 图标：玫瑰粉圆角正方形，内有两个白色圆点 */
 .logo-icon {
-  width: 80rpx;
-  height: 80rpx;
-  background: #2F5E38;
-  border-radius: 20rpx;
+  width: 64rpx;
+  height: 64rpx;
+  background: #E45A7E;
+  border-radius: 16rpx;
   position: relative;
   flex-shrink: 0;
 }
 
 .logo-dot-lg {
   position: absolute;
-  width: 32rpx;
-  height: 32rpx;
-  background: #ffffff;
+  width: 20rpx;
+  height: 20rpx;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
   top: 14rpx;
-  left: 14rpx;
+  left: 16rpx;
 }
 
 .logo-dot-sm {
   position: absolute;
-  width: 18rpx;
-  height: 18rpx;
-  background: #ffffff;
+  width: 12rpx;
+  height: 12rpx;
+  background: rgba(255, 255, 255, 0.55);
   border-radius: 50%;
   bottom: 14rpx;
   right: 14rpx;
@@ -51,36 +51,25 @@
 
 /* Logo 右侧文字块 */
 .logo-text-block {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6rpx;
 }
 
-/* 品牌名：微信规范 H2 级，16px = 32rpx */
 .brand-name {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1F1417;
   line-height: 1.25;
 }
 
-.encrypt-row {
-  display: flex;
-  align-items: center;
-  gap: 6rpx;
-}
-
-.encrypt-lock {
-  font-size: 18rpx;
-  line-height: 1;
-}
-
-/* 辅助小字：微信规范 Caption，10px = 20rpx */
-.encrypt-text {
+.brand-tagline {
   font-size: 20rpx;
-  color: #A0A0A0;
+  color: #8F8589;
   line-height: 1;
 }
+
 
 /* ═══════════════════════════
    可滚动内容
@@ -92,99 +81,284 @@
 
 /* ── 问候区 ── */
 .greeting-wrap {
-  padding: 20rpx 40rpx 24rpx;
+  padding: 12rpx 40rpx 24rpx;
 }
 
-/* 辅助文字：微信规范 Secondary，12px = 24rpx */
 .greeting-meta {
   display: block;
   font-size: 24rpx;
-  color: #A0A0A0;
+  color: #8F8589;
   margin-bottom: 10rpx;
   line-height: 1.4;
 }
 
-/* 主标题：微信规范 Display，22px = 44rpx（大标题上限） */
 .greeting-title {
   display: block;
-  font-size: 44rpx;
+  font-size: 48rpx;
   font-weight: 700;
-  color: #1C1C1E;
+  color: #1F1417;
   line-height: 1.25;
-  letter-spacing: -0.5rpx;
+  letter-spacing: -1rpx;
+}
+
+.greeting-sub {
+  display: block;
+  font-size: 26rpx;
+  color: #8F8589;
+  line-height: 1.5;
+  margin-top: 10rpx;
 }
 
 /* ── 快速输入卡片 ── */
 .quick-card {
-  margin: 0 40rpx 28rpx;
+  margin: 0 40rpx 24rpx;
   background: #FFFFFF;
-  border-radius: 24rpx;
+  border-radius: 32rpx;
   overflow: hidden;
-  border: 2rpx solid #4A7B7B;
+  border: 3rpx solid #EFE4E0;
+  transition: border-color 0.2s;
 }
 
-/* 正文：微信规范 Secondary，12px = 24rpx */
+.quick-card-active {
+  border-color: #E45A7E;
+}
+
 .quick-input {
   display: block;
   width: 100%;
-  min-height: 110rpx;
-  padding: 24rpx 24rpx 16rpx;
-  font-size: 24rpx;
-  color: #1C1C1E;
+  min-height: 112rpx;
+  padding: 28rpx 32rpx 16rpx;
+  font-size: 28rpx;
+  color: #1F1417;
   line-height: 1.65;
   box-sizing: border-box;
 }
 
 .quick-placeholder {
-  color: #BCBBAF;
-  font-size: 24rpx;
+  color: #BDB3B5;
+  font-size: 28rpx;
 }
 
 /* 输入卡片底部操作栏 */
 .quick-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 16rpx 20rpx 20rpx 20rpx;
+  justify-content: space-between;
+  padding: 12rpx 20rpx 20rpx;
 }
 
-/* 开始按钮：圆角胶囊 */
-.start-btn {
-  height: 60rpx;
-  padding: 0 28rpx;
+.quick-bar-left {
+  display: flex;
+  gap: 8rpx;
+}
+
+.media-btn {
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 禁用态：输入为空 */
-.start-btn-off {
-  background: #E8E5DF;
+.media-hover {
+  background: #FAF4F1;
 }
 
-/* 激活态：有输入内容 */
+.media-icon {
+  font-size: 26rpx;
+}
+
+/* 开始按钮 */
+.start-btn {
+  height: 60rpx;
+  padding: 0 32rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-btn-off {
+  background: #EFE4E0;
+}
+
 .start-btn-on {
-  background: #4A7B7B;
+  background: #E45A7E;
 }
 
 .start-hover {
-  opacity: 0.8;
+  opacity: 0.82;
 }
 
-/* 按钮文字 */
 .start-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 500;
-  letter-spacing: 0.5rpx;
 }
 
 .start-text-off {
-  color: #B8B4AE;
+  color: #BDB3B5;
 }
 
 .start-text-on {
   color: #FFFFFF;
+}
+
+/* ── 评估结果摘要卡 ── */
+.assessment-card {
+  margin: 0 40rpx 24rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx 24rpx;
+  border: 1rpx solid #EFE4E0;
+}
+
+.assessment-card-green  { border-color: rgba(61, 122, 90, 0.25);  background: #F7FBF9; }
+.assessment-card-yellow { border-color: rgba(160, 120, 48, 0.25); background: #FDFAF4; }
+.assessment-card-red    { border-color: rgba(155, 64, 64, 0.25);  background: #FBF7F7; }
+
+.acard-top {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.acard-score-block {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.acard-score {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1F1417;
+  line-height: 1;
+}
+
+.acard-score-unit {
+  font-size: 22rpx;
+  color: #8F8589;
+}
+
+.acard-badge {
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  flex-shrink: 0;
+}
+
+.acard-badge-green  { background: #EDF6F0; }
+.acard-badge-yellow { background: #FDF6E3; }
+.acard-badge-red    { background: #FBF0F0; }
+
+.acard-badge-text { font-size: 20rpx; font-weight: 500; }
+.acard-badge-text-green  { color: #3D7A5A; }
+.acard-badge-text-yellow { color: #A07830; }
+.acard-badge-text-red    { color: #9B4040; }
+
+.acard-label {
+  flex: 1;
+  font-size: 22rpx;
+  color: #8F8589;
+  text-align: right;
+}
+
+.acard-insight {
+  display: block;
+  font-size: 24rpx;
+  color: #52464A;
+  line-height: 1.6;
+  margin-bottom: 22rpx;
+  font-style: italic;
+}
+
+.acard-actions {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.acard-btn-primary {
+  flex: 1;
+  height: 64rpx;
+  background: #E45A7E;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acard-btn-primary-hover { opacity: 0.82; }
+
+.acard-btn-primary-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+
+.acard-btn-ghost {
+  height: 64rpx;
+  padding: 0 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acard-btn-ghost-text {
+  font-size: 24rpx;
+  color: #8F8589;
+}
+
+/* ── 续接条 ── */
+.resume-strip {
+  margin: 0 40rpx 24rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: #FCE8EE;
+  border: 1rpx solid rgba(228, 90, 126, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.resume-hover {
+  opacity: 0.82;
+}
+
+.resume-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #E45A7E;
+  flex-shrink: 0;
+}
+
+.resume-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.resume-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #C73E64;
+  line-height: 1.4;
+}
+
+.resume-sub {
+  font-size: 22rpx;
+  color: #E45A7E;
+  line-height: 1.4;
+}
+
+.resume-arrow {
+  font-size: 40rpx;
+  color: #E45A7E;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* ── 场景区 Section Header ── */
@@ -195,16 +369,15 @@
   padding: 4rpx 40rpx 16rpx;
 }
 
-/* 辅助说明：微信规范 Secondary，12px = 24rpx */
 .section-hd-title {
   font-size: 24rpx;
-  color: #8A8478;
-  font-weight: 400;
+  color: #52464A;
+  font-weight: 600;
 }
 
 .section-hd-more {
   font-size: 22rpx;
-  color: #A09888;
+  color: #8F8589;
 }
 
 .more-hover {
@@ -216,17 +389,16 @@
   margin: 0 40rpx;
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
+  gap: 16rpx;
 }
 
-/* 场景卡片 */
 .scenario-card {
   background: #FFFFFF;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid #EFE4E0;
   display: flex;
   align-items: center;
-  min-height: 148rpx;
-  box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.05);
+  min-height: 144rpx;
   overflow: hidden;
 }
 
@@ -234,20 +406,15 @@
   opacity: 0.86;
 }
 
-/* 左侧色条：不贴卡片边缘，有上下间距，圆角胶囊 */
+/* 左侧色条 */
 .accent-bar {
-  width: 7rpx;
+  width: 8rpx;
   border-radius: 999rpx;
   flex-shrink: 0;
-  /* 通过上下 margin 实现与卡片边缘的间距 */
-  margin-top: 28rpx;
-  margin-bottom: 28rpx;
-  margin-left: 18rpx;
-  margin-right: 22rpx;
+  margin: 32rpx 24rpx 32rpx 18rpx;
   align-self: stretch;
 }
 
-/* 卡片主内容 */
 .card-body {
   flex: 1;
   padding: 24rpx 0;
@@ -262,15 +429,13 @@
   flex-wrap: wrap;
 }
 
-/* 卡片标题：微信规范 Body Strong，14px = 28rpx */
 .card-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1F1417;
   line-height: 1.4;
 }
 
-/* 场景徽章（行内小标签）*/
 .badge {
   display: inline-flex;
   align-items: center;
@@ -279,24 +444,21 @@
   flex-shrink: 0;
 }
 
-/* 微信规范 Caption，10px = 20rpx */
 .badge-text {
   font-size: 20rpx;
   font-weight: 500;
   line-height: 1;
 }
 
-/* 场景描述：微信规范 Secondary，12px = 24rpx */
 .card-desc {
   font-size: 22rpx;
-  color: #A0A0A0;
+  color: #8F8589;
   line-height: 1.5;
 }
 
-/* 右侧箭头 */
 .card-arrow {
   font-size: 40rpx;
-  color: #C8C0B4;
+  color: #BDB3B5;
   line-height: 1;
   padding-right: 24rpx;
   padding-left: 12rpx;
@@ -309,61 +471,9 @@
   padding: 36rpx 40rpx 0;
 }
 
-/* 微信规范 Caption，10px = 20rpx */
 .disclaimer-text {
   font-size: 20rpx;
-  color: #C0BAB0;
+  color: #BDB3B5;
   line-height: 1.6;
 }
 
-/* ═══════════════════════════
-   底部 Tab 栏
-═══════════════════════════ */
-.tab-bar {
-  flex-shrink: 0;
-  height: 116rpx;
-  background: #FFFFFF;
-  border-top: 1rpx solid #E8E2DA;
-  display: flex;
-  align-items: flex-start;
-  padding-top: 16rpx;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.tab-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-}
-
-.tab-icon {
-  font-size: 40rpx;
-  color: #C0B8AE;
-  line-height: 1;
-}
-
-.tab-icon-active {
-  color: #2F5E38;
-}
-
-.tab-icon-tools {
-  color: #C0B8AE;
-}
-
-/* Tab 标签：微信规范最小文字，10px = 20rpx */
-.tab-label {
-  font-size: 20rpx;
-  color: #B0AAA0;
-  line-height: 1;
-}
-
-.tab-label-active {
-  color: #2F5E38;
-  font-weight: 600;
-}
-
-.tab-tools-icon-wrap {
-  position: relative;
-}
