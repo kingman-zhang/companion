@@ -1,0 +1,35 @@
+<!-- 工具页 -->
+<view class="page">
+
+  <view class="header">
+    <text class="header-title">工具</text>
+    <text class="header-sub">帮你度过这段时间的实用功能</text>
+  </view>
+
+  <view class="tool-section">
+
+    <view class="tool-card" bindtap="goLetgo" hover-class="card-hover" hover-stay-time="80">
+      <view class="tool-icon-wrap teal">
+        <image class="tool-img" src="/assets/icons/feat-leaf.png" mode="aspectFit"/>
+      </view>
+      <view class="tool-body">
+        <text class="tool-name">放下模式</text>
+        <text class="tool-desc">断联建议 · 写告别信 · 7天恢复计划</text>
+      </view>
+      <text class="tool-arrow">›</text>
+    </view>
+
+    <view class="tool-card" bindtap="goLog" hover-class="card-hover" hover-stay-time="80">
+      <view class="tool-icon-wrap amber">
+        <image class="tool-img" src="/assets/icons/feat-notebook.png" mode="aspectFit"/>
+      </view>
+      <view class="tool-body">
+        <text class="tool-name">每日日志</text>
+        <text class="tool-desc">记录情绪状态 · 获取 AI 建议</text>
+      </view>
+      <text class="tool-arrow">›</text>
+    </view>
+
+  </view>
+
+</view>

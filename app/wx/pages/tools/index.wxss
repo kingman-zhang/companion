@@ -1,0 +1,93 @@
+/* 工具页 */
+page {
+  background: #F5F3F0;
+}
+
+.page {
+  min-height: 100vh;
+  background: #F5F3F0;
+  padding-top: 120rpx;
+}
+
+.header {
+  padding: 40rpx 40rpx 32rpx;
+}
+
+.header-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1C1C1E;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.header-sub {
+  font-size: 26rpx;
+  color: #A0A0A0;
+}
+
+.tool-section {
+  padding: 0 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.tool-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.card-hover {
+  opacity: 0.8;
+}
+
+.tool-icon-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.teal { background: #EDF4F4; }
+.amber { background: #FDF6E3; }
+
+.tool-icon {
+  font-size: 44rpx;
+}
+
+.tool-img {
+  width: 52rpx;
+  height: 52rpx;
+}
+
+.tool-body {
+  flex: 1;
+}
+
+.tool-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1C1C1E;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.tool-desc {
+  font-size: 24rpx;
+  color: #A0A0A0;
+  line-height: 1.5;
+}
+
+.tool-arrow {
+  font-size: 40rpx;
+  color: #C0BAB0;
+  flex-shrink: 0;
+}

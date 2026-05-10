@@ -1,0 +1,207 @@
+<!-- P6 每日日志页 -->
+<view class="page-wrap">
+
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="nav-back-icon">‹</text>
+    </view>
+    <text class="nav-title">每日日志</text>
+    <view class="nav-placeholder" />
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{tab === 'submit' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="submit">
+      <text>今日记录</text>
+    </view>
+    <view class="tab-item {{tab === 'history' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="history">
+      <text>历史日志</text>
+    </view>
+  </view>
+
+  <!-- ── 今日记录 Tab ─────────────────────────────────────────────────── -->
+  <scroll-view wx:if="{{tab === 'submit'}}" class="scroll-area" scroll-y>
+
+    <!-- 已提交：展示今日日志 -->
+    <block wx:if="{{todayLog}}">
+
+      <view class="result-card">
+        <view class="result-header">
+          <text class="result-label">今日已记录</text>
+          <text class="result-date">{{todayLog.log_date}}</text>
+        </view>
+
+        <!-- 情绪评分 -->
+        <view class="result-row">
+          <text class="result-row-label">情绪评分</text>
+          <view class="score-badge score-{{todayLog.emotion_score <= 3 ? 'low' : todayLog.emotion_score <= 6 ? 'mid' : 'high'}}">
+            <text class="score-num">{{todayLog.emotion_score}}</text>
+            <text class="score-denom">/10</text>
+          </view>
+        </view>
+
+        <!-- 情绪标签 -->
+        <view class="result-row">
+          <text class="result-row-label">情绪感受</text>
+          <view class="chip-list">
+            <text class="chip chip-filled" wx:for="{{todayLog.emotion_labels_cn}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- 联系情况 -->
+        <view class="result-row">
+          <text class="result-row-label">联系情况</text>
+          <text class="result-row-val">{{todayLog.contacted_ex ? '有联系' : '未联系'}}</text>
+        </view>
+
+        <!-- 备注 -->
+        <view class="result-row" wx:if="{{todayLog.notes}}">
+          <text class="result-row-label">备注</text>
+          <text class="result-notes">{{todayLog.notes}}</text>
+        </view>
+
+        <!-- AI 建议 -->
+        <view class="suggestion-wrap" wx:if="{{todayLog.ai_suggestion}}">
+          <text class="suggestion-label">AI 给你的建议</text>
+          <text class="suggestion-text">{{todayLog.ai_suggestion}}</text>
+        </view>
+
+        <view class="suggestion-action" wx:elif="{{!suggestionLoading}}">
+          <view class="btn-suggestion" bindtap="getSuggestion">
+            <text>获取 AI 建议</text>
+          </view>
+        </view>
+
+        <view class="suggestion-loading" wx:elif="{{suggestionLoading}}">
+          <text class="loading-text">AI 正在为你生成建议…</text>
+        </view>
+      </view>
+
+    </block>
+
+    <!-- 未提交：显示表单 -->
+    <block wx:elif="{{!loadingToday}}">
+
+      <!-- 情绪评分滑块 -->
+      <view class="section-card">
+        <text class="section-title">今天情绪怎么样？</text>
+        <view class="score-display">
+          <text class="score-big">{{emotionScore}}</text>
+          <text class="score-unit">/ 10</text>
+        </view>
+        <slider class="slider-ctrl"
+          min="1" max="10" step="1"
+          value="{{emotionScore}}"
+          activeColor="#4A7B7B"
+          backgroundColor="#E8E5DF"
+          block-color="#4A7B7B"
+          bindchange="onScoreChange" />
+        <view class="slider-labels">
+          <text class="slider-label-l">低落</text>
+          <text class="slider-label-r">状态很好</text>
+        </view>
+      </view>
+
+      <!-- 情绪标签多选 -->
+      <view class="section-card">
+        <text class="section-title">选择最符合的情绪（最多3个）</text>
+        <view class="emotion-grid">
+          <view class="emotion-chip {{selectedEmotionsMap[item.value] ? 'emotion-chip-sel' : ''}}"
+            wx:for="{{emotionOptions}}" wx:key="value"
+            bindtap="toggleEmotion" data-value="{{item.value}}">
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 联系对方 -->
+      <view class="section-card">
+        <view class="contact-row" bindtap="toggleContactedEx">
+          <text class="section-title">今天联系过对方了吗？</text>
+          <view class="toggle-btn {{contactedEx ? 'toggle-on' : ''}}">
+            <view class="toggle-dot {{contactedEx ? 'toggle-dot-on' : ''}}" />
+          </view>
+        </view>
+
+        <view class="outcome-group" wx:if="{{contactedEx}}">
+          <text class="section-subtitle">联系结果如何？</text>
+          <view class="outcome-item {{selectedOutcome === item.value ? 'outcome-sel' : ''}}"
+            wx:for="{{contactOutcomeOptions}}" wx:key="value"
+            bindtap="selectOutcome" data-value="{{item.value}}">
+            <text>{{item.label}}</text>
+          </view>
+          <textarea
+            class="outcome-note-input {{contactOutcomeNote ? 'outcome-note-active' : ''}}"
+            value="{{contactOutcomeNote}}"
+            placeholder="没有更好的选项，还是自己写一下…"
+            maxlength="200"
+            auto-height
+            adjust-position="{{true}}"
+            bindinput="onOutcomeNoteInput"
+          />
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="section-card">
+        <text class="section-title">今日备注（选填）</text>
+        <textarea class="notes-input"
+          value="{{notes}}"
+          placeholder="随便写写今天的感受…"
+          maxlength="500"
+          bindinput="onNotesInput" />
+        <text class="notes-count">{{notes.length}}/500</text>
+      </view>
+
+      <!-- 提交按钮 -->
+      <view class="btn-submit-wrap">
+        <view class="btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submit">
+          <text>{{submitting ? '提交中…' : '记录今天'}}</text>
+        </view>
+      </view>
+
+    </block>
+
+    <!-- 加载中 -->
+    <view class="center-loading" wx:if="{{loadingToday}}">
+      <text class="loading-text">加载中…</text>
+    </view>
+
+    <view class="page-bottom-space" />
+  </scroll-view>
+
+  <!-- ── 历史日志 Tab ─────────────────────────────────────────────────── -->
+  <scroll-view wx:if="{{tab === 'history'}}" class="scroll-area" scroll-y>
+
+    <view class="center-loading" wx:if="{{loadingHistory}}">
+      <text class="loading-text">加载中…</text>
+    </view>
+
+    <view class="history-empty" wx:elif="{{!history.length}}">
+      <text class="history-empty-text">还没有历史日志</text>
+      <text class="history-empty-sub">每天记录情绪，看见自己的变化</text>
+    </view>
+
+    <view wx:else>
+      <view class="history-item" wx:for="{{history}}" wx:key="log_id">
+        <view class="history-header">
+          <text class="history-date">{{item.log_date}}</text>
+          <view class="history-score-badge score-{{item.emotion_score <= 3 ? 'low' : item.emotion_score <= 6 ? 'mid' : 'high'}}">
+            <text>{{item.emotion_score}}/10</text>
+          </view>
+        </view>
+        <text class="history-emotions">{{item.emotion_labels_text}}</text>
+        <view class="history-row" wx:if="{{item.notes}}">
+          <text class="history-notes">{{item.notes}}</text>
+        </view>
+        <view class="history-suggestion" wx:if="{{item.ai_suggestion}}">
+          <text class="history-suggestion-text">💡 {{item.ai_suggestion}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="page-bottom-space" />
+  </scroll-view>
+
+</view>

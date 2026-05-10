@@ -1,0 +1,57 @@
+<!-- 聊天历史列表页 -->
+<view class="page">
+
+  <!-- 顶部导航（仅标题，右侧预留胶囊空间）-->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navCapsuleWidth}};">
+    <text class="nav-title">聊天</text>
+  </view>
+
+  <!-- 有历史记录 -->
+  <scroll-view wx:if="{{sessions.length > 0}}" class="list" scroll-y>
+    <view
+      wx:for="{{sessions}}"
+      wx:key="session_id"
+      class="session-card"
+      bindtap="openSession"
+      bindlongpress="deleteSession"
+      data-id="{{item.session_id}}"
+      hover-class="card-hover"
+      hover-stay-time="80"
+    >
+      <view class="ai-avatar">
+        <view class="ai-dot-l"></view>
+        <view class="ai-dot-r"></view>
+      </view>
+      <view class="session-info">
+        <text class="session-preview">{{item.preview}}</text>
+        <text class="session-meta">{{item.message_count}} 条消息 · {{item.date}}</text>
+      </view>
+      <text class="session-chev">›</text>
+    </view>
+    <view style="height: 120rpx;"></view>
+  </scroll-view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty">
+    <view class="empty-avatar-wrap">
+      <view class="empty-ai-icon">
+        <view class="ai-dot-l"></view>
+        <view class="ai-dot-r"></view>
+      </view>
+    </view>
+    <text class="empty-title">还没有对话记录</text>
+    <text class="empty-desc">先做一个关系评估，AI 会根据你的情况陪你聊。</text>
+    <view class="empty-cta" bindtap="goAssess" hover-class="cta-hover" hover-stay-time="100">
+      <text class="empty-cta-text">开始评估 →</text>
+    </view>
+  </view>
+
+  <!-- 底部遮罩：防止导航动画期间下层页面底栏穿透 -->
+  <view class="bottom-shield"></view>
+
+  <!-- 右下角悬浮新建按钮 -->
+  <view class="fab" bindtap="startNew" hover-class="fab-hover" hover-stay-time="80">
+    <text class="fab-icon">+</text>
+  </view>
+
+</view>

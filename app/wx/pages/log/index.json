@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "每日日志",
+  "navigationBarBackgroundColor": "#F5F3F0",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F5F3F0",
+  "renderer": "webview"
+}

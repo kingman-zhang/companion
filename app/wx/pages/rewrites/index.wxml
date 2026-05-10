@@ -1,0 +1,58 @@
+<!-- 改写历史列表页 -->
+<view class="page">
+
+  <!-- 顶部导航（仅标题，右侧预留胶囊空间）-->
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navCapsuleWidth}};">
+    <text class="nav-title">改写</text>
+  </view>
+
+  <!-- 有历史记录 -->
+  <scroll-view wx:if="{{history.length > 0}}" class="list" scroll-y>
+    <view
+      wx:for="{{history}}"
+      wx:key="rewrite_id"
+      class="rewrite-card"
+      bindtap="openRewrite"
+      bindlongpress="deleteRewrite"
+      data-id="{{item.rewrite_id}}"
+      hover-class="card-hover"
+      hover-stay-time="80"
+    >
+      <view class="card-header">
+        <text class="card-date">{{item.date}}</text>
+        <text class="card-chev">›</text>
+      </view>
+      <view class="original-block">
+        <text class="block-label">原文</text>
+        <text class="original-text">{{item.original}}</text>
+      </view>
+      <view class="arrow-row">
+        <text class="arrow-down">↓</text>
+        <text class="arrow-label">AI 改写</text>
+      </view>
+      <view class="result-block">
+        <text class="result-text">{{item.result}}</text>
+      </view>
+    </view>
+    <view style="height: 120rpx;"></view>
+  </scroll-view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty">
+    <text class="empty-icon">✏️</text>
+    <text class="empty-title">还没有改写记录</text>
+    <text class="empty-desc">把想说的话贴进来，AI 帮你调整措辞，降低冲突风险。</text>
+    <view class="empty-cta" bindtap="startNew" hover-class="cta-hover" hover-stay-time="100">
+      <text class="empty-cta-text">开始改写 →</text>
+    </view>
+  </view>
+
+  <!-- 底部遮罩：防止导航动画期间下层页面底栏穿透显示 -->
+  <view class="bottom-shield"></view>
+
+  <!-- 右下角悬浮新建按钮 -->
+  <view class="fab" bindtap="startNew" hover-class="fab-hover" hover-stay-time="80">
+    <text class="fab-icon">+</text>
+  </view>
+
+</view>

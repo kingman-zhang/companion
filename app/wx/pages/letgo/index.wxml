@@ -1,0 +1,206 @@
+<!-- P7 放下模式页 -->
+<view class="page">
+
+  <!-- ── 顶部导航 ── -->
+  <view class="nav" style="padding-top: {{navPaddingTop}};">
+    <view class="nav-back" bindtap="goBack" hover-class="nav-btn-hover" hover-stay-time="80">
+      <text class="nav-back-icon">‹</text>
+    </view>
+    <text class="nav-title">放下，重新开始</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- ══ 确认区块（首次进入）══ -->
+  <view wx:if="{{!confirmed}}" class="confirm-wrap">
+    <view class="confirm-icon-wrap">
+      <image class="confirm-img" src="/assets/icons/feat-seedling.png" mode="aspectFit"/>
+    </view>
+    <text class="confirm-title">在开始之前</text>
+    <text class="confirm-body">进入放下模式后，计划和建议会围绕帮你恢复状态展开。这不代表放弃，而是选择先照顾自己。</text>
+    <view
+      class="confirm-btn-primary"
+      bindtap="confirm"
+      hover-class="btn-hover"
+      hover-stay-time="80"
+    >
+      <text class="confirm-btn-primary-text">我准备好了</text>
+    </view>
+    <view
+      class="confirm-btn-ghost"
+      bindtap="goBack"
+      hover-class="ghost-hover"
+      hover-stay-time="80"
+    >
+      <text class="confirm-btn-ghost-text">我再想想</text>
+    </view>
+  </view>
+
+  <!-- ══ 主内容区（已确认）══ -->
+  <scroll-view wx:if="{{confirmed}}" class="content" scroll-y type="list" enhanced bounces="{{false}}">
+
+    <!-- 断联建议卡 -->
+    <view class="section-card">
+      <view class="card-hd">
+        <image class="card-hd-img" src="/assets/icons/feat-nocontact.png" mode="aspectFit"/>
+        <text class="card-hd-title">断联建议</text>
+      </view>
+      <view wx:for="{{noContactTips}}" wx:key="index" class="tip-row">
+        <text class="tip-dot">·</text>
+        <text class="tip-text">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 告别信卡 -->
+    <view class="section-card">
+
+      <!-- 入口态（编辑器关闭时） -->
+      <view wx:if="{{!showEditor}}" class="letter-entry" bindtap="openEditor" hover-class="card-hover" hover-stay-time="80">
+        <view class="letter-entry-left">
+          <image class="card-hd-img" src="/assets/icons/feat-letter.png" mode="aspectFit"/>
+          <view class="letter-entry-body">
+            <text class="card-hd-title">写一封告别信</text>
+            <text class="letter-entry-sub">写出来，整理自己的感受</text>
+          </view>
+        </view>
+        <view class="letter-entry-btn">
+          <text class="letter-entry-btn-text">{{letterContent ? '继续写' : '开始写'}} ›</text>
+        </view>
+      </view>
+
+      <!-- 编辑器态（展开时） -->
+      <view wx:if="{{showEditor}}" class="editor-wrap">
+        <view class="editor-hd">
+          <text class="editor-title">告别信</text>
+          <view class="editor-close" bindtap="closeEditor" hover-class="nav-btn-hover" hover-stay-time="80">
+            <text class="editor-close-icon">✕</text>
+          </view>
+        </view>
+        <textarea
+          class="editor-textarea"
+          value="{{letterContent}}"
+          bindinput="onLetterInput"
+          placeholder="有些话，你可以先写下来。写出来不一定要发送，但往往能帮你理清心情。"
+          placeholder-class="editor-placeholder"
+          auto-height
+          adjust-position="{{true}}"
+        />
+        <view class="editor-actions">
+          <view
+            class="editor-btn-ghost {{letterLoading ? 'editor-btn-loading' : ''}}"
+            bindtap="polish"
+            hover-class="ghost-hover"
+            hover-stay-time="80"
+          >
+            <text class="editor-btn-ghost-text">{{letterLoading ? '润色中…' : '帮我润色'}}</text>
+          </view>
+          <view class="editor-btn-primary" bindtap="confirmLetter" hover-class="btn-hover" hover-stay-time="80">
+            <text class="editor-btn-primary-text">完成</text>
+          </view>
+        </view>
+
+        <!-- 润色结果 -->
+        <view wx:if="{{showLetterResult}}" class="result-panel">
+          <view class="result-panel-hd">
+            <text class="result-panel-title">选一个版本替换</text>
+            <view bindtap="dismissResult" hover-class="nav-btn-hover" hover-stay-time="80">
+              <text class="result-panel-close">✕</text>
+            </view>
+          </view>
+          <view
+            wx:for="{{letterResult}}"
+            wx:key="version"
+            class="result-variant"
+            bindtap="useVariant"
+            data-content="{{item.content}}"
+            hover-class="card-hover"
+            hover-stay-time="80"
+          >
+            <text class="result-variant-label">{{item.version_label}}</text>
+            <text class="result-variant-content">{{item.content}}</text>
+          </view>
+        </view>
+
+        <!-- 完成后的选择面板 -->
+        <view wx:if="{{showLetterDone}}" class="letter-done-panel">
+          <text class="letter-done-title">这封信写完了</text>
+          <text class="letter-done-sub">由你来决定它的去向，也可以只留给自己</text>
+          <view class="letter-done-actions">
+            <view class="letter-done-btn-primary" bindtap="copyLetter" hover-class="btn-hover" hover-stay-time="80">
+              <text class="letter-done-btn-primary-text">复制文字，自己决定要不要发</text>
+            </view>
+            <view class="letter-done-btn-ghost" bindtap="keepPrivate" hover-class="ghost-hover" hover-stay-time="80">
+              <text class="letter-done-btn-ghost-text">就这样，留给自己</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 7天恢复计划卡 -->
+    <view class="section-card">
+      <view class="card-hd">
+        <image class="card-hd-img" src="/assets/icons/feat-calendar.png" mode="aspectFit"/>
+        <text class="card-hd-title">接下来 7 天</text>
+        <text class="card-hd-sub">每天一件小事，慢慢找回自己</text>
+      </view>
+
+      <view wx:for="{{recoveryPlan}}" wx:key="day"
+            class="plan-item {{item.locked ? 'plan-item-locked' : ''}} {{item.completed ? 'plan-item-done' : ''}}">
+
+        <!-- 标题行 -->
+        <view class="plan-item-hd"
+              bindtap="togglePlanDay" data-day="{{item.day}}"
+              hover-class="{{item.locked ? '' : 'card-hover'}}" hover-stay-time="80">
+
+          <!-- Day 徽章：始终显示 "Day N"，仅通过填充/描边/颜色区分状态 -->
+          <view class="plan-day-badge badge-{{item.done ? 'done' : item.skipped ? 'skip' : item.locked ? 'locked' : item.isToday ? 'today' : 'normal'}}">
+            <text class="plan-day-text">Day {{item.day}}{{item.done ? ' ✓' : ''}}</text>
+          </view>
+
+          <text class="plan-title {{item.locked ? 'plan-title-dim' : ''}}">{{item.title}}</text>
+
+          <text wx:if="{{!item.locked}}"
+                class="plan-chev {{item.open ? 'plan-chev-open' : ''}}">›</text>
+        </view>
+
+        <!-- 展开内容 -->
+        <view wx:if="{{item.open && !item.locked}}" class="plan-detail">
+          <text class="plan-desc">{{item.desc}}</text>
+
+          <!-- 已操作：显示操作记录 -->
+          <view wx:if="{{item.acted}}" class="plan-action-record plan-action-record-{{item.done ? 'done' : 'skip'}}">
+            <text class="plan-action-record-text">{{item.actionLabel}}</text>
+          </view>
+
+          <!-- 未操作：两个平级按钮 -->
+          <view wx:else class="plan-action-row">
+            <view class="plan-btn-done"
+                  bindtap="markDone" data-day="{{item.day}}"
+                  hover-class="btn-hover" hover-stay-time="80">
+              <text class="plan-btn-done-text">我做到了</text>
+            </view>
+            <view class="plan-btn-skip"
+                  bindtap="markSkip" data-day="{{item.day}}"
+                  hover-class="ghost-hover" hover-stay-time="80">
+              <text class="plan-btn-skip-text">今天没做到</text>
+            </view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="footer-area">
+      <view class="footer-btn" bindtap="goLog" hover-class="btn-hover" hover-stay-time="80">
+        <text class="footer-btn-text">记录今日日志</text>
+      </view>
+      <view bindtap="goReconcile" hover-class="link-hover" hover-stay-time="80">
+        <text class="footer-link">我改变主意了，想尝试挽回</text>
+      </view>
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </scroll-view>
+
+</view>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "工具",
+  "navigationBarBackgroundColor": "#F5F3F0",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F5F3F0",
+  "navigationStyle": "custom",
+  "renderer": "webview"
+}
