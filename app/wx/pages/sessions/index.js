@@ -101,6 +101,11 @@ Page({
     wx.navigateTo({ url: '/pages/questionnaire/index' })
   },
 
+  retrySessions() {
+    this.setData({ localFallback: false })
+    this._loadSessions()
+  },
+
   startNew() {
     const hasAssessment = !!app.getAssessmentResult()
     if (hasAssessment) {

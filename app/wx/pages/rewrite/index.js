@@ -4,6 +4,15 @@ const app = getApp()
 const VERSION_LABELS = { gentle: '温和', direct: '直接', brief: '简短' }
 const RISK_TEXT = { low: '低风险', medium: '中风险', high: '高风险' }
 
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(String(dateStr).replace(' ', 'T'))
+  if (isNaN(d.getTime())) return String(dateStr).slice(0, 10)
+  const now = new Date()
+  if (d.toDateString() === now.toDateString()) return '今天'
+  return `${d.getMonth() + 1}月${d.getDate()}日`
+}
+
 const GOALS = [
   { id: 'mend',     title: '修复联系', sub: '想让关系重新有温度' },
   { id: 'boundary', title: '设立边界', sub: '要说清楚哪些不行' },
@@ -93,6 +102,9 @@ Page({
     copied: false,
     navPaddingTop: '44px',
     showUpgradeModal: false,
+    showHistory: false,
+    history: [],
+    historyFallback: false,
   },
 
   onLoad() {
@@ -116,18 +128,53 @@ Page({
       })
     }
 
-    // 从历史列表带过来的原文预填
+    // 从历史列表带过来：有 variants 直接展示结果，否则预填原文
     const preload = wx.getStorageSync('rewritePreload')
     if (preload && preload.original) {
       wx.removeStorageSync('rewritePreload')
-      const risk = analyzeRisk(preload.original)
-      this.setData({ originalMessage: preload.original, riskLevel: risk.level, riskLabel: risk.label })
+      const original = preload.original
+      const risk = analyzeRisk(original)
+
+      const isPremium = app.isPremium()
+      let variants = []
+      if (preload.variants && preload.variants.length > 0) {
+        variants = preload.variants.map((v, i) => ({
+          ...v,
+          version_label: VERSION_LABELS[v.version] || v.version,
+          risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
+          locked: !isPremium && i > 0,
+        }))
+      } else if (preload.gentle_full) {
+        variants = [{
+          version: 'gentle',
+          content: preload.gentle_full,
+          version_label: VERSION_LABELS['gentle'],
+          risk_level: 'low',
+          risk_text: RISK_TEXT['low'],
+          locked: false,
+        }]
+      }
+
+      if (variants.length > 0) {
+        this.setData({
+          originalMessage: original,
+          riskLevel: risk.level,
+          riskLabel: risk.label,
+          variants,
+          hasResults: true,
+          activeTab: 0,
+          currentVariant: variants[0],
+        })
+      } else {
+        this.setData({ originalMessage: original, riskLevel: risk.level, riskLabel: risk.label })
+      }
       return
     }
 
     // 恢复今日最近一次改写结果
     const lastResult = wx.getStorageSync('rewriteLastResult')
-    if (lastResult && lastResult.date === new Date().toDateString()) {
+    const todayKey = new Date().toISOString().slice(0, 10)
+    if (lastResult && lastResult.date === todayKey) {
       const risk = analyzeRisk(lastResult.originalMessage)
       this.setData({
         originalMessage: lastResult.originalMessage,
@@ -164,7 +211,7 @@ Page({
     if (!msg || this.data.loading) return
 
     if (msg.length < 5) {
-      wx.showToast({ title: '内容太短了，再多写几个字', icon: 'none' })
+      wx.showToast({ title: '至少写 5 个字再改写', icon: 'none', duration: 2000 })
       return
     }
 
@@ -183,7 +230,7 @@ Page({
       })
 
       if (res.code === 200 && res.data) {
-        const todayStr = new Date().toDateString()
+        const todayStr = new Date().toISOString().slice(0, 10)
         wx.setStorageSync('rewriteUsedDate', todayStr)
 
         const variants = res.data.variants.map((v, index) => ({
@@ -254,6 +301,96 @@ Page({
     })
   },
 
+  async openHistory() {
+    const token = app.globalData.token
+    if (token) {
+      try {
+        const res = await app.request({ url: '/api/v1/rewrite/history' })
+        if (res && res.code === 200 && Array.isArray(res.data)) {
+          const history = res.data.map(item => {
+            const original = item.original_message || ''
+            const gentle = item.gentle_content || ''
+            const isPremium = app.isPremium()
+            const variants = Array.isArray(item.variants) && item.variants.length > 0
+              ? item.variants.map((v, i) => ({
+                  version: v.version,
+                  content: v.content,
+                  version_label: VERSION_LABELS[v.version] || v.version,
+                  risk_level: v.risk_level,
+                  risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
+                  locked: !isPremium && i > 0,
+                }))
+              : []
+            return {
+              rewrite_id: item.rewrite_id,
+              original: original.slice(0, 50) + (original.length > 50 ? '…' : ''),
+              original_full: original,
+              gentle_full: gentle,
+              result: gentle.slice(0, 60) + (gentle.length > 60 ? '…' : ''),
+              variants,
+              date: formatDate(item.created_at),
+              created_at: item.created_at,
+            }
+          })
+          this.setData({ showHistory: true, history, historyFallback: false })
+          return
+        }
+      } catch (e) {}
+    }
+    // 未登录或服务端失败：降级本地
+    const history = wx.getStorageSync('rewrite_history') || []
+    this.setData({ showHistory: true, history, historyFallback: !!token })
+  },
+
+  closeHistory() {
+    this.setData({ showHistory: false })
+  },
+
+  restoreHistory(e) {
+    const { index } = e.currentTarget.dataset
+    const item = this.data.history[index]
+    if (!item) return
+    const original = item.original_full || item.original
+    const risk = analyzeRisk(original)
+
+    const isPremium = app.isPremium()
+    let variants = []
+
+    if (item.variants && item.variants.length > 0) {
+      variants = item.variants.map((v, i) => ({ ...v, locked: !isPremium && i > 0 }))
+    } else {
+      // variants 为空，用 gentle_full 或 result 构造一个可复制的版本
+      const gentleContent = item.gentle_full || item.result || ''
+      if (gentleContent) {
+        variants = [{
+          version: 'gentle',
+          content: gentleContent,
+          version_label: '温和',
+          risk_level: 'low',
+          risk_text: '低风险',
+          locked: false,
+        }]
+      }
+    }
+
+    if (variants.length > 0) {
+      this.setData({
+        showHistory: false,
+        hasResults: true,
+        originalMessage: original,
+        riskLevel: risk.level,
+        riskLabel: risk.label,
+        variants,
+        activeTab: 0,
+        currentVariant: variants[0],
+        copied: false,
+      })
+    } else {
+      this.setData({ showHistory: false, originalMessage: original, riskLevel: risk.level, riskLabel: risk.label })
+      wx.showToast({ title: '记录内容已失效，可重新改写', icon: 'none', duration: 2500 })
+    }
+  },
+
   resetPage() {
     this.setData({
       hasResults: false,
@@ -289,14 +426,19 @@ Page({
     const now = new Date()
     const date = `${now.getMonth() + 1}月${now.getDate()}日`
     const history = wx.getStorageSync('rewrite_history') || []
+    // 存储时去掉 locked 标志，历史记录中所有版本均可查看
+    const unlockedVariants = variants.map(v => ({ ...v, locked: false }))
     history.unshift({
       rewrite_id: rewriteId || String(Date.now()),
       original: original.slice(0, 50) + (original.length > 50 ? '…' : ''),
       original_full: original,
       result: first.content.slice(0, 60) + (first.content.length > 60 ? '…' : ''),
+      variants: unlockedVariants,
       date,
       created_at: now.toISOString(),
     })
-    wx.setStorageSync('rewrite_history', history.slice(0, 50))
+    const saved = history.slice(0, 50)
+    wx.setStorageSync('rewrite_history', saved)
+    this.setData({ history: saved })
   },
 })

@@ -1,6 +1,16 @@
 // app.js
 const { request } = require('./utils/api')
 
+function parseJwtPayload(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const buf = wx.base64ToArrayBuffer(b64)
+    return JSON.parse(String.fromCharCode(...new Uint8Array(buf)))
+  } catch (e) {
+    return null
+  }
+}
+
 App({
   globalData: {
     entryState: '',
@@ -8,6 +18,7 @@ App({
     chatSessionId: '',
     pendingAnswers: null,
     token: null,
+    subscriptionTier: 'free',
   },
 
   request,
@@ -15,7 +26,11 @@ App({
   onLaunch() {
     // 恢复本地缓存的 token
     const cached = wx.getStorageSync('token')
-    if (cached) this.globalData.token = cached
+    if (cached) {
+      this.globalData.token = cached
+      const payload = parseJwtPayload(cached)
+      if (payload?.subscriptionTier) this.globalData.subscriptionTier = payload.subscriptionTier
+    }
 
     // 静默登录（不弹授权框，用户无感）
     this.silentLogin()
@@ -37,8 +52,11 @@ App({
           skipAuth: true,
         }).then(res => {
           if (res && res.code === 200 && res.data && res.data.token) {
-            self.globalData.token = res.data.token
-            wx.setStorageSync('token', res.data.token)
+            const token = res.data.token
+            self.globalData.token = token
+            wx.setStorageSync('token', token)
+            const payload = parseJwtPayload(token)
+            if (payload?.subscriptionTier) self.globalData.subscriptionTier = payload.subscriptionTier
           }
         }).catch(err => {
           console.warn('[Auth] 静默登录失败，降级为匿名模式', err)
@@ -48,6 +66,10 @@ App({
         console.warn('[Auth] wx.login 失败', err)
       },
     })
+  },
+
+  isPremium() {
+    return this.globalData.subscriptionTier !== 'free'
   },
 
   setAssessmentResult(result) {

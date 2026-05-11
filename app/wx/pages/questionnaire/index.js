@@ -151,10 +151,15 @@ Page({
 
   async _loadQuestions() {
     let questions
+    let usedFallback = false
     try {
       questions = await getQuestionnaire()
     } catch (e) {
       questions = FALLBACK_QUESTIONS
+      usedFallback = true
+    }
+    if (usedFallback) {
+      wx.showToast({ title: '网络异常，使用本地题库', icon: 'none', duration: 2000 })
     }
     this._questions = questions
     const total = questions.length

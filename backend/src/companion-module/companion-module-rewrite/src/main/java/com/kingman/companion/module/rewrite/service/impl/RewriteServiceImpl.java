@@ -80,6 +80,7 @@ public class RewriteServiceImpl implements RewriteService {
 
         RewriteRecord record = new RewriteRecord();
         record.setId(DistributeID.generate());
+        record.setUserId(AuthContext.getCurrentUserId());
         record.setSessionId(req.getSessionId());
         record.setOriginalMessage(req.getOriginalMessage());
         record.setVariants(variants);
@@ -231,16 +232,27 @@ public class RewriteServiceImpl implements RewriteService {
         return rewriteRepository.findTop20ByUserIdAndDeletedFalseOrderByCreateTimeDesc(userId)
                 .stream()
                 .map(r -> {
-                    String gentleContent = r.getVariants() != null ? r.getVariants().stream()
+                    List<RewriteVariant> vs = r.getVariants() != null ? r.getVariants() : Collections.emptyList();
+                    String gentleContent = vs.stream()
                             .filter(v -> "gentle".equals(v.getVersion()))
                             .findFirst()
                             .map(RewriteVariant::getContent)
-                            .orElse("") : "";
+                            .orElse("");
+                    List<RewriteHistoryItemResp.VariantResp> variantResps = vs.stream()
+                            .map(v -> RewriteHistoryItemResp.VariantResp.builder()
+                                    .version(v.getVersion())
+                                    .content(v.getContent())
+                                    .riskLevel(v.getRiskLevel())
+                                    .sendRecommended(v.getSendRecommended())
+                                    .confidence(v.getConfidence())
+                                    .build())
+                            .toList();
                     return RewriteHistoryItemResp.builder()
                             .rewriteId(r.getId())
                             .originalMessage(r.getOriginalMessage())
                             .gentleContent(gentleContent)
                             .createdAt(r.getCreateTime())
+                            .variants(variantResps)
                             .build();
                 })
                 .toList();

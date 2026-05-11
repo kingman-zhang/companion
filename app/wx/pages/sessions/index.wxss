@@ -31,11 +31,20 @@
   flex-shrink: 0;
   padding: 8rpx 32rpx;
   background: #FDF6E3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .local-fallback-text {
   font-size: 22rpx;
   color: #A07830;
+}
+
+.local-fallback-retry {
+  font-size: 22rpx;
+  color: #4A7B7B;
+  font-weight: 600;
 }
 
 /* ── 列表 ── */

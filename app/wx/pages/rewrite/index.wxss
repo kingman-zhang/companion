@@ -66,12 +66,18 @@
 .nav-right {
   min-width: 60rpx;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 20rpx;
 }
 
-.nav-reset {
+.nav-action-text {
   font-size: 24rpx;
   color: #8F8589;
+}
+
+.nav-history-text {
+  color: #E45A7E;
 }
 
 /* ══════════════════════════
@@ -588,6 +594,84 @@
   font-size: 22rpx;
   font-weight: 500;
   color: #FFFFFF;
+}
+
+/* ══════════════════════════
+   历史记录
+══════════════════════════ */
+.hist-fallback-tip {
+  margin: 20rpx 40rpx 0;
+  padding: 14rpx 24rpx;
+  background: #FDF6E3;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hist-fallback-text {
+  font-size: 22rpx;
+  color: #A07830;
+}
+
+.hist-fallback-retry {
+  font-size: 22rpx;
+  color: #4A7B7B;
+  font-weight: 600;
+}
+
+.hist-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.hist-empty-text {
+  font-size: 28rpx;
+  color: #BDB3B5;
+}
+
+.hist-item {
+  margin: 20rpx 40rpx 0;
+  padding: 24rpx 28rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  border: 1rpx solid #EFE4E0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.hist-item-hover { background: #FBF6F4; }
+
+.hist-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.hist-original {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1F1417;
+  line-height: 1.5;
+}
+
+.hist-date {
+  font-size: 22rpx;
+  color: #BDB3B5;
+  flex-shrink: 0;
+  padding-top: 4rpx;
+}
+
+.hist-result {
+  display: block;
+  font-size: 24rpx;
+  color: #8F8589;
+  line-height: 1.6;
 }
 
 /* ── 升级引导弹窗 ── */

@@ -8,17 +8,23 @@
     </view>
     <view class="nav-center">
       <text class="nav-title">话术改写</text>
-      <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : '发前先过一遍'}}</text>
+      <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : (showHistory ? '改写记录' : '发前先过一遍')}}</text>
     </view>
     <view class="nav-right">
-      <text wx:if="{{hasResults}}" class="nav-reset" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重来</text>
+      <block wx:if="{{showHistory}}">
+        <text class="nav-action-text" bindtap="closeHistory" hover-class="nav-btn-hover" hover-stay-time="80">关闭</text>
+      </block>
+      <block wx:else>
+        <text wx:if="{{hasResults}}" class="nav-action-text" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重来</text>
+        <text class="nav-action-text nav-history-text" bindtap="openHistory" hover-class="nav-btn-hover" hover-stay-time="80">历史</text>
+      </block>
     </view>
   </view>
 
   <!-- ══════════════════════
        输入状态（未生成结果）
   ══════════════════════ -->
-  <block wx:if="{{!hasResults}}">
+  <block wx:if="{{!hasResults && !showHistory}}">
     <scroll-view class="content" scroll-y>
 
       <!-- Hero -->
@@ -109,6 +115,37 @@
       </view>
     </view>
   </block>
+
+  <!-- ══════════════════════
+       历史记录
+  ══════════════════════ -->
+  <scroll-view wx:elif="{{showHistory}}" class="content" scroll-y>
+    <view wx:if="{{historyFallback}}" class="hist-fallback-tip">
+      <text class="hist-fallback-text">网络异常，仅显示本地记录</text>
+      <text class="hist-fallback-retry" bindtap="openHistory">重试</text>
+    </view>
+    <view wx:if="{{history.length === 0}}" class="hist-empty">
+      <text class="hist-empty-text">还没有改写记录</text>
+    </view>
+    <view wx:else>
+      <view
+        wx:for="{{history}}"
+        wx:key="rewrite_id"
+        class="hist-item"
+        bindtap="restoreHistory"
+        data-index="{{index}}"
+        hover-class="hist-item-hover"
+        hover-stay-time="80"
+      >
+        <view class="hist-item-top">
+          <text class="hist-original">{{item.original}}</text>
+          <text class="hist-date">{{item.date}}</text>
+        </view>
+        <text class="hist-result">{{item.result}}</text>
+      </view>
+    </view>
+    <view style="height: 60rpx;"></view>
+  </scroll-view>
 
   <!-- ══════════════════════
        结果状态（已生成）

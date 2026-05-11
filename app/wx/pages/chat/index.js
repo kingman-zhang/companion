@@ -105,10 +105,6 @@ Page({
     try {
       const res = await app.request({ url: `/api/v1/chat/sessions/${sessionId}/messages` })
       if (res && res.code === 200 && Array.isArray(res.data) && res.data.length > 0) {
-        const EMOTION_TEXT_MAP = {
-          ANGER: '愤怒', SADNESS: '难过', GUILT: '自责',
-          ANXIETY: '焦虑', FEAR: '恐惧', CALM: '平静',
-        }
         const messages = res.data.map((m, i) => ({
           id: `msg-${i}`,
           role: m.role,
@@ -116,6 +112,7 @@ Page({
           emotion_label: m.emotion_label,
           emotion_text: EMOTION_TEXT_MAP[m.emotion_label] || '',
         }))
+
         this.setData({ messages, userHasSent: true, roundCount: messages.length })
         setTimeout(() => this._scrollToBottom(), 100)
       } else {
@@ -163,7 +160,7 @@ Page({
       const body = assessment?.assessment_id ? { assessment_id: assessment.assessment_id } : {}
       const res = await app.request({ url: '/api/v1/chat/session', method: 'POST', data: body })
       if (res.code === 200 && res.data?.session_id) {
-        this.setData({ sessionId: res.data.session_id })
+        this.setData({ sessionId: res.data.session_id, emotionBadge: '', emotionLevel: 'medium' })
         app.globalData.chatSessionId = res.data.session_id
       }
     } catch (e) {}
