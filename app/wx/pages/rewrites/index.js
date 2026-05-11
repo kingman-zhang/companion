@@ -1,6 +1,9 @@
 // 改写历史列表页（Tab 3）
 const app = getApp()
 
+const VERSION_LABELS = { gentle: '温和', direct: '直接', brief: '简短' }
+const RISK_TEXT = { low: '低风险', medium: '中风险', high: '高风险' }
+
 function formatDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(dateStr.replace(' ', 'T'))
@@ -42,14 +45,31 @@ Page({
       try {
         const res = await app.request({ url: '/api/v1/rewrite/history' })
         if (res && res.code === 200 && Array.isArray(res.data)) {
-          const history = res.data.map(item => ({
-            rewrite_id: item.rewrite_id,
-            original: (item.original_message || '').slice(0, 50) + ((item.original_message || '').length > 50 ? '…' : ''),
-            original_full: item.original_message || '',
-            result: (item.gentle_content || '').slice(0, 60) + ((item.gentle_content || '').length > 60 ? '…' : ''),
-            date: formatDate(item.created_at),
-            created_at: item.created_at,
-          }))
+          const history = res.data.map(item => {
+            const original = item.original_message || ''
+            const gentle = item.gentle_content || ''
+            const isPremium = app.isPremium()
+            const variants = Array.isArray(item.variants) && item.variants.length > 0
+              ? item.variants.map((v, i) => ({
+                  version: v.version,
+                  content: v.content,
+                  version_label: VERSION_LABELS[v.version] || v.version,
+                  risk_level: v.risk_level,
+                  risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
+                  locked: !isPremium && i > 0,
+                }))
+              : []
+            return {
+              rewrite_id: item.rewrite_id,
+              original: original.slice(0, 50) + (original.length > 50 ? '…' : ''),
+              original_full: original,
+              gentle_full: gentle,
+              result: gentle.slice(0, 60) + (gentle.length > 60 ? '…' : ''),
+              variants,
+              date: formatDate(item.created_at),
+              created_at: item.created_at,
+            }
+          })
           this.setData({ history, loading: false })
           return
         }
@@ -73,7 +93,11 @@ Page({
     const { id } = e.currentTarget.dataset
     const item = this.data.history.find(h => h.rewrite_id === id)
     if (item) {
-      wx.setStorageSync('rewritePreload', { original: item.original_full || item.original })
+      wx.setStorageSync('rewritePreload', {
+        original: item.original_full || item.original,
+        gentle_full: item.gentle_full || '',
+        variants: item.variants || [],
+      })
     }
     wx.navigateTo({ url: '/pages/rewrite/index' })
   },

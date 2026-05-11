@@ -96,6 +96,18 @@ Page({
     wx.showActionSheet({
       itemList: ['分享评估结果', '重新评估'],
       success: (res) => {
+        if (res.tapIndex === 0) {
+          const result = this.data.result
+          const level = result?.level === 'GREEN' ? '绿' : result?.level === 'YELLOW' ? '黄' : '红'
+          wx.showShareMenu({
+            withShareTicket: false,
+            menus: ['shareAppMessage'],
+          })
+          wx.shareAppMessage({
+            title: `我的关系评估结果是${level}色·${result?.score ?? '--'}分 — 用 AI 看清楚了一些`,
+            path: '/pages/index/index',
+          })
+        }
         if (res.tapIndex === 1) this.goRedo()
       },
     })

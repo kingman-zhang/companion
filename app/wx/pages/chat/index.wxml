@@ -93,9 +93,6 @@
         </view>
         <view class="msg-bubble-wrap">
           <view class="msg-bubble msg-bubble-ai">
-            <view wx:if="{{item.emotion_label}}" class="emotion-badge emotion-{{item.emotion_label}}">
-              <text class="emotion-text">{{item.emotion_text}}</text>
-            </view>
             <text class="msg-text">{{item.content}}</text>
           </view>
         </view>

@@ -351,32 +351,6 @@
   color: #FFFFFF;
 }
 
-/* ── 情绪标签 ── */
-.emotion-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4rpx 16rpx;
-  border-radius: 999rpx;
-  margin-bottom: 12rpx;
-}
-
-.emotion-ANGER   { background: #FBF0F0; }
-.emotion-SADNESS { background: #EDF2FB; }
-.emotion-GUILT   { background: #F0EDF6; }
-.emotion-ANXIETY { background: #FDF6E3; }
-.emotion-FEAR    { background: #F5F0FB; }
-.emotion-CALM    { background: #E3EEDF; }
-.emotion-anger   { background: #FBF0F0; }
-.emotion-sadness { background: #EDF2FB; }
-.emotion-guilt   { background: #F0EDF6; }
-.emotion-anxiety { background: #FDF6E3; }
-.emotion-fear    { background: #F5F0FB; }
-.emotion-calm    { background: #E3EEDF; }
-
-.emotion-text {
-  font-size: 20rpx;
-  color: #52464A;
-}
 
 /* ── 输入中动画 ── */
 .msg-typing {
