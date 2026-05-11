@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.kingman.companion.framework.logger.LoggerAutoConfiguration
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.kingman.companion.framework.logger.LoggerEnvironmentPostProcessor

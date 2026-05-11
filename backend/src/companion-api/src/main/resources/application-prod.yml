@@ -24,12 +24,13 @@ spring:
       password: ${REDIS_PASSWORD}
       timeout: 5000ms
 
-logging:
-  level:
-    root: WARN
-    com.kingman.companion: INFO
-    org.springframework.data.mongodb: WARN
-
 companion:
   jwt:
     secret: ${JWT_SECRET}
+
+  logging:
+    consoleOutJson: true       # JSON 格式输出到 stdout（容器日志）
+    file:
+      enabled: true            # 同时写到文件（供 CLS LogListener 采集）
+      path: ${LOG_PATH:/app/logs}
+      saveDay: 7

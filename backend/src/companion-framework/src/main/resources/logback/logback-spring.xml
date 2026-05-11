@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--SpringBoot的三个自定义转换器-->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <conversionRule conversionWord="traceId"
+                    converterClass="com.kingman.companion.framework.common.logger.logback.messageConverter.DistributedLogTraceIdMessageConverter"/>
+
+    <!-- 默认日志输出格式-->
+    <springProperty scope="context" name="consolePattern" source="companion.logging.consolePattern" defaultValue="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%20.20t]){faint} %clr([%traceId]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <springProperty scope="context" name="level" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="APP"/>
+    <springProperty scope="context" name="consoleOutJson" source="companion.logging.consoleOutJson" defaultValue="${CONSOLE_OUT_JSON:-false}"/>
+
+    <!-- 业务日志 -->
+    <!-- 写入文件的配置 -->
+    <springProperty scope="context" name="fileEnabled" source="companion.logging.file.enabled" defaultValue="${LOG_FILE_ENABLED:-false}"/>
+    <springProperty scope="context" name="filePath" source="companion.logging.file.path" defaultValue="${LOG_FILE_PATH:-/data/companion/logs/${appName}}/"/>
+    <springProperty scope="context" name="fileSaveDay" source="companion.logging.file.saveDay" defaultValue="${LOG_FILE_SAVE_DAY:-14}"/>
+    <!-- 业务日志 -->
+
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${consolePattern}</pattern>
+        </encoder>
+    </appender>
+
+    <if condition="${consoleOutJson}" >
+        <then>
+            <appender name="consoleJson" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <!-- 指定你创建的类的类路径 -->
+                    <layout class="com.kingman.companion.framework.common.logger.logback.messagePattenLayOut.DistributedLogMessagePattenLayOut"/>
+                    <immediateFlush>true</immediateFlush>
+                </encoder>
+            </appender>
+        </then>
+    </if>
+
+
+    <if condition="${fileEnabled}" >
+        <then>
+            <!-- 业务日志 -->
+            <!-- 控制台日志滚动压缩 -->
+            <appender name="consoleFile"
+                      class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${filePath}/${appName}.console</file>
+                <rollingPolicy
+                        class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>${filePath}/${appName}.console.%d{yyyyMMdd}-%i.zip
+                    </FileNamePattern>
+                    <MaxHistory>${fileSaveDay}</MaxHistory>
+                    <TimeBasedFileNamingAndTriggeringPolicy
+                            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <MaxFileSize>500MB</MaxFileSize>
+                    </TimeBasedFileNamingAndTriggeringPolicy>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>${consolePattern}</pattern>
+                </encoder>
+            </appender>
+
+            <!-- 日志滚动压缩 -->
+            <appender name="rollingFile"
+                      class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${filePath}/${appName}.log</file>
+                <rollingPolicy
+                        class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>${filePath}/${appName}.log.%d{yyyyMMdd}-%i.zip
+                    </FileNamePattern>
+                    <MaxHistory>${fileSaveDay}</MaxHistory>
+                    <TimeBasedFileNamingAndTriggeringPolicy
+                            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <MaxFileSize>500MB</MaxFileSize>
+                    </TimeBasedFileNamingAndTriggeringPolicy>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <!-- 指定你创建的类的类路径 -->
+                    <layout class="com.kingman.companion.framework.common.logger.logback.messagePattenLayOut.DistributedLogMessagePattenLayOut"/>
+                    <immediateFlush>true</immediateFlush>
+                </encoder>
+            </appender>
+            <!-- 业务日志 -->
+        </then>
+    </if>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+
+    <if condition="!${consoleOutJson}" >
+        <then>
+            <root level="${level}">
+                <appender-ref ref="console"/>
+            </root>
+        </then>
+    </if>
+
+    <if condition="${consoleOutJson}" >
+        <then>
+            <root level="${level}">
+                <appender-ref ref="consoleJson"/>
+            </root>
+        </then>
+    </if>
+
+    <if condition="${fileEnabled}" >
+        <then>
+            <root level="${level}">
+                <appender-ref ref="consoleFile"/>
+                <appender-ref ref="rollingFile"/>
+            </root>
+
+            <!-- 增加WEB请求响应的日志输出到文件 -->
+            <logger name="com.wadi.framework.web.filter" level="info" additivity="false">
+                <appender-ref ref="rollingFile"/>
+            </logger>
+
+            <!-- 框架包的日志输出到文件和控制台 -->
+            <logger name="com.kingman.companion.framework" level="info" additivity="false">
+                <appender-ref ref="console"/>
+                <appender-ref ref="consoleFile"/>
+                <appender-ref ref="rollingFile"/>
+            </logger>
+
+            <!-- 增加业务的日志输出到文件 -->
+            <logger name="com.kingman.companion" level="info" additivity="false">
+                <appender-ref ref="rollingFile"/>
+            </logger>
+
+        </then>
+    </if>
+
+</configuration>
