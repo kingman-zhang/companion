@@ -26,6 +26,18 @@
 
 .nav-btn-hover { opacity: 0.75; }
 
+/* ── 本地缓存提示 ── */
+.local-fallback-tip {
+  flex-shrink: 0;
+  padding: 8rpx 32rpx;
+  background: #FDF6E3;
+}
+
+.local-fallback-text {
+  font-size: 22rpx;
+  color: #A07830;
+}
+
 /* ── 列表 ── */
 .list {
   flex: 1;

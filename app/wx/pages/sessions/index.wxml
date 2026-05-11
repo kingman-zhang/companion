@@ -6,6 +6,11 @@
     <text class="nav-title">聊天</text>
   </view>
 
+  <!-- 本地缓存提示 -->
+  <view wx:if="{{localFallback}}" class="local-fallback-tip">
+    <text class="local-fallback-text">网络异常，仅显示本地记录</text>
+  </view>
+
   <!-- 有历史记录 -->
   <scroll-view wx:if="{{sessions.length > 0}}" class="list" scroll-y>
     <view

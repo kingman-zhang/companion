@@ -29,7 +29,7 @@
         class="quick-input"
         value="{{quickText}}"
         bindinput="onQuickInput"
-        placeholder="分手、挽回、冷战、不知道怎么回消息……都可以说"
+        placeholder="分手、挽回、冷战、不会回消息……都可以说"
         placeholder-class="quick-placeholder"
         auto-height
         adjust-position="{{true}}"

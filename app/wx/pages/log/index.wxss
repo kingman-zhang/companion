@@ -15,7 +15,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24rpx 32rpx 16rpx;
+  padding: 10px 32rpx 16rpx;
   background: #F5F3F0;
 }
 
@@ -83,12 +83,32 @@ page {
   padding: 32rpx;
 }
 
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
 .section-title {
   font-size: 28rpx;
   font-weight: 600;
   color: #1C1C1E;
   display: block;
   margin-bottom: 24rpx;
+}
+
+.section-title-row .section-title {
+  margin-bottom: 0;
+}
+
+.emotion-count-badge {
+  font-size: 22rpx;
+  color: #A0A0A0;
+}
+
+.emotion-chip-disabled {
+  opacity: 0.35;
 }
 
 .section-subtitle {

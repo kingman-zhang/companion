@@ -162,13 +162,18 @@ Page({
     // 有续接数据时，从上次的题目和答案恢复
     const resume = this._resumeData
     if (resume && resume.step < total) {
+      // 过滤掉当前题目集中不存在的 key，防止题目变更后答案错配
+      const validKeys = new Set(questions.map(q => q.key))
+      const safeAnswers = Object.fromEntries(
+        Object.entries(resume.answers || {}).filter(([k]) => validKeys.has(k))
+      )
       this.setData({
         questionsReady: true,
         totalQuestions: total,
         currentIndex: resume.step,
         currentQuestion: questions[resume.step],
-        answers: resume.answers || {},
-        currentAnswer: (resume.answers || {})[questions[resume.step].key] || '',
+        answers: safeAnswers,
+        currentAnswer: safeAnswers[questions[resume.step].key] || '',
         progressSegments: buildSegments(resume.step, total),
       })
     } else {

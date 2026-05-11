@@ -62,7 +62,8 @@ Page({
 
     const result = app.getAssessmentResult()
     if (!result) {
-      wx.switchTab({ url: '/pages/index/index' })
+      wx.showToast({ title: '评估结果已过期，请重新评估', icon: 'none', duration: 2500 })
+      setTimeout(() => wx.switchTab({ url: '/pages/index/index' }), 1500)
       return
     }
 

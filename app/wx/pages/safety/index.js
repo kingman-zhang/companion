@@ -60,10 +60,13 @@ Page({
   },
 
   callHotline(e) {
+    if (this._calling) return
+    this._calling = true
+    setTimeout(() => { this._calling = false }, 2000)
     const { phone } = e.currentTarget.dataset
     wx.makePhoneCall({
       phoneNumber: phone,
-      fail() {
+      fail: () => {
         wx.showToast({ title: `请拨打 ${phone}`, icon: 'none', duration: 3000 })
       },
     })

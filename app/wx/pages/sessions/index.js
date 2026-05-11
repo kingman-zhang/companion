@@ -15,6 +15,7 @@ Page({
   data: {
     sessions: [],
     loading: false,
+    localFallback: false,
     navPaddingTop: '44px',
     navCapsuleWidth: '200rpx',
   },
@@ -51,13 +52,13 @@ Page({
             created_at: s.created_at,
             from_server: true,
           }))
-          this.setData({ sessions, loading: false })
+          this.setData({ sessions, loading: false, localFallback: false })
           return
         }
       } catch (e) {
         // 服务端加载失败，降级到本地
       }
-      this.setData({ loading: false })
+      this.setData({ loading: false, localFallback: true })
     }
     // 未登录或服务端失败：从本地存储加载
     this._loadLocal()
@@ -105,7 +106,19 @@ Page({
     if (hasAssessment) {
       wx.navigateTo({ url: '/pages/chat/index' })
     } else {
-      wx.navigateTo({ url: '/pages/questionnaire/index' })
+      wx.showModal({
+        title: '先做个评估？',
+        content: '做完 7 题评估，AI 能更准确地陪你聊。也可以跳过，直接开始对话。',
+        confirmText: '前往评估',
+        cancelText: '坚持聊天',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/questionnaire/index' })
+          } else {
+            wx.navigateTo({ url: '/pages/chat/index' })
+          }
+        },
+      })
     }
   },
 })

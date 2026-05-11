@@ -2,7 +2,7 @@
 <view class="page-wrap">
 
   <!-- 导航栏 -->
-  <view class="nav-bar">
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}};">
     <view class="nav-back" bindtap="goBack">
       <text class="nav-back-icon">‹</text>
     </view>
@@ -105,9 +105,12 @@
 
       <!-- 情绪标签多选 -->
       <view class="section-card">
-        <text class="section-title">选择最符合的情绪（最多3个）</text>
+        <view class="section-title-row">
+          <text class="section-title">选择最符合的情绪</text>
+          <text class="emotion-count-badge">{{selectedEmotions.length}}/3</text>
+        </view>
         <view class="emotion-grid">
-          <view class="emotion-chip {{selectedEmotionsMap[item.value] ? 'emotion-chip-sel' : ''}}"
+          <view class="emotion-chip {{selectedEmotionsMap[item.value] ? 'emotion-chip-sel' : (!selectedEmotionsMap[item.value] && selectedEmotions.length >= 3 ? 'emotion-chip-disabled' : '')}}"
             wx:for="{{emotionOptions}}" wx:key="value"
             bindtap="toggleEmotion" data-value="{{item.value}}">
             <text>{{item.label}}</text>

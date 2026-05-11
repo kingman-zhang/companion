@@ -220,9 +220,14 @@ Page({
   },
 
   _refreshPlan() {
-    const startDate = wx.getStorageSync('letgo_start_date') || _todayStr()
     // letgo_plan_map: { [day]: { status: 'done'|'skip', date: 'YYYY-MM-DD' } }
     const planMap = wx.getStorageSync('letgo_plan_map') || {}
+    let startDate = wx.getStorageSync('letgo_start_date')
+    if (!startDate) {
+      // 开始日期丢失时，从计划记录中推算最早的操作日期，避免计划重置
+      const dates = Object.values(planMap).map(e => e.date).filter(Boolean).sort()
+      startDate = dates[0] || _todayStr()
+    }
     const daysPassed = _daysDiff(startDate)
     const unlockedThrough = Math.min(7, daysPassed + 1)
 

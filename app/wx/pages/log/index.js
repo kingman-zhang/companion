@@ -51,9 +51,13 @@ Page({
     // 历史
     history: [],
     loadingHistory: false,
+
+    navPaddingTop: '44px',
   },
 
   onLoad() {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ navPaddingTop: `${sysInfo.statusBarHeight + 10}px` })
     this._loadToday()
   },
 

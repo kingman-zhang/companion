@@ -1,5 +1,5 @@
 <!-- 工具页 -->
-<view class="page">
+<view class="page" style="padding-top: {{navPaddingTop}};">
 
   <view class="header">
     <text class="header-title">工具</text>

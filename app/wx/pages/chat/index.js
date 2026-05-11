@@ -95,7 +95,8 @@ Page({
       })
       setTimeout(() => this._scrollToBottom(), 100)
     } else {
-      this._createSession()
+      // 保持传入的 sessionId，不重新创建，避免覆盖已有会话
+      this.setData({ sessionId })
     }
   },
 
@@ -196,6 +197,13 @@ Page({
   async sendMessage() {
     const content = this.data.inputValue.trim()
     if (!content || this.data.loading || this.data.showPaywall) return
+    if (!this.data.sessionId) {
+      await this._createSession()
+      if (!this.data.sessionId) {
+        wx.showToast({ title: '连接失败，请检查网络后重试', icon: 'none' })
+        return
+      }
+    }
 
     // 隐藏微干预
     if (this.data.showMicro) this.setData({ showMicro: false })

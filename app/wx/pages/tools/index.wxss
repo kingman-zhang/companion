@@ -6,7 +6,6 @@ page {
 .page {
   min-height: 100vh;
   background: #F5F3F0;
-  padding-top: 120rpx;
 }
 
 .header {
