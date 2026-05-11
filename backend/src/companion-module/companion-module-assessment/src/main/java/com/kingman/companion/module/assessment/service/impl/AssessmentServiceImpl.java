@@ -146,8 +146,11 @@ public class AssessmentServiceImpl implements AssessmentService {
     LlmEnrichment llmEnrich(ScoreEngine.ScoreResult result, AssessmentReq req) {
         try {
             String userMessage = buildEnrichPrompt(result, req);
+            log.debug("[Assessment] LLM 增强输入: {}", userMessage);
             String llmText = llmGateway.complete(assessmentProperties.getSystemPrompt(), userMessage, RoutingContext.standard());
-            return parseLlmEnrichment(llmText);
+            LlmEnrichment enrichment = parseLlmEnrichment(llmText);
+            log.info("[Assessment] LLM 增强完成: coreInsight={}", enrichment.coreInsight());
+            return enrichment;
         } catch (Exception e) {
             log.warn("评估 LLM 增强失败，降级使用规则模板: {}", e.getMessage());
             return new LlmEnrichment(result.coreInsight(), result.reason());

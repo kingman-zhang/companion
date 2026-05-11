@@ -67,6 +67,9 @@ public class RewriteServiceImpl implements RewriteService {
             checkDailyLimit(AuthContext.getCurrentUserId());
         }
 
+        log.info("[Rewrite] 收到改写请求: session={}, userId={}, originalLen={}",
+                req.getSessionId(), AuthContext.getCurrentUserId(), req.getOriginalMessage().length());
+
         String systemPrompt = assessmentContext != null
                 ? assessmentContext + "\n\n" + rewriteProperties.getSystemPrompt()
                 : rewriteProperties.getSystemPrompt();
@@ -87,7 +90,11 @@ public class RewriteServiceImpl implements RewriteService {
             recordUsage(AuthContext.getCurrentUserId());
         }
 
-        log.info("改写完成: id={}", saved.getId());
+        log.info("[Rewrite] 改写完成: id={}, gentle风险={}, direct风险={}, brief风险={}",
+                saved.getId(),
+                variants.stream().filter(v -> "gentle".equals(v.getVersion())).findFirst().map(RewriteVariant::getRiskLevel).orElse("-"),
+                variants.stream().filter(v -> "direct".equals(v.getVersion())).findFirst().map(RewriteVariant::getRiskLevel).orElse("-"),
+                variants.stream().filter(v -> "brief".equals(v.getVersion())).findFirst().map(RewriteVariant::getRiskLevel).orElse("-"));
         return toResp(saved);
     }
 

@@ -63,6 +63,15 @@ public class LlmGatewayImpl implements LlmGateway {
                 ? SAFETY_SYSTEM_PREFIX + systemPrompt
                 : systemPrompt;
 
+        // 取最后一条用户消息用于日志
+        String lastUserMsg = messages.isEmpty() ? ""
+                : messages.get(messages.size() - 1).content();
+
+        log.debug("[AI] system prompt: {}", effectiveSystemPrompt);
+        log.info("[AI] 用户问题: {}", truncate(lastUserMsg, 500));
+
+        long start = System.currentTimeMillis();
+
         for (ModelConfig config : chain) {
             LlmProvider provider = findProvider(config.provider());
             if (provider == null) {
@@ -71,8 +80,12 @@ public class LlmGatewayImpl implements LlmGateway {
             }
 
             try {
-                log.debug("调用模型: tier={}, provider={}, model={}", tier, config.provider(), config.modelId());
-                return provider.call(effectiveSystemPrompt, messages, config);
+                log.info("[AI] 调用: tier={}, provider={}, model={}, 历史消息={}条",
+                        tier, config.provider(), config.modelId(), messages.size());
+                String response = provider.call(effectiveSystemPrompt, messages, config);
+                long elapsed = System.currentTimeMillis() - start;
+                log.info("[AI] 回复 (耗时={}ms, model={}): {}", elapsed, config.modelId(), truncate(response, 500));
+                return response;
             } catch (Exception e) {
                 log.warn("模型调用失败，尝试下一个: model={}, reason={}", config.modelId(), e.getMessage());
             }
@@ -87,5 +100,10 @@ public class LlmGatewayImpl implements LlmGateway {
                 .filter(p -> p.supports(providerName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private static String truncate(String s, int maxLen) {
+        if (s == null) return "";
+        return s.length() <= maxLen ? s : s.substring(0, maxLen) + "…";
     }
 }

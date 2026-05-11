@@ -81,6 +81,9 @@ public class DashScopeProvider implements LlmProvider {
                 .put("model", config.modelId())
                 .put("max_tokens", config.maxTokens());
 
+        // 强制 JSON 输出，避免模型忽略 system prompt 中的格式指令
+        body.set("response_format", MAPPER.createObjectNode().put("type", "json_object"));
+
         ArrayNode msgsNode = MAPPER.createArrayNode();
 
         // OpenAI 兼容格式：system prompt 作为第一条 role=system 消息

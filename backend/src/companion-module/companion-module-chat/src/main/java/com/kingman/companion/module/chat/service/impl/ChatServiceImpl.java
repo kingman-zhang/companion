@@ -80,6 +80,10 @@ public class ChatServiceImpl implements ChatService {
         ChatSession session = sessionRepository.findByIdAndDeletedFalse(req.getSessionId())
                 .orElseThrow(() -> new ApiException(CodeEnum.NOT_FOUND));
 
+        log.info("[Chat] 收到消息: session={}, userId={}, round={}, safety={}, msgLen={}",
+                req.getSessionId(), session.getUserId(), session.getRoundCount(),
+                safety.level(), req.getContent().length());
+
         // 免费层轮次限制
         if (session.getRoundCount() >= FREE_TIER_ROUND_LIMIT) {
             throw new ApiException(CodeEnum.FREE_TIER_LIMIT_REACHED);
@@ -134,6 +138,9 @@ public class ChatServiceImpl implements ChatService {
         // 更新会话轮次
         session.setRoundCount(session.getRoundCount() + 1);
         sessionRepository.save(session);
+
+        log.info("[Chat] 回复完成: session={}, emotion={}, intensity={}, replyLen={}",
+                req.getSessionId(), result.emotionLabel(), result.emotionIntensity(), result.reply().length());
 
         ChatResp.ChatRespBuilder builder = ChatResp.builder()
                 .messageId(savedAiMsg.getId())
@@ -202,7 +209,7 @@ public class ChatServiceImpl implements ChatService {
 
             // Model returned plain text (no JSON) — use it directly as the reply
             if (!json.startsWith("{")) {
-                log.warn("Chat LLM 返回纯文本（非 JSON），降级处理: len={}", llmText.length());
+                log.warn("Chat LLM 返回纯文本（非 JSON），降级处理: len={}，返回内容为：{}", llmText.length(),llmText);
                 return new LlmResult(llmText.trim(), EmotionLabel.OTHER, 5);
             }
 
