@@ -5,6 +5,10 @@
 
 ---
 
+## 小程序设计规范
+> 小程序界面相关的工作请参考 `.claude/skills/miniprogram-ui-design/`，
+> 设计 token 在 `app/wx/styles/tokens.wxss`。
+
 ## 项目简介
 
 **RelationshipAI（伴听）** 是一款面向 22-38 岁用户的 AI 情感陪伴 App。

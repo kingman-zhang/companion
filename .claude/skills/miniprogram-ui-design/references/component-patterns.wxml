@@ -1,0 +1,230 @@
+<!-- 
+  标准组件范式集
+  这些是经过验证的、符合本 skill 规范的 WXML 模板
+  复制时记得：1) import design-tokens.wxss  2) 替换品牌色
+-->
+
+<!-- ============ 1. 标准卡片（带 hover 反馈） ============ -->
+<view 
+  class="md-card md-card-hover" 
+  bindtap="onCardTap"
+  hover-class="md-card-pressed"
+  hover-stay-time="80"
+>
+  <view class="card-title">{{title}}</view>
+  <view class="card-desc">{{desc}}</view>
+</view>
+
+<!-- ============ 2. Hero 卡片（首屏主推） ============ -->
+<view class="hero-card">
+  <view class="hero-icon-bg" style="background: var(--md-color-primary-light)">
+    <text class="hero-emoji">💔</text>
+  </view>
+  <view class="hero-content">
+    <view class="hero-title">{{title}}</view>
+    <view class="hero-sub">{{subtitle}}</view>
+    <view class="hero-cta md-btn-primary" bindtap="onStart">
+      <text>立即开始</text>
+      <text class="arrow">→</text>
+    </view>
+  </view>
+</view>
+
+<!-- ============ 3. 列表项（带左图标、右箭头） ============ -->
+<view 
+  class="list-item" 
+  hover-class="md-card-pressed"
+  hover-stay-time="80"
+  bindtap="onItemTap"
+>
+  <view class="list-item-icon" style="background: {{item.iconBg}}">
+    <text class="list-item-emoji">{{item.emoji}}</text>
+  </view>
+  <view class="list-item-body">
+    <view class="list-item-title-row">
+      <text class="list-item-title">{{item.title}}</text>
+      <view wx:if="{{item.badge}}" class="badge badge-{{item.badgeType}}">
+        {{item.badge}}
+      </view>
+    </view>
+    <text class="list-item-desc">{{item.desc}}</text>
+  </view>
+  <text class="list-item-arrow">›</text>
+</view>
+
+<!-- ============ 4. 按钮组（主+次） ============ -->
+<view class="btn-group">
+  <view class="md-btn-primary" bindtap="onPrimary">
+    主要操作
+  </view>
+  <view class="md-btn-ghost" bindtap="onSecondary">
+    次要操作
+  </view>
+</view>
+
+<!-- ============ 5. 输入卡片（推荐写法） ============ -->
+<view class="input-card {{hasContent ? 'input-card-active' : ''}}">
+  <textarea
+    class="input-area"
+    value="{{text}}"
+    bindinput="onInput"
+    placeholder="请输入内容..."
+    placeholder-class="input-placeholder"
+    auto-height
+    adjust-position
+    maxlength="500"
+    show-confirm-bar="{{false}}"
+  />
+  <view class="input-footer">
+    <text class="input-counter">{{text.length}}/500</text>
+    <view 
+      wx:if="{{hasContent}}"
+      class="input-submit md-btn-primary"
+      bindtap="onSubmit"
+    >
+      发送
+    </view>
+  </view>
+</view>
+
+<!-- ============ 6. 空状态 ============ -->
+<view class="empty-state">
+  <image class="empty-illustration" src="/assets/empty-list.png" mode="aspectFit" />
+  <text class="empty-title">还没有任何记录</text>
+  <text class="empty-desc">添加第一条来开始使用吧</text>
+  <view class="md-btn-primary" bindtap="onCreate">
+    <text>+ 添加</text>
+  </view>
+</view>
+
+<!-- ============ 7. 骨架屏（列表用） ============ -->
+<view wx:if="{{loading}}" class="skeleton-list">
+  <view class="skeleton-card" wx:for="{{[1,2,3]}}" wx:key="*this">
+    <view class="skeleton-line skeleton-line-title"></view>
+    <view class="skeleton-line skeleton-line-desc"></view>
+    <view class="skeleton-line skeleton-line-short"></view>
+  </view>
+</view>
+
+<!-- ============ 8. 错误状态（带重试） ============ -->
+<view wx:if="{{error}}" class="error-state">
+  <text class="error-icon">⚠️</text>
+  <text class="error-title">加载失败</text>
+  <text class="error-desc">{{errorMsg || '网络异常，请检查网络后重试'}}</text>
+  <view class="md-btn-ghost" bindtap="onRetry">
+    重新加载
+  </view>
+</view>
+
+<!-- ============ 9. Tab 切换栏（顶部） ============ -->
+<view class="tabs">
+  <view 
+    wx:for="{{tabs}}"
+    wx:key="key"
+    class="tab-item {{currentTab === item.key ? 'tab-item-active' : ''}}"
+    bindtap="onTabChange"
+    data-key="{{item.key}}"
+  >
+    <text class="tab-text">{{item.label}}</text>
+    <view wx:if="{{currentTab === item.key}}" class="tab-indicator"></view>
+  </view>
+</view>
+
+<!-- ============ 配套 WXSS（节选） ============ -->
+<!-- 
+.card-title {
+  font-size: var(--md-font-h3);
+  font-weight: var(--md-weight-medium);
+  color: var(--md-text-primary);
+  line-height: var(--md-line-tight);
+}
+.card-desc {
+  font-size: var(--md-font-caption);
+  color: var(--md-text-secondary);
+  margin-top: var(--md-space-2);
+  line-height: var(--md-line-normal);
+}
+
+.hero-card {
+  display: flex;
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-lg);
+  padding: var(--md-space-5);
+  box-shadow: var(--md-shadow-md);
+  margin-bottom: var(--md-space-3);
+}
+.hero-icon-bg {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--md-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--md-space-3);
+}
+.hero-title {
+  font-size: var(--md-font-h2);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
+}
+.hero-sub {
+  font-size: var(--md-font-body);
+  color: var(--md-text-secondary);
+  margin: var(--md-space-1) 0 var(--md-space-3);
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-md);
+  padding: var(--md-space-3) var(--md-space-4);
+  margin-bottom: var(--md-space-3);
+  box-shadow: var(--md-shadow-sm);
+}
+.list-item-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--md-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--md-space-3);
+  flex-shrink: 0;
+}
+.list-item-body { flex: 1; min-width: 0; }
+.list-item-title {
+  font-size: var(--md-font-h3);
+  font-weight: var(--md-weight-medium);
+  color: var(--md-text-primary);
+}
+.list-item-arrow {
+  font-size: 40rpx;
+  color: var(--md-text-tertiary);
+  margin-left: var(--md-space-2);
+}
+
+.skeleton-line {
+  height: 28rpx;
+  background: linear-gradient(
+    90deg,
+    #F0F0F0 0%,
+    #F7F7F7 50%,
+    #F0F0F0 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--md-radius-sm);
+  margin-bottom: var(--md-space-2);
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.md-card-pressed {
+  background: var(--md-bg-hover);
+  transform: scale(0.98);
+  transition: transform var(--md-duration-fast) var(--md-easing);
+}
+-->

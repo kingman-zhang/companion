@@ -1,0 +1,163 @@
+/**
+ * 微信小程序设计 Tokens
+ * 用法：在 app.wxss 顶部 @import "/styles/tokens.wxss";
+ * 然后在样式中使用 var(--md-color-primary) 等 CSS 变量
+ *
+ * 基于：WeUI 规范 + 微信官方设计指南 + 8倍数间距系统
+ */
+
+page {
+  /* ============ 颜色 ============ */
+
+  /* 文本色（WeUI 标准灰阶） */
+  --md-text-primary: #1A1A1A;       /* 主文本 */
+  --md-text-strong: #353535;        /* 强调正文 */
+  --md-text-secondary: #888888;     /* 次要文本 */
+  --md-text-tertiary: #B2B2B2;      /* 辅助/占位 */
+  --md-text-disabled: #CCCCCC;      /* 禁用态 */
+
+  /* 功能色 */
+  --md-color-link: #576B95;         /* 链接蓝 */
+  --md-color-success: #09BB07;      /* 成功绿 */
+  --md-color-warning: #FFC300;      /* 警告黄 */
+  --md-color-error: #E64340;        /* 错误红 */
+
+  /* 品牌色 —— 项目中按需替换 */
+  --md-color-primary: #E91E63;      /* 主品牌色（示例：粉色）*/
+  --md-color-primary-hover: #C2185B;
+  --md-color-primary-light: #FCE4EC;
+
+  /* 背景色 */
+  --md-bg-page: #F7F7F7;            /* 页面背景 */
+  --md-bg-card: #FFFFFF;            /* 卡片背景 */
+  --md-bg-overlay: rgba(0, 0, 0, 0.5); /* 蒙层 */
+  --md-bg-hover: rgba(0, 0, 0, 0.04);  /* hover/active 态 */
+
+  /* 边框 */
+  --md-border-light: #F0F0F0;
+  --md-border-normal: #E5E5E5;
+  --md-border-strong: #D9D9D9;
+
+  /* ============ 字号（rpx） ============ */
+  --md-font-display: 48rpx;         /* 巨标题（hero）*/
+  --md-font-h1: 40rpx;              /* 一级标题 */
+  --md-font-h2: 36rpx;              /* 二级标题 */
+  --md-font-h3: 32rpx;              /* 三级标题 / 强调正文 */
+  --md-font-body: 28rpx;            /* 正文 */
+  --md-font-caption: 26rpx;         /* 辅助 */
+  --md-font-hint: 22rpx;            /* 提示/标签 */
+
+  /* ============ 字重 ============ */
+  --md-weight-regular: 400;
+  --md-weight-medium: 500;
+  --md-weight-semibold: 600;
+
+  /* ============ 行高 ============ */
+  --md-line-tight: 1.2;             /* 标题 */
+  --md-line-normal: 1.5;            /* 正文 */
+  --md-line-loose: 1.7;             /* 长段落 */
+
+  /* ============ 间距（8 倍数系统） ============ */
+  --md-space-1: 8rpx;
+  --md-space-2: 16rpx;
+  --md-space-3: 24rpx;
+  --md-space-4: 32rpx;              /* 页面左右 padding */
+  --md-space-5: 40rpx;
+  --md-space-6: 48rpx;              /* 章节间距 */
+  --md-space-8: 64rpx;
+  --md-space-10: 80rpx;
+  --md-space-12: 96rpx;
+
+  /* ============ 圆角 ============ */
+  --md-radius-sm: 8rpx;             /* 按钮、tag */
+  --md-radius-md: 16rpx;            /* 卡片 */
+  --md-radius-lg: 24rpx;            /* 大卡片、弹窗 */
+  --md-radius-pill: 999rpx;         /* 胶囊 */
+  --md-radius-full: 50%;            /* 头像 */
+
+  /* ============ 阴影（保持克制） ============ */
+  --md-shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  --md-shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  --md-shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  --md-shadow-popup: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+
+  /* ============ z-index（WeUI 四层模型） ============ */
+  --md-z-content: 1;
+  --md-z-nav: 100;
+  --md-z-mask: 1000;
+  --md-z-popout: 1001;
+
+  /* ============ 过渡动画 ============ */
+  --md-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --md-duration-fast: 150ms;
+  --md-duration-normal: 250ms;
+  --md-duration-slow: 400ms;
+}
+
+/* ============ 通用工具类 ============ */
+
+/* 卡片标准样式 */
+.md-card {
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-md);
+  padding: var(--md-space-4);
+  box-shadow: var(--md-shadow-sm);
+}
+
+.md-card-hover:active {
+  background: var(--md-bg-hover);
+  transition: background var(--md-duration-fast) var(--md-easing);
+}
+
+/* 主按钮 */
+.md-btn-primary {
+  background: var(--md-color-primary);
+  color: #FFFFFF;
+  font-size: var(--md-font-h3);
+  font-weight: var(--md-weight-medium);
+  padding: var(--md-space-3) var(--md-space-6);
+  border-radius: var(--md-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-btn-primary:active {
+  background: var(--md-color-primary-hover);
+}
+
+/* 次级按钮 */
+.md-btn-ghost {
+  background: transparent;
+  color: var(--md-color-primary);
+  border: 2rpx solid var(--md-color-primary);
+  font-size: var(--md-font-body);
+  padding: var(--md-space-2) var(--md-space-5);
+  border-radius: var(--md-radius-pill);
+}
+
+/* 禁用按钮 */
+.md-btn-disabled {
+  background: var(--md-text-disabled);
+  color: #FFFFFF;
+  pointer-events: none;
+}
+
+/* 文本省略 */
+.md-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 安全区域 */
+.md-safe-bottom {
+  padding-bottom: calc(var(--md-space-4) + env(safe-area-inset-bottom));
+}
