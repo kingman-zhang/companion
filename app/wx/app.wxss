@@ -1,77 +1,111 @@
 /* app.wxss — 全局样式变量与基础组件 */
 @import "styles/tokens.wxss";
 page {
-  background-color: #F5F3F0;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 46%, #F7EEEA 100%);
   font-family: PingFang SC, -apple-system, sans-serif;
-  color: #1C1C1E;
+  color: var(--md-text-primary);
   box-sizing: border-box;
   height: 100%;
 }
 
+view,
+scroll-view,
+swiper,
+button,
+input,
+textarea,
+text,
+navigator,
+image {
+  box-sizing: border-box;
+}
+
 /* ── 按钮 ── */
 .btn-primary {
-  background: #4A7B7B;
+  background: linear-gradient(135deg, var(--md-color-brand) 0%, var(--md-color-brand-deep) 100%);
   color: #ffffff;
-  height: 104rpx;
-  border-radius: 24rpx;
+  min-height: 96rpx;
+  border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: var(--md-font-h3);
+  font-weight: var(--md-weight-semibold);
   width: 100%;
   border: none;
+  box-shadow: 0 14rpx 28rpx rgba(199, 62, 100, 0.16);
 }
 
 .btn-primary.disabled {
-  background: #E8E4DE;
-  color: #ABABAB;
+  background: linear-gradient(135deg, #EBDDD8 0%, #E4D4CF 100%);
+  color: #AE9DA0;
+  box-shadow: none;
 }
 
 .btn-secondary {
-  background: transparent;
-  color: #4A7B7B;
-  border: 2rpx solid #4A7B7B;
-  height: 104rpx;
-  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--md-color-brand-deep);
+  border: 2rpx solid rgba(199, 62, 100, 0.18);
+  min-height: 96rpx;
+  border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32rpx;
-  font-weight: 500;
+  font-size: var(--md-font-h3);
+  font-weight: var(--md-weight-medium);
   width: 100%;
+  backdrop-filter: blur(12rpx);
 }
 
 .btn-ghost {
   background: transparent;
-  color: #6B6B6B;
+  color: var(--md-text-secondary);
   height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
+  font-size: var(--md-font-body);
   width: 100%;
 }
 
 /* ── 卡片 ── */
 .card {
-  background: #FAFAF8;
-  border: 1rpx solid #E8E4DE;
-  border-radius: 32rpx;
-  padding: 32rpx;
-  box-shadow: 0 2rpx 24rpx rgba(0,0,0,0.06);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid var(--md-border-normal);
+  border-radius: var(--md-radius-lg);
+  padding: var(--md-space-4);
+  box-shadow: var(--md-shadow-md);
+  backdrop-filter: blur(18rpx);
 }
 
 /* ── 状态徽章 ── */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 8rpx 20rpx;
-  border-radius: 999rpx;
-  font-size: 26rpx;
-  font-weight: 500;
+  padding: 10rpx 20rpx;
+  border-radius: var(--md-radius-pill);
+  font-size: var(--md-font-hint);
+  font-weight: var(--md-weight-medium);
+  line-height: 1;
+  border: 1rpx solid transparent;
 }
 
-.badge-green { background: #EDF6F0; color: #2A5C40; }
-.badge-yellow { background: #FDF6E3; color: #7A5820; }
-.badge-red { background: #FBF0F0; color: #7A2A2A; }
+.badge-green {
+  background: #EDF6F0;
+  color: #2A5C40;
+  border-color: rgba(61, 122, 90, 0.16);
+}
+
+.badge-yellow {
+  background: #FDF6E3;
+  color: #7A5820;
+  border-color: rgba(160, 120, 48, 0.16);
+}
+
+.badge-red {
+  background: #FBF0F0;
+  color: #7A2A2A;
+  border-color: rgba(155, 64, 64, 0.16);
+}

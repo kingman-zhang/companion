@@ -26,20 +26,20 @@ page {
   /* --md-color-primary: #E91E63;
   --md-color-primary-hover: #C2185B;
   --md-color-primary-light: #FCE4EC; */
-  --md-color-primary: #C97B7B;        /* 豆沙玫瑰 */
-  --md-color-primary-hover: #B06363;
-  --md-color-primary-light: #F5E4E4;
+  --md-color-primary: #E45A7E;        /* 伴听主品牌色 */
+  --md-color-primary-hover: #C73E64;
+  --md-color-primary-light: #FCE8EE;
 
   /* 背景色 */
-  --md-bg-page: #F7F7F7;            /* 页面背景 */
+  --md-bg-page: #FAF4F1;            /* 页面背景 */
   --md-bg-card: #FFFFFF;            /* 卡片背景 */
   --md-bg-overlay: rgba(0, 0, 0, 0.5); /* 蒙层 */
   --md-bg-hover: rgba(0, 0, 0, 0.04);  /* hover/active 态 */
 
   /* 边框 */
-  --md-border-light: #F0F0F0;
-  --md-border-normal: #E5E5E5;
-  --md-border-strong: #D9D9D9;
+  --md-border-light: rgba(228, 210, 205, 0.42);
+  --md-border-normal: rgba(228, 210, 205, 0.72);
+  --md-border-strong: rgba(219, 200, 195, 0.88);
 
   /* ============ 字号（rpx） ============ */
   --md-font-display: 48rpx;         /* 巨标题（hero）*/
@@ -72,17 +72,17 @@ page {
   --md-space-12: 96rpx;
 
   /* ============ 圆角 ============ */
-  --md-radius-sm: 8rpx;             /* 按钮、tag */
-  --md-radius-md: 16rpx;            /* 卡片 */
-  --md-radius-lg: 24rpx;            /* 大卡片、弹窗 */
+  --md-radius-sm: 16rpx;            /* 输入框、小卡片 */
+  --md-radius-md: 24rpx;            /* 按钮、常规卡片 */
+  --md-radius-lg: 32rpx;            /* 大卡片、弹窗 */
   --md-radius-pill: 999rpx;         /* 胶囊 */
   --md-radius-full: 50%;            /* 头像 */
 
   /* ============ 阴影（保持克制） ============ */
-  --md-shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  --md-shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-  --md-shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
-  --md-shadow-popup: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+  --md-shadow-sm: 0 10rpx 24rpx rgba(117, 77, 76, 0.05);
+  --md-shadow-md: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
+  --md-shadow-lg: 0 20rpx 48rpx rgba(117, 77, 76, 0.1);
+  --md-shadow-popup: 0 24rpx 60rpx rgba(65, 33, 38, 0.16);
 
   /* ============ z-index（WeUI 四层模型） ============ */
   --md-z-content: 1;
@@ -129,10 +129,12 @@ page {
 
 /* 卡片标准样式 */
 .md-card {
-  background: var(--md-bg-card);
-  border-radius: var(--md-radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid var(--md-border-normal);
+  border-radius: var(--md-radius-lg);
   padding: var(--md-space-4);
-  box-shadow: var(--md-shadow-sm);
+  box-shadow: var(--md-shadow-md);
+  backdrop-filter: blur(18rpx);
 }
 
 .md-card-hover:active {
@@ -142,29 +144,36 @@ page {
 
 /* 主按钮 */
 .md-btn-primary {
-  background: var(--md-color-primary);
+  background: linear-gradient(135deg, var(--md-color-brand) 0%, var(--md-color-brand-deep) 100%);
   color: #FFFFFF;
   font-size: var(--md-font-h3);
-  font-weight: var(--md-weight-medium);
-  padding: var(--md-space-3) var(--md-space-6);
+  font-weight: var(--md-weight-semibold);
+  min-height: 96rpx;
+  padding: 0 var(--md-space-6);
   border-radius: var(--md-radius-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 14rpx 28rpx rgba(199, 62, 100, 0.16);
 }
 
 .md-btn-primary:active {
-  background: var(--md-color-primary-hover);
+  background: linear-gradient(135deg, var(--md-color-brand-deep) 0%, #AF3154 100%);
 }
 
 /* 次级按钮 */
 .md-btn-ghost {
-  background: transparent;
-  color: var(--md-color-primary);
-  border: 2rpx solid var(--md-color-primary);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--md-color-brand-deep);
+  border: 2rpx solid rgba(199, 62, 100, 0.18);
   font-size: var(--md-font-body);
-  padding: var(--md-space-2) var(--md-space-5);
+  min-height: 88rpx;
+  padding: 0 var(--md-space-5);
   border-radius: var(--md-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12rpx);
 }
 
 /* 禁用按钮 */
@@ -190,5 +199,5 @@ page {
 
 /* 安全区域 */
 .md-safe-bottom {
-  padding-bottom: calc(var(--md-space-4) + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--md-space-4) + env(safe-area-inset-bottom, 0px));
 }

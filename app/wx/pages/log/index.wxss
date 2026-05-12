@@ -1,13 +1,15 @@
 /* P6 每日日志页 */
 page {
-  background: #F5F3F0;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 36%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 48%, #F6EEEA 100%);
 }
 
 .page-wrap {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #F5F3F0;
+  background: transparent;
 }
 
 /* 导航栏 */
@@ -16,7 +18,9 @@ page {
   align-items: center;
   justify-content: space-between;
   padding: 10px 32rpx 16rpx;
-  background: #F5F3F0;
+  background: rgba(250, 241, 237, 0.92);
+  border-bottom: 1rpx solid rgba(228, 210, 205, 0.84);
+  backdrop-filter: blur(18rpx);
 }
 
 .nav-back {
@@ -25,19 +29,36 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 10rpx 24rpx rgba(117, 77, 76, 0.05);
 }
 
 .nav-back-icon {
   font-size: 48rpx;
-  color: #4A7B7B;
+  color: #52464A;
   font-weight: 300;
   line-height: 1;
 }
 
+.nav-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
 .nav-title {
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1F1417;
+}
+
+.nav-subtitle {
+  font-size: 20rpx;
+  color: #8F8589;
+  line-height: 1;
 }
 
 .nav-placeholder {
@@ -48,9 +69,11 @@ page {
 .tab-bar {
   display: flex;
   margin: 0 32rpx 24rpx;
-  background: #FFFFFF;
-  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 24rpx;
   padding: 6rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 12rpx 28rpx rgba(117, 77, 76, 0.05);
 }
 
 .tab-item {
@@ -64,9 +87,10 @@ page {
 }
 
 .tab-active {
-  background: #4A7B7B;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   color: #FFFFFF;
   font-weight: 600;
+  box-shadow: 0 10rpx 22rpx rgba(199, 62, 100, 0.16);
 }
 
 /* 滚动区 */
@@ -77,10 +101,12 @@ page {
 
 /* 通用卡片 */
 .section-card {
-  background: #FFFFFF;
-  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 28rpx;
   margin: 0 32rpx 20rpx;
   padding: 32rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
 }
 
 .section-title-row {
@@ -129,7 +155,7 @@ page {
 .score-big {
   font-size: 72rpx;
   font-weight: 700;
-  color: #4A7B7B;
+  color: #C73E64;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -168,12 +194,12 @@ page {
   border: 2rpx solid #E8E5DF;
   font-size: 26rpx;
   color: #1C1C1E;
-  background: #F5F3F0;
+  background: #FCF6F3;
 }
 
 .emotion-chip-sel {
-  background: #4A7B7B;
-  border-color: #4A7B7B;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
+  border-color: #E45A7E;
   color: #FFFFFF;
   font-weight: 600;
 }
@@ -196,7 +222,7 @@ page {
 }
 
 .toggle-on {
-  background: #4A7B7B;
+  background: #E45A7E;
 }
 
 .toggle-dot {
@@ -226,13 +252,13 @@ page {
   margin-bottom: 12rpx;
   font-size: 26rpx;
   color: #1C1C1E;
-  background: #F5F3F0;
+  background: #FCF6F3;
 }
 
 .outcome-sel {
-  border-color: #4A7B7B;
-  background: rgba(74, 123, 123, 0.08);
-  color: #4A7B7B;
+  border-color: #E45A7E;
+  background: rgba(228, 90, 126, 0.08);
+  color: #C73E64;
   font-weight: 600;
 }
 
@@ -241,7 +267,7 @@ page {
   min-height: 80rpx;
   margin-top: 12rpx;
   padding: 20rpx 24rpx;
-  background: #F5F3F0;
+  background: #FCF6F3;
   border-radius: 16rpx;
   border: 2rpx solid #E8E5DF;
   font-size: 26rpx;
@@ -251,8 +277,8 @@ page {
 }
 
 .outcome-note-active {
-  border-color: #4A7B7B;
-  background: rgba(74, 123, 123, 0.08);
+  border-color: #E45A7E;
+  background: rgba(228, 90, 126, 0.08);
 }
 
 /* 备注输入 */
@@ -278,13 +304,14 @@ page {
 }
 
 .btn-submit {
-  background: #4A7B7B;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   color: #FFFFFF;
   font-size: 30rpx;
   font-weight: 600;
   text-align: center;
   padding: 28rpx 0;
   border-radius: 999rpx;
+  box-shadow: 0 14rpx 28rpx rgba(199, 62, 100, 0.16);
 }
 
 .btn-disabled {
@@ -294,10 +321,12 @@ page {
 
 /* 今日日志结果卡 */
 .result-card {
-  background: #FFFFFF;
-  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 28rpx;
   margin: 0 32rpx 20rpx;
   padding: 32rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
 }
 
 .result-header {
@@ -310,7 +339,7 @@ page {
 .result-label {
   font-size: 28rpx;
   font-weight: 600;
-  color: #4A7B7B;
+  color: #C73E64;
 }
 
 .result-date {
@@ -393,8 +422,8 @@ page {
 
 /* AI 建议 */
 .suggestion-wrap {
-  background: rgba(74, 123, 123, 0.06);
-  border-left: 4rpx solid #4A7B7B;
+  background: rgba(228, 90, 126, 0.06);
+  border-left: 4rpx solid #E45A7E;
   border-radius: 0 12rpx 12rpx 0;
   padding: 20rpx 24rpx;
   margin-top: 24rpx;
@@ -402,7 +431,7 @@ page {
 
 .suggestion-label {
   font-size: 22rpx;
-  color: #4A7B7B;
+  color: #C73E64;
   font-weight: 600;
   display: block;
   margin-bottom: 10rpx;
@@ -419,9 +448,9 @@ page {
 }
 
 .btn-suggestion {
-  background: rgba(74, 123, 123, 0.08);
-  border: 2rpx solid #4A7B7B;
-  color: #4A7B7B;
+  background: rgba(228, 90, 126, 0.08);
+  border: 2rpx solid #E45A7E;
+  color: #C73E64;
   font-size: 26rpx;
   font-weight: 600;
   text-align: center;
@@ -441,10 +470,12 @@ page {
 
 /* 历史列表 */
 .history-item {
-  background: #FFFFFF;
-  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 28rpx;
   margin: 0 32rpx 20rpx;
   padding: 28rpx 32rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 14rpx 34rpx rgba(117, 77, 76, 0.05);
 }
 
 .history-header {
@@ -484,15 +515,15 @@ page {
 }
 
 .history-suggestion {
-  background: rgba(74, 123, 123, 0.05);
-  border-radius: 12rpx;
+  background: rgba(228, 90, 126, 0.06);
+  border-radius: 16rpx;
   padding: 16rpx 20rpx;
   margin-top: 12rpx;
 }
 
 .history-suggestion-text {
   font-size: 24rpx;
-  color: #4A7B7B;
+  color: #C73E64;
   line-height: 1.6;
 }
 

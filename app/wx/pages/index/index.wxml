@@ -3,13 +3,18 @@
 
   <!-- ── 顶部 Header ── -->
   <view class="header">
-    <view class="logo-icon">
-      <view class="logo-dot-lg"></view>
-      <view class="logo-dot-sm"></view>
+    <view class="header-brand">
+      <view class="logo-icon">
+        <view class="logo-dot-lg"></view>
+        <view class="logo-dot-sm"></view>
+      </view>
+      <view class="logo-text-block">
+        <text class="brand-name">伴听</text>
+        <text class="brand-tagline">陪你慢慢想清楚</text>
+      </view>
     </view>
-    <view class="logo-text-block">
-      <text class="brand-name">伴听</text>
-      <text class="brand-tagline">AI 情感陪伴</text>
+    <view class="header-status">
+      <text class="header-status-text">私密对话空间</text>
     </view>
   </view>
 
@@ -19,8 +24,19 @@
     <!-- 问候语 -->
     <view class="greeting-wrap">
       <text class="greeting-meta">{{greeting}} · {{todayStr}}</text>
-      <text class="greeting-title">在感情上遇到难题了吗？</text>
-      <text class="greeting-sub">告诉我发生了什么，AI 陪你看清楚下一步</text>
+      <text class="greeting-title">这段关系，让你有点撑不住了吗？</text>
+      <text class="greeting-sub">告诉我发生了什么，我们一起看看下一步</text>
+      <view class="greeting-chips">
+        <view class="greeting-chip">
+          <text class="greeting-chip-text">先稳住情绪</text>
+        </view>
+        <view class="greeting-chip">
+          <text class="greeting-chip-text">再判断关系</text>
+        </view>
+        <view class="greeting-chip">
+          <text class="greeting-chip-text">最后决定表达</text>
+        </view>
+      </view>
     </view>
 
     <!-- 快速输入卡片 -->
@@ -43,7 +59,7 @@
           hover-class="{{quickText.length > 0 ? 'start-hover' : ''}}"
           hover-stay-time="80"
         >
-          <text class="start-text">开始 →</text>
+          <text class="start-text">开始聊聊 →</text>
         </view>
       </view>
     </view>
@@ -69,10 +85,10 @@
       <text class="acard-insight" wx:if="{{assessmentInsight}}">"{{assessmentInsight}}"</text>
       <view class="acard-actions">
         <view class="acard-btn-primary" catchtap="goChat" hover-class="acard-btn-primary-hover" hover-stay-time="80">
-          <text class="acard-btn-primary-text">继续聊天</text>
+          <text class="acard-btn-primary-text">继续聊聊</text>
         </view>
         <view class="acard-btn-ghost" hover-class="acard-ghost-hover" hover-stay-time="80">
-          <text class="acard-btn-ghost-text">查看详情 ›</text>
+          <text class="acard-btn-ghost-text">看看评估 ›</text>
         </view>
       </view>
     </view>
@@ -87,7 +103,7 @@
     >
       <view class="resume-dot"></view>
       <view class="resume-body">
-        <text class="resume-title">继续上次的评估</text>
+        <text class="resume-title">接着看完上次的评估</text>
         <text class="resume-sub">第 {{resumeStep}} / 7 题 · 进度已保存</text>
       </view>
       <text class="resume-arrow">›</text>
@@ -95,7 +111,7 @@
 
     <!-- 场景区 header -->
     <view class="section-hd">
-      <text class="section-hd-title">或者，从一个场景开始</text>
+      <text class="section-hd-title">也可以从一个场景开始</text>
       <view hover-class="more-hover" hover-stay-time="80">
         <text class="section-hd-more">全部 ›</text>
       </view>
@@ -130,7 +146,7 @@
             </view>
             <text class="hero-desc">{{item.desc}}</text>
             <view class="hero-cta">
-              <text class="hero-cta-text">立即开始 →</text>
+              <text class="hero-cta-text">开始看看 →</text>
             </view>
           </view>
         </view>
@@ -168,7 +184,7 @@
 
     <!-- 免责声明 -->
     <view class="disclaimer">
-      <text class="disclaimer-text">🔒 端到端加密 · 不记录身份 · 不用于训练 · 随时删除</text>
+      <text class="disclaimer-text">🔒 端到端加密 · 不记录身份信息 · 不用于训练 · 可随时删除</text>
     </view>
 
     <view style="height: 24rpx;"></view>

@@ -2,8 +2,11 @@
 <view class="page" style="padding-top: {{navPaddingTop}};">
 
   <view class="header">
-    <text class="header-title">工具</text>
-    <text class="header-sub">帮你度过这段时间的实用功能</text>
+    <view class="header-pill">
+      <text class="header-pill-text">需要的时候，可以来这里看看</text>
+    </view>
+    <text class="header-title">支持工具</text>
+    <text class="header-sub">在这段时间里，给你一些具体、能用上的支持</text>
   </view>
 
   <view class="tool-section">
@@ -14,7 +17,7 @@
       </view>
       <view class="tool-body">
         <text class="tool-name">放下模式</text>
-        <text class="tool-desc">断联建议 · 写告别信 · 7天恢复计划</text>
+        <text class="tool-desc">断联建议 · 告别信草稿 · 恢复计划</text>
       </view>
       <text class="tool-arrow">›</text>
     </view>
@@ -25,7 +28,7 @@
       </view>
       <view class="tool-body">
         <text class="tool-name">每日日志</text>
-        <text class="tool-desc">记录情绪状态 · 获取 AI 建议</text>
+        <text class="tool-desc">记录情绪状态 · 看看接下来怎么照顾自己</text>
       </view>
       <text class="tool-arrow">›</text>
     </view>

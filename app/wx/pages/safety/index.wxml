@@ -7,7 +7,7 @@
       <text class="care-icon">🫂</text>
     </view>
     <text class="care-title">我注意到你现在可能很难受</text>
-    <text class="care-subtitle">你的感受非常重要。有时候，和专业的人说说话，会帮助很大。</text>
+    <text class="care-subtitle">你的感受很重要。现在先联系专业支持，会比一个人扛着更有帮助。</text>
 
     <!-- 冷静期提示（有 cooldown 时显示）-->
     <view wx:if="{{cooldownTip}}" class="cooldown-tip">
@@ -41,13 +41,13 @@
 
   <!-- 底部信息 -->
   <view class="bottom-tip">
-    <text class="bottom-tip-text">你并不孤单，我们随时在这里</text>
+    <text class="bottom-tip-text">你不是一个人在面对这些事</text>
   </view>
 
   <!-- 返回按钮 -->
   <view class="footer-btn">
     <view class="btn-ok" bindtap="goHome" hover-class="btn-hover" hover-stay-time="100">
-      <text class="btn-ok-text">我明白了，返回首页</text>
+      <text class="btn-ok-text">回到首页</text>
     </view>
   </view>
 

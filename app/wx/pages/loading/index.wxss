@@ -2,13 +2,29 @@
 
 .page {
   height: 100vh;
-  background: #FAF4F1;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 36%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 48%, #F6EEEA 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 0 60rpx;
   box-sizing: border-box;
+}
+
+.intro-pill {
+  margin-bottom: 28rpx;
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(228, 90, 126, 0.12);
+}
+
+.intro-pill-text {
+  font-size: 22rpx;
+  color: #9A6C79;
+  line-height: 1;
 }
 
 /* ── 呼吸圆 ── */
@@ -19,9 +35,10 @@
 .main-circle {
   width: 160rpx;
   height: 160rpx;
-  background: #E45A7E;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   border-radius: 50%;
   animation: breathe 2.4s ease-in-out infinite;
+  box-shadow: 0 20rpx 44rpx rgba(199, 62, 100, 0.18);
 }
 
 @keyframes breathe {

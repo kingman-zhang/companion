@@ -3,7 +3,9 @@
 /* 页面容器 */
 .page {
   height: 100vh;
-  background: var(--md-bg-page-warm);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 46%, #F6EEEA 100%);
   display: flex;
   flex-direction: column;
 }
@@ -15,18 +17,40 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--md-space-3);
+  padding: 104rpx var(--md-space-5) 20rpx;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
   gap: var(--md-space-2);
-  padding: 104rpx var(--md-space-5) var(--md-space-2);
+}
+
+.header-status {
+  padding: 12rpx 18rpx;
+  border-radius: var(--md-radius-pill);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1rpx solid rgba(228, 90, 126, 0.14);
+  box-shadow: 0 8rpx 20rpx rgba(199, 62, 100, 0.08);
+}
+
+.header-status-text {
+  font-size: var(--md-font-hint);
+  color: var(--md-color-brand-deep);
+  line-height: 1;
 }
 
 /* Logo 图标：玫瑰粉圆角正方形，内有两个白色圆点 */
 .logo-icon {
   width: 64rpx;
   height: 64rpx;
-  background: var(--md-color-brand);
+  background: linear-gradient(145deg, #EB6F90 0%, #C73E64 100%);
   border-radius: var(--md-radius-md);
   position: relative;
   flex-shrink: 0;
+  box-shadow: 0 16rpx 30rpx rgba(199, 62, 100, 0.2);
 }
 
 .logo-dot-lg {
@@ -81,7 +105,7 @@
 
 /* ── 问候区 ── */
 .greeting-wrap {
-  padding: var(--md-space-2) var(--md-space-5) var(--md-space-3);
+  padding: 12rpx var(--md-space-5) var(--md-space-3);
 }
 
 .greeting-meta {
@@ -97,30 +121,52 @@
   font-size: var(--md-font-display);
   font-weight: var(--md-weight-semibold);
   color: var(--md-text-primary);
-  line-height: 1.25;
-  letter-spacing: -1rpx;
+  line-height: 1.18;
 }
 
 .greeting-sub {
   display: block;
   font-size: var(--md-font-caption);
-  color: var(--md-text-secondary);
-  line-height: 1.5;
-  margin-top: var(--md-space-1);
+  color: var(--md-text-mid);
+  line-height: 1.6;
+  margin-top: 18rpx;
+}
+
+.greeting-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: var(--md-space-3);
+}
+
+.greeting-chip {
+  padding: 12rpx 18rpx;
+  border-radius: var(--md-radius-pill);
+  background: rgba(255, 255, 255, 0.74);
+  border: 1rpx solid rgba(228, 90, 126, 0.12);
+}
+
+.greeting-chip-text {
+  font-size: var(--md-font-hint);
+  color: var(--md-text-mid);
+  line-height: 1;
 }
 
 /* ── 快速输入卡片 ── */
 .quick-card {
   margin: 0 var(--md-space-5) var(--md-space-3);
-  background: var(--md-bg-card);
-  border-radius: var(--md-radius-lg);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 28rpx;
   overflow: hidden;
-  border: 3rpx solid var(--md-border-light);
-  transition: border-color 0.2s;
+  border: 2rpx solid rgba(222, 204, 199, 0.72);
+  box-shadow: 0 18rpx 40rpx rgba(122, 71, 73, 0.07);
+  backdrop-filter: blur(18rpx);
+  transition: border-color 0.2s, transform 0.2s;
 }
 
 .quick-card-active {
-  border-color: var(--md-color-brand);
+  border-color: rgba(228, 90, 126, 0.38);
+  transform: translateY(-1rpx);
 }
 
 .quick-input {
@@ -145,6 +191,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--md-space-2) var(--md-space-3) var(--md-space-3);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(252, 240, 243, 0.84) 100%);
 }
 
 .quick-bar-left {
@@ -177,11 +224,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--md-color-brand);
+  background: linear-gradient(135deg, var(--md-color-brand) 0%, var(--md-color-brand-deep) 100%);
   opacity: 0;
   transform: scale(0.88);
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 12rpx 24rpx rgba(199, 62, 100, 0.2);
 }
 
 .start-btn-visible {
@@ -203,10 +251,11 @@
 /* ── 评估结果摘要卡 ── */
 .assessment-card {
   margin: 0 var(--md-space-5) var(--md-space-3);
-  background: var(--md-bg-card);
-  border-radius: var(--md-radius-lg);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 28rpx;
   padding: var(--md-space-3) var(--md-space-4) var(--md-space-3);
   border: 1rpx solid var(--md-border-light);
+  box-shadow: 0 16rpx 38rpx rgba(122, 71, 73, 0.06);
 }
 
 .assessment-card-green  { border-color: var(--md-assess-green-border);  background: var(--md-assess-green-card); }
@@ -278,11 +327,12 @@
 .acard-btn-primary {
   flex: 1;
   height: var(--md-space-8);
-  background: var(--md-color-brand);
+  background: linear-gradient(135deg, var(--md-color-brand) 0%, var(--md-color-brand-deep) 100%);
   border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 12rpx 24rpx rgba(199, 62, 100, 0.16);
 }
 
 .acard-btn-primary-hover { opacity: 0.82; }
@@ -314,12 +364,13 @@
 .resume-strip {
   margin: 0 var(--md-space-5) var(--md-space-3);
   padding: var(--md-space-3) var(--md-space-3);
-  border-radius: var(--md-radius-lg);
-  background: var(--md-color-brand-light);
-  border: 1rpx solid var(--md-color-brand-border);
+  border-radius: 24rpx;
+  background: rgba(252, 232, 238, 0.88);
+  border: 1rpx solid rgba(228, 90, 126, 0.16);
   display: flex;
   align-items: center;
   gap: var(--md-space-3);
+  box-shadow: 0 14rpx 32rpx rgba(122, 71, 73, 0.05);
 }
 
 .resume-hover {
@@ -371,7 +422,7 @@
 
 .section-hd-title {
   font-size: var(--md-font-caption);
-  color: var(--md-text-mid);
+  color: #6E6064;
   font-weight: var(--md-weight-semibold);
 }
 
@@ -389,25 +440,25 @@
   margin: 0 var(--md-space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--md-space-2);
+  gap: 18rpx;
 }
 
 /* 通用按下反馈（assessment-card、hero、普通卡共用） */
 .card-active {
-  opacity: 0.9;
-  transform: scale(0.985);
+  opacity: 0.94;
+  transform: scale(0.992);
 }
 
 /* ── Hero 场景卡（第一张，差异化设计） ── */
 .scenario-hero {
-  background: var(--md-bg-card);
-  border-radius: var(--md-radius-lg);
-  border: 1rpx solid var(--md-border-light);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 246, 246, 0.92) 100%);
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(228, 90, 126, 0.12);
   display: flex;
   align-items: flex-start;
   padding: var(--md-space-4);
   gap: var(--md-space-3);
-  box-shadow: var(--md-shadow-md);
+  box-shadow: 0 18rpx 42rpx rgba(128, 66, 75, 0.08);
 }
 
 .hero-icon-bg {
@@ -456,11 +507,12 @@
 .hero-cta {
   display: inline-flex;
   align-items: center;
-  background: var(--md-color-brand);
+  background: linear-gradient(135deg, var(--md-color-brand) 0%, var(--md-color-brand-deep) 100%);
   border-radius: var(--md-radius-pill);
   height: 56rpx;
   padding: 0 var(--md-space-4);
   align-self: flex-start;
+  box-shadow: 0 12rpx 24rpx rgba(199, 62, 100, 0.18);
 }
 
 .hero-cta-text {
@@ -471,16 +523,16 @@
 
 /* ── 普通场景卡（第二张起，带圆角 emoji 图标区） ── */
 .scenario-card {
-  background: var(--md-bg-card);
-  border-radius: var(--md-radius-lg);
-  border: 1rpx solid var(--md-border-light);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(222, 204, 199, 0.72);
   display: flex;
   align-items: center;
   min-height: 144rpx;
   overflow: hidden;
   padding-left: var(--md-space-3);
   gap: var(--md-space-3);
-  box-shadow: var(--md-shadow-sm);
+  box-shadow: 0 14rpx 32rpx rgba(128, 66, 75, 0.05);
 }
 
 .card-icon-bg {
@@ -549,7 +601,7 @@
 /* ── 免责声明 ── */
 .disclaimer {
   text-align: center;
-  padding: var(--md-space-5) var(--md-space-5) 0;
+  padding: var(--md-space-5) calc(var(--md-space-5) + 12rpx) 0;
 }
 
 .disclaimer-text {

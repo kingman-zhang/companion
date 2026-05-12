@@ -2,7 +2,9 @@
 
 .page {
   min-height: 100vh;
-  background: #FAF4F1;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 36%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 48%, #F6EEEA 100%);
   padding-bottom: 80rpx;
 }
 
@@ -41,8 +43,9 @@
   margin: 28rpx 0 0;
   padding: 16rpx 28rpx;
   border-radius: 16rpx;
-  background: #FCE8EE;
+  background: linear-gradient(180deg, #FFF4F7 0%, #FCE8EE 100%);
   display: inline-block;
+  border: 1rpx solid rgba(228, 90, 126, 0.12);
 }
 
 .cooldown-text {
@@ -66,14 +69,15 @@
 }
 
 .hotline-card {
-  background: #FFFFFF;
-  border: 1rpx solid #EFE4E0;
-  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  border-radius: 28rpx;
   padding: 28rpx 32rpx;
   margin-bottom: 16rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
 }
 
 .card-hover { opacity: 0.82; }
@@ -134,12 +138,13 @@
 }
 
 .btn-ok {
-  background: #E45A7E;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   height: 96rpx;
-  border-radius: 24rpx;
+  border-radius: 28rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 14rpx 28rpx rgba(199, 62, 100, 0.16);
 }
 
 .btn-ok-text {

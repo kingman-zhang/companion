@@ -2,12 +2,14 @@
 
 .page {
   height: 100vh;
-  background: #FAF4F1;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 46%, #F6EEEA 100%);
 }
 
 /* ── 自定义导航栏 ── */
 .nav-bar {
-  background: #FAF4F1;
+  background: rgba(250, 241, 237, 0.92);
   display: flex;
   align-items: flex-end;
   padding-left: 32rpx;
@@ -16,18 +18,20 @@
   top: 0;
   z-index: 100;
   box-sizing: border-box;
+  backdrop-filter: blur(18rpx);
 }
 
 .nav-back-btn {
   width: 60rpx;
   height: 60rpx;
   border-radius: 50%;
-  border: 1.5rpx solid #EFE4E0;
-  background: #FFFFFF;
+  border: 1.5rpx solid rgba(219, 200, 195, 0.72);
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 10rpx 24rpx rgba(117, 77, 76, 0.06);
 }
 
 .nav-btn-hover { opacity: 0.7; }
@@ -37,13 +41,26 @@
   height: 36rpx;
 }
 
-.nav-title {
+.nav-center {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.nav-title {
   text-align: center;
   font-size: 30rpx;
   font-weight: 600;
   color: #1F1417;
-  line-height: 60rpx;
+  line-height: 1.2;
+}
+
+.nav-subtitle {
+  font-size: 20rpx;
+  color: #8F8589;
+  line-height: 1;
 }
 
 .nav-more {
@@ -57,11 +74,12 @@
   width: 60rpx;
   height: 60rpx;
   border-radius: 50%;
-  border: 1.5rpx solid #EFE4E0;
-  background: #FFFFFF;
+  border: 1.5rpx solid rgba(219, 200, 195, 0.72);
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 10rpx 24rpx rgba(117, 77, 76, 0.06);
 }
 
 .nav-more-text {
@@ -74,10 +92,12 @@
 ══════════════════════════ */
 .score-card {
   margin: 16rpx 32rpx 0;
-  background: #FFFFFF;
-  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 36rpx;
   padding: 32rpx;
-  border: 1rpx solid #EFE4E0;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 20rpx 50rpx rgba(117, 77, 76, 0.08);
+  backdrop-filter: blur(18rpx);
 }
 
 /* 顶行：左（徽章+标题）右（分数）*/
@@ -100,14 +120,15 @@
 .level-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6rpx 18rpx;
-  border-radius: 8rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
   align-self: flex-start;
+  border: 1rpx solid transparent;
 }
 
-.badge-green  { background: #E3EEDF; }
-.badge-yellow { background: #FDF6E3; }
-.badge-red    { background: #FBF0F0; }
+.badge-green  { background: #E3EEDF; border-color: rgba(61, 122, 90, 0.16); }
+.badge-yellow { background: #FDF6E3; border-color: rgba(160, 120, 48, 0.16); }
+.badge-red    { background: #FBF0F0; border-color: rgba(155, 64, 64, 0.16); }
 
 .level-badge-text {
   font-size: 22rpx;
@@ -146,6 +167,7 @@
   font-size: 88rpx;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: -1rpx;
 }
 
 .score-num-green  { color: #3D7A5A; }
@@ -197,29 +219,31 @@
 .dim-score-red    { color: #9B4040; }
 
 .dim-track {
-  height: 8rpx;
-  background: #EFE4E0;
-  border-radius: 4rpx;
+  height: 10rpx;
+  background: rgba(228, 214, 209, 0.88);
+  border-radius: 999rpx;
   overflow: hidden;
 }
 
 .dim-fill {
   height: 100%;
-  border-radius: 4rpx;
+  border-radius: 999rpx;
 }
 
-.dim-fill-green  { background: #3D7A5A; }
-.dim-fill-yellow { background: #A07830; }
-.dim-fill-red    { background: #9B4040; }
+.dim-fill-green  { background: linear-gradient(135deg, #4E936A 0%, #3D7A5A 100%); }
+.dim-fill-yellow { background: linear-gradient(135deg, #C28E34 0%, #A07830 100%); }
+.dim-fill-red    { background: linear-gradient(135deg, #B45858 0%, #9B4040 100%); }
 
 /* ══════════════════════════
    核心洞察卡片（粉色）
 ══════════════════════════ */
 .insight-card {
   margin: 28rpx 32rpx 0;
-  padding: 28rpx 28rpx 24rpx;
-  border-radius: 24rpx;
-  background: #FCE8EE;
+  padding: 30rpx 28rpx 24rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(180deg, #FFF4F7 0%, #FCE8EE 100%);
+  border: 1rpx solid rgba(228, 90, 126, 0.14);
+  box-shadow: 0 16rpx 36rpx rgba(199, 62, 100, 0.08);
 }
 
 .insight-label {
@@ -247,6 +271,18 @@
   line-height: 1.7;
 }
 
+.insight-foot {
+  margin-top: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid rgba(228, 90, 126, 0.12);
+}
+
+.insight-foot-text {
+  font-size: 22rpx;
+  color: #9A6C79;
+  line-height: 1.6;
+}
+
 /* ══════════════════════════
    行动卡片
 ══════════════════════════ */
@@ -269,14 +305,16 @@
 }
 
 .action-card {
-  background: #FFFFFF;
-  border-radius: 24rpx;
-  border: 1rpx solid #EFE4E0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 28rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
   overflow: hidden;
+  box-shadow: 0 14rpx 34rpx rgba(117, 77, 76, 0.05);
 }
 
 .action-card-primary {
-  border-color: rgba(228, 90, 126, 0.35);
+  border-color: rgba(228, 90, 126, 0.26);
+  box-shadow: 0 16rpx 36rpx rgba(199, 62, 100, 0.08);
 }
 
 .action-card-dim {
@@ -290,7 +328,7 @@
   gap: 20rpx;
 }
 
-.action-hover { opacity: 0.8; }
+.action-hover { opacity: 0.92; }
 
 /* 序号圆圈 */
 .action-num {
@@ -305,8 +343,8 @@
 
 .action-num-primary  { background: #E45A7E; }
 .action-num-secondary {
-  background: transparent;
-  border: 1.5rpx solid #EFE4E0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5rpx solid rgba(228, 210, 205, 0.84);
 }
 
 .action-num-text-white {
@@ -374,8 +412,8 @@
 .action-detail-text {
   display: block;
   padding: 20rpx;
-  border-radius: 16rpx;
-  background: #FAF4F1;
+  border-radius: 20rpx;
+  background: #FCF6F3;
   font-size: 24rpx;
   color: #52464A;
   line-height: 1.7;
@@ -384,11 +422,12 @@
 .action-cta {
   margin-top: 16rpx;
   height: 84rpx;
-  border-radius: 16rpx;
-  background: #E45A7E;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 14rpx 28rpx rgba(199, 62, 100, 0.16);
 }
 
 .cta-hover { opacity: 0.82; }
@@ -407,9 +446,10 @@
   display: flex;
   align-items: flex-start;
   gap: 12rpx;
-  background: #FAF0DC;
-  border-radius: 16rpx;
+  background: rgba(250, 240, 220, 0.9);
+  border-radius: 20rpx;
   padding: 20rpx 24rpx;
+  border: 1rpx solid rgba(200, 138, 63, 0.14);
 }
 
 .disclaimer-icon {

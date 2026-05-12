@@ -3,13 +3,13 @@
 
   <!-- 顶部导航（仅标题，右侧预留胶囊空间）-->
   <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navCapsuleWidth}};">
-    <text class="nav-title">聊天</text>
+    <text class="nav-title">对话记录</text>
   </view>
 
   <!-- 本地缓存提示 -->
   <view wx:if="{{localFallback}}" class="local-fallback-tip">
-    <text class="local-fallback-text">网络异常，仅显示本地记录</text>
-    <text class="local-fallback-retry" bindtap="retrySessions">重试</text>
+    <text class="local-fallback-text">网络暂时不可用，当前只显示本地记录</text>
+    <text class="local-fallback-retry" bindtap="retrySessions">再试一次</text>
   </view>
 
   <!-- 有历史记录 -->
@@ -39,6 +39,9 @@
 
   <!-- 空状态 -->
   <view wx:else class="empty">
+    <view class="empty-intro-pill">
+      <text class="empty-intro-pill-text">这段对话会留在这里</text>
+    </view>
     <view class="empty-avatar-wrap">
       <view class="empty-ai-icon">
         <view class="ai-dot-l"></view>
@@ -46,9 +49,9 @@
       </view>
     </view>
     <text class="empty-title">还没有对话记录</text>
-    <text class="empty-desc">先做一个关系评估，AI 会根据你的情况陪你聊。</text>
+    <text class="empty-desc">先做一次关系评估，我们会按你的情况，把这段对话慢慢接起来。</text>
     <view class="empty-cta" bindtap="goAssess" hover-class="cta-hover" hover-stay-time="100">
-      <text class="empty-cta-text">开始评估 →</text>
+      <text class="empty-cta-text">先做评估 →</text>
     </view>
   </view>
 

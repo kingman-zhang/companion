@@ -6,7 +6,10 @@
     <view class="nav-back-btn" bindtap="goHome" hover-class="nav-btn-hover" hover-stay-time="100">
       <image src="/assets/icons/home.svg" class="nav-home-icon" mode="aspectFit"/>
     </view>
-    <text class="nav-title">关系评估</text>
+    <view class="nav-center">
+      <text class="nav-title">关系评估</text>
+      <text class="nav-subtitle">先把情况看清，再决定怎么走</text>
+    </view>
     <view class="nav-more" style="width: {{navPaddingRight}};">
       <view class="nav-more-btn" bindtap="showMore" hover-class="nav-btn-hover" hover-stay-time="80">
         <text class="nav-more-text">⋯</text>
@@ -30,7 +33,7 @@
           <text class="score-num score-num-{{levelClass}}">{{result.score}}</text>
           <text class="score-unit">/100</text>
         </view>
-        <text class="score-label">关系健康度</text>
+        <text class="score-label">当前状态</text>
       </view>
     </view>
 
@@ -69,9 +72,12 @@
 
   <!-- ── 核心洞察（粉色卡片）── -->
   <view class="insight-card">
-    <text class="insight-label">核心洞察</text>
+    <text class="insight-label">先看到的重点</text>
     <text class="insight-quote">"{{result.core_insight}}"</text>
     <text class="insight-desc">{{result.llm_reason}}</text>
+    <view class="insight-foot">
+      <text class="insight-foot-text">这份判断只是起点，接下来怎么做，才更重要。</text>
+    </view>
   </view>
 
   <!-- ── 接下来可以 ── -->
@@ -87,16 +93,16 @@
           </view>
           <view class="action-content">
             <text class="action-title-text">{{action1Title}}</text>
-            <text class="action-desc-text">和 AI 聊 · 大约 10 分钟</text>
+            <text class="action-desc-text">先把心里的话说出来 · 大约 10 分钟</text>
           </view>
           <view class="chev-wrap {{expandedAction === 'chat' ? 'chev-up' : ''}}">
             <text class="action-chev">›</text>
           </view>
         </view>
         <view wx:if="{{expandedAction === 'chat'}}" class="action-detail">
-          <text class="action-detail-text">先不做任何关系上的决定。用 AI 帮你把卡在心里的话说出来，情绪稳了之后再往下走。</text>
+          <text class="action-detail-text">先别急着做决定。把卡在心里的话说出来，等情绪稳一点，再往下看。</text>
           <view class="action-cta" bindtap="goChat" hover-class="cta-hover" hover-stay-time="80">
-            <text class="action-cta-text">开始对话 →</text>
+            <text class="action-cta-text">开始聊聊 →</text>
           </view>
         </view>
       </view>
@@ -108,17 +114,17 @@
             <text class="action-num-text-gray">2</text>
           </view>
           <view class="action-content">
-            <text class="action-title-text">生成一条给 TA 的话</text>
-            <text class="action-desc-text">基于你的评估定制 · 3 个版本</text>
+            <text class="action-title-text">整理一段想说的话</text>
+            <text class="action-desc-text">按你的情况来写 · 3 个版本</text>
           </view>
           <view class="chev-wrap {{expandedAction === 'rewrite' ? 'chev-up' : ''}}">
             <text class="action-chev">›</text>
           </view>
         </view>
         <view wx:if="{{expandedAction === 'rewrite'}}" class="action-detail">
-          <text class="action-detail-text">根据你的目标（修复 / 设边界 / 告别），AI 给你三种不同风险等级的表达，附改写原理。</text>
+          <text class="action-detail-text">按你的目标来想表达方式。这里会给你几种不同分寸的说法，也告诉你为什么这样写。</text>
           <view class="action-cta" bindtap="goRewrite" hover-class="cta-hover" hover-stay-time="80">
-            <text class="action-cta-text">去改写 →</text>
+            <text class="action-cta-text">开始改写 →</text>
           </view>
         </view>
       </view>
@@ -130,15 +136,15 @@
             <text class="action-num-text-gray">3</text>
           </view>
           <view class="action-content">
-            <text class="action-title-text">{{showLetgoAction ? '放下模式' : '开启 14 天恢复计划'}}</text>
-            <text class="action-desc-text">{{showLetgoAction ? '断联建议 · 告别信 · 7天恢复' : '每日任务 · 可随时暂停'}}</text>
+            <text class="action-title-text">{{showLetgoAction ? '恢复计划' : '开启 14 天恢复计划'}}</text>
+            <text class="action-desc-text">{{showLetgoAction ? '断联建议 · 告别信 · 7天计划' : '每日安排 · 可随时暂停'}}</text>
           </view>
           <text class="action-chev {{showLetgoAction ? '' : 'action-chev-dim'}} {{expandedAction === 'letgo' ? 'chev-up-inline' : ''}}">›</text>
         </view>
         <view wx:if="{{showLetgoAction && expandedAction === 'letgo'}}" class="action-detail">
-          <text class="action-detail-text">先照顾好自己。断开联系、写出感受、用 7 天一步步找回状态。这不是放弃，是更好地重新开始。</text>
+          <text class="action-detail-text">先把自己照顾好。断开联系、写下感受、用 7 天慢慢把状态找回来，这不是退缩，是在重新站稳。</text>
           <view class="action-cta" bindtap="goLetgo" hover-class="cta-hover" hover-stay-time="80">
-            <text class="action-cta-text">进入放下模式 →</text>
+            <text class="action-cta-text">开始恢复计划 →</text>
           </view>
         </view>
       </view>
@@ -149,12 +155,12 @@
   <!-- ── 免责声明 ── -->
   <view class="disclaimer-row">
     <text class="disclaimer-icon">ⓘ</text>
-    <text class="disclaimer-text">此评估基于你提供的信息 · 仅供参考 · 不替代专业心理咨询。如果你有自伤念头，请拨打 400-161-9995。</text>
+    <text class="disclaimer-text">本评估基于你提供的信息整理，仅供参考，不能替代专业心理咨询。如有自伤念头，请立即拨打 400-161-9995。</text>
   </view>
 
   <!-- ── 底部文字链接 ── -->
   <view class="page-footer">
-    <text class="footer-link" bindtap="goRedo" hover-class="footer-hover" hover-stay-time="80">重新评估 / 修改答案</text>
+    <text class="footer-link" bindtap="goRedo" hover-class="footer-hover" hover-stay-time="80">重新回答问题</text>
   </view>
 
 </scroll-view>

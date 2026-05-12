@@ -6,17 +6,20 @@
     <view class="nav-back" bindtap="goBack">
       <text class="nav-back-icon">‹</text>
     </view>
-    <text class="nav-title">每日日志</text>
+    <view class="nav-center">
+      <text class="nav-title">情绪日志</text>
+      <text class="nav-subtitle">记下今天，也看看自己正在经历什么</text>
+    </view>
     <view class="nav-placeholder" />
   </view>
 
   <!-- Tab 切换 -->
   <view class="tab-bar">
     <view class="tab-item {{tab === 'submit' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="submit">
-      <text>今日记录</text>
+      <text>今天</text>
     </view>
     <view class="tab-item {{tab === 'history' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="history">
-      <text>历史日志</text>
+      <text>过往</text>
     </view>
   </view>
 
@@ -28,13 +31,13 @@
 
       <view class="result-card">
         <view class="result-header">
-          <text class="result-label">今日已记录</text>
+          <text class="result-label">今天的记录</text>
           <text class="result-date">{{todayLog.log_date}}</text>
         </view>
 
         <!-- 情绪评分 -->
         <view class="result-row">
-          <text class="result-row-label">情绪评分</text>
+          <text class="result-row-label">情绪强度</text>
           <view class="score-badge score-{{todayLog.emotion_score <= 3 ? 'low' : todayLog.emotion_score <= 6 ? 'mid' : 'high'}}">
             <text class="score-num">{{todayLog.emotion_score}}</text>
             <text class="score-denom">/10</text>
@@ -43,7 +46,7 @@
 
         <!-- 情绪标签 -->
         <view class="result-row">
-          <text class="result-row-label">情绪感受</text>
+          <text class="result-row-label">此刻感受</text>
           <view class="chip-list">
             <text class="chip chip-filled" wx:for="{{todayLog.emotion_labels_cn}}" wx:key="*this">{{item}}</text>
           </view>
@@ -51,30 +54,30 @@
 
         <!-- 联系情况 -->
         <view class="result-row">
-          <text class="result-row-label">联系情况</text>
+          <text class="result-row-label">今天有没有联系</text>
           <text class="result-row-val">{{todayLog.contacted_ex ? '有联系' : '未联系'}}</text>
         </view>
 
         <!-- 备注 -->
         <view class="result-row" wx:if="{{todayLog.notes}}">
-          <text class="result-row-label">备注</text>
+          <text class="result-row-label">你写下的话</text>
           <text class="result-notes">{{todayLog.notes}}</text>
         </view>
 
         <!-- AI 建议 -->
         <view class="suggestion-wrap" wx:if="{{todayLog.ai_suggestion}}">
-          <text class="suggestion-label">AI 给你的建议</text>
+          <text class="suggestion-label">接下来可以试试</text>
           <text class="suggestion-text">{{todayLog.ai_suggestion}}</text>
         </view>
 
         <view class="suggestion-action" wx:elif="{{!suggestionLoading}}">
           <view class="btn-suggestion" bindtap="getSuggestion">
-            <text>获取 AI 建议</text>
+            <text>看看接下来怎么做</text>
           </view>
         </view>
 
         <view class="suggestion-loading" wx:elif="{{suggestionLoading}}">
-          <text class="loading-text">AI 正在为你生成建议…</text>
+          <text class="loading-text">正在为你整理一些建议…</text>
         </view>
       </view>
 
@@ -85,7 +88,7 @@
 
       <!-- 情绪评分滑块 -->
       <view class="section-card">
-        <text class="section-title">今天情绪怎么样？</text>
+        <text class="section-title">今天整体怎么样？</text>
         <view class="score-display">
           <text class="score-big">{{emotionScore}}</text>
           <text class="score-unit">/ 10</text>
@@ -93,9 +96,9 @@
         <slider class="slider-ctrl"
           min="1" max="10" step="1"
           value="{{emotionScore}}"
-          activeColor="#4A7B7B"
-          backgroundColor="#E8E5DF"
-          block-color="#4A7B7B"
+          activeColor="#E45A7E"
+          backgroundColor="#F0D8DE"
+          block-color="#E45A7E"
           bindchange="onScoreChange" />
         <view class="slider-labels">
           <text class="slider-label-l">低落</text>
@@ -106,7 +109,7 @@
       <!-- 情绪标签多选 -->
       <view class="section-card">
         <view class="section-title-row">
-          <text class="section-title">选择最符合的情绪</text>
+          <text class="section-title">选几个最接近的感受</text>
           <text class="emotion-count-badge">{{selectedEmotions.length}}/3</text>
         </view>
         <view class="emotion-grid">
@@ -121,7 +124,7 @@
       <!-- 联系对方 -->
       <view class="section-card">
         <view class="contact-row" bindtap="toggleContactedEx">
-          <text class="section-title">今天联系过对方了吗？</text>
+          <text class="section-title">今天和对方有联系吗？</text>
           <view class="toggle-btn {{contactedEx ? 'toggle-on' : ''}}">
             <view class="toggle-dot {{contactedEx ? 'toggle-dot-on' : ''}}" />
           </view>
@@ -148,7 +151,7 @@
 
       <!-- 备注 -->
       <view class="section-card">
-        <text class="section-title">今日备注（选填）</text>
+        <text class="section-title">补一句今天的状态（选填）</text>
         <textarea class="notes-input"
           value="{{notes}}"
           placeholder="随便写写今天的感受…"
@@ -160,7 +163,7 @@
       <!-- 提交按钮 -->
       <view class="btn-submit-wrap">
         <view class="btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submit">
-          <text>{{submitting ? '提交中…' : '记录今天'}}</text>
+          <text>{{submitting ? '保存中…' : '记下今天'}}</text>
         </view>
       </view>
 
@@ -183,7 +186,7 @@
 
     <view class="history-empty" wx:elif="{{!history.length}}">
       <text class="history-empty-text">还没有历史日志</text>
-      <text class="history-empty-sub">每天记录情绪，看见自己的变化</text>
+      <text class="history-empty-sub">慢慢记下这些天，也会慢慢看见自己的变化</text>
     </view>
 
     <view wx:else>

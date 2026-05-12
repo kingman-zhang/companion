@@ -1,28 +1,46 @@
 /* 工具页 */
 page {
-  background: #F5F3F0;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 36%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 48%, #F6EEEA 100%);
 }
 
 .page {
   min-height: 100vh;
-  background: #F5F3F0;
+  background: transparent;
 }
 
 .header {
-  padding: 40rpx 40rpx 32rpx;
+  padding: 36rpx 40rpx 30rpx;
+}
+
+.header-pill {
+  display: inline-flex;
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(228, 90, 126, 0.12);
+  margin-bottom: 18rpx;
+}
+
+.header-pill-text {
+  font-size: 22rpx;
+  color: #9A6C79;
+  line-height: 1;
 }
 
 .header-title {
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: 700;
-  color: #1C1C1E;
+  color: #1F1417;
   display: block;
-  margin-bottom: 12rpx;
+  margin-bottom: 10rpx;
 }
 
 .header-sub {
   font-size: 26rpx;
-  color: #A0A0A0;
+  color: #8F8589;
+  line-height: 1.6;
 }
 
 .tool-section {
@@ -33,16 +51,19 @@ page {
 }
 
 .tool-card {
-  background: #FFFFFF;
-  border-radius: 24rpx;
-  padding: 32rpx 28rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 28rpx;
+  padding: 30rpx 28rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
 }
 
 .card-hover {
-  opacity: 0.8;
+  opacity: 0.94;
+  transform: translateY(-1rpx);
 }
 
 .tool-icon-wrap {
@@ -53,10 +74,11 @@ page {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 10rpx 22rpx rgba(117, 77, 76, 0.05);
 }
 
-.teal { background: #EDF4F4; }
-.amber { background: #FDF6E3; }
+.teal { background: linear-gradient(180deg, #FFF1F5 0%, #FCE8EE 100%); }
+.amber { background: linear-gradient(180deg, #FFF7EA 0%, #FDF6E3 100%); }
 
 .tool-icon {
   font-size: 44rpx;
@@ -74,15 +96,15 @@ page {
 .tool-name {
   font-size: 30rpx;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1F1417;
   display: block;
   margin-bottom: 8rpx;
 }
 
 .tool-desc {
   font-size: 24rpx;
-  color: #A0A0A0;
-  line-height: 1.5;
+  color: #8F8589;
+  line-height: 1.55;
 }
 
 .tool-arrow {

@@ -3,7 +3,7 @@
 
   <!-- 顶部导航（仅标题，右侧预留胶囊空间）-->
   <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navCapsuleWidth}};">
-    <text class="nav-title">改写</text>
+    <text class="nav-title">消息改写</text>
   </view>
 
   <!-- 有历史记录 -->
@@ -23,12 +23,12 @@
         <text class="card-chev">›</text>
       </view>
       <view class="original-block">
-        <text class="block-label">原文</text>
+        <text class="block-label">你原本想说的</text>
         <text class="original-text">{{item.original}}</text>
       </view>
       <view class="arrow-row">
         <text class="arrow-down">↓</text>
-        <text class="arrow-label">AI 改写</text>
+        <text class="arrow-label">整理后</text>
       </view>
       <view class="result-block">
         <text class="result-text">{{item.result}}</text>
@@ -39,11 +39,14 @@
 
   <!-- 空状态 -->
   <view wx:else class="empty">
+    <view class="empty-intro-pill">
+      <text class="empty-intro-pill-text">先把想说的话放稳一点</text>
+    </view>
     <text class="empty-icon">✏️</text>
     <text class="empty-title">还没有改写记录</text>
-    <text class="empty-desc">把想说的话贴进来，AI 帮你调整措辞，降低冲突风险。</text>
+    <text class="empty-desc">把想说的话贴进来，我们一起把语气和分寸理顺一点。</text>
     <view class="empty-cta" bindtap="startNew" hover-class="cta-hover" hover-stay-time="100">
-      <text class="empty-cta-text">开始改写 →</text>
+      <text class="empty-cta-text">去写一版 →</text>
     </view>
   </view>
 

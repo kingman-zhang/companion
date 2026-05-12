@@ -7,15 +7,15 @@
       <text class="nav-back-icon">‹</text>
     </view>
     <view class="nav-center">
-      <text class="nav-title">话术改写</text>
-      <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : (showHistory ? '改写记录' : '发前先过一遍')}}</text>
+      <text class="nav-title">消息改写</text>
+      <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : (showHistory ? '过往改写' : '发出去前先过一遍')}}</text>
     </view>
     <view class="nav-right">
       <block wx:if="{{showHistory}}">
-        <text class="nav-action-text" bindtap="closeHistory" hover-class="nav-btn-hover" hover-stay-time="80">关闭</text>
+        <text class="nav-action-text" bindtap="closeHistory" hover-class="nav-btn-hover" hover-stay-time="80">返回</text>
       </block>
       <block wx:else>
-        <text wx:if="{{hasResults}}" class="nav-action-text" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重来</text>
+        <text wx:if="{{hasResults}}" class="nav-action-text" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重新写</text>
         <text class="nav-action-text nav-history-text" bindtap="openHistory" hover-class="nav-btn-hover" hover-stay-time="80">历史</text>
       </block>
     </view>
@@ -29,15 +29,15 @@
 
       <!-- Hero -->
       <view class="hero">
-        <text class="hero-title">发消息之前，让我先看看</text>
-        <text class="hero-desc">告诉我你想怎样、粘上原文，我给你三个不同风险的版本，附改写原理。</text>
+        <text class="hero-title">发出去之前，先一起过一遍</text>
+        <text class="hero-desc">告诉我你想达到什么效果，再贴上原话，我会帮你整理出几种不同分寸的说法。</text>
       </view>
 
       <!-- Step 1：目标选择 -->
       <view class="step-block">
         <view class="step-label-row">
           <view class="step-num step-num-on"><text class="step-num-text">1</text></view>
-          <text class="step-label-text">你想达到的效果</text>
+          <text class="step-label-text">这句话，你想说到哪里</text>
         </view>
         <view class="goal-chips">
           <view
@@ -61,7 +61,7 @@
           <view class="step-num {{originalMessage ? 'step-num-on' : 'step-num-off'}}">
             <text class="step-num-text">2</text>
           </view>
-          <text class="step-label-text">粘上你写的原文</text>
+          <text class="step-label-text">把你写的原话贴进来</text>
         </view>
         <view class="input-card {{originalMessage ? 'input-card-active' : ''}}">
           <textarea
@@ -121,8 +121,8 @@
   ══════════════════════ -->
   <scroll-view wx:elif="{{showHistory}}" class="content" scroll-y>
     <view wx:if="{{historyFallback}}" class="hist-fallback-tip">
-      <text class="hist-fallback-text">网络异常，仅显示本地记录</text>
-      <text class="hist-fallback-retry" bindtap="openHistory">重试</text>
+      <text class="hist-fallback-text">网络暂时不可用，当前只显示本地记录</text>
+      <text class="hist-fallback-retry" bindtap="openHistory">再试一次</text>
     </view>
     <view wx:if="{{history.length === 0}}" class="hist-empty">
       <text class="hist-empty-text">还没有改写记录</text>
@@ -193,7 +193,7 @@
             <text class="lock-badge-icon">🔒</text>
           </view>
           <text class="lock-overlay-title">解锁完整版本</text>
-          <text class="lock-overlay-sub">升级会员，查看全部 3 种改写方案</text>
+          <text class="lock-overlay-sub">升级后可查看全部 3 种改写方案</text>
           <view class="lock-overlay-btn" hover-class="btn-hover" hover-stay-time="100">
             <text class="lock-overlay-btn-text">立即升级</text>
           </view>
@@ -207,7 +207,7 @@
         <!-- 操作行 -->
         <view class="result-actions">
           <view class="action-copy {{copied ? 'action-copy-done' : ''}}" bindtap="copyResult" hover-class="btn-hover" hover-stay-time="80">
-            <text class="action-copy-text">{{copied ? '✓ 已复制' : '复制'}}</text>
+            <text class="action-copy-text">{{copied ? '✓ 已复制' : '复制内容'}}</text>
           </view>
           <view class="action-icon-btn" bindtap="doRewrite" hover-class="btn-hover" hover-stay-time="80">
             <text class="action-icon">↻</text>
@@ -222,11 +222,11 @@
         <text class="nudge-icon">✦</text>
       </view>
       <view class="nudge-body">
-        <text class="nudge-title">预测 TA 可能的回复</text>
-        <text class="nudge-sub">高级功能 · 帮你提前想好接下来的话</text>
+        <text class="nudge-title">顺便想一想 TA 可能怎么回</text>
+        <text class="nudge-sub">进阶功能 · 帮你把后面的对话也想在前面</text>
       </view>
       <view class="nudge-btn" bindtap="showUpgrade" hover-class="btn-hover" hover-stay-time="80">
-        <text class="nudge-btn-text">解锁</text>
+        <text class="nudge-btn-text">看看</text>
       </view>
     </view>
 
@@ -239,14 +239,14 @@
       <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
         <text class="upgrade-modal-close-icon">×</text>
       </view>
-      <text class="upgrade-modal-title">功能开发中</text>
-      <text class="upgrade-modal-body">该功能正在开发中，如需提前使用请联系管理员开通。</text>
+      <text class="upgrade-modal-title">功能还在准备中</text>
+      <text class="upgrade-modal-body">这个功能还在完善里。想提前使用的话，可以先联系管理员开通。</text>
       <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
         <text class="upgrade-modal-email">diamondiamon@163.com</text>
-        <text class="upgrade-modal-copy-hint">点击复制</text>
+        <text class="upgrade-modal-copy-hint">轻触复制</text>
       </view>
       <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
-        <text class="upgrade-modal-btn-text">我知道了</text>
+        <text class="upgrade-modal-btn-text">知道了</text>
       </view>
     </view>
   </view>

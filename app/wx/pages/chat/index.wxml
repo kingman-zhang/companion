@@ -7,8 +7,8 @@
       <text class="nav-back-icon">‹</text>
     </view>
     <view class="nav-center">
-      <text class="nav-title">和 AI 聊聊</text>
-      <text class="nav-subtitle">会话仅保存在你的设备</text>
+      <text class="nav-title">聊聊现在的你</text>
+      <text class="nav-subtitle">内容只保存在这台设备里</text>
     </view>
     <view class="nav-right">
       <view wx:if="{{emotionBadge}}" class="emotion-pill emotion-pill-{{emotionLevel}}">
@@ -24,6 +24,9 @@
 
     <!-- 居中内容 -->
     <view class="empty-center">
+      <view class="empty-intro-pill">
+        <text class="empty-intro-pill-text">先把话说出来</text>
+      </view>
       <!-- AI 头像 -->
       <view class="empty-avatar-wrap">
         <view class="empty-avatar">
@@ -33,7 +36,7 @@
         </view>
       </view>
 
-      <text class="empty-title">我在这里</text>
+      <text class="empty-title">先从一句话开始也可以</text>
       <text class="empty-desc">不着急。你想说什么都可以， 一个词、一句话、甚至只是发泄都行。</text>
 
       <!-- 快速发起 chips -->
@@ -53,7 +56,7 @@
 
       <!-- 安全声明 -->
       <view class="empty-safety">
-        <text class="safety-text">我不是心理医生 · 只是一个能帮你理顺思路的 AI</text>
+        <text class="safety-text">我不是心理医生，但可以先陪你把思路理一理</text>
         <text class="safety-link">如果你有自伤念头，请先拨打 400-161-9995</text>
       </view>
     </view>
@@ -74,7 +77,7 @@
   >
     <!-- 顶部安全说明 -->
     <view class="chat-system-tip">
-      <text class="system-tip-text">我不是心理医生 · 只是 AI</text>
+      <text class="system-tip-text">我不是心理医生，但会尽力陪你理清当下</text>
       <text class="system-tip-link">有自伤念头请拨打 400-161-9995</text>
     </view>
 
@@ -127,7 +130,7 @@
     <!-- Paywall 提示 -->
     <view class="paywall-banner" wx:if="{{showPaywall}}">
       <text class="paywall-title">已用完 10 轮免费对话</text>
-      <text class="paywall-sub">升级会员，无限次倾诉陪伴</text>
+      <text class="paywall-sub">升级后，可以继续不限次聊下去</text>
       <view class="paywall-btn" bindtap="showUpgradeModal" hover-class="btn-hover" hover-stay-time="100">
         <text class="paywall-btn-text">立即升级</text>
       </view>
@@ -186,7 +189,7 @@
         class="chat-input"
         value="{{inputValue}}"
         bindinput="onInput"
-        placeholder="说说你的感受"
+        placeholder="想说什么，就从这里开始"
         placeholder-class="input-placeholder"
         confirm-type="send"
         bindconfirm="sendMessage"
@@ -211,14 +214,14 @@
       <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
         <text class="upgrade-modal-close-icon">×</text>
       </view>
-      <text class="upgrade-modal-title">功能开发中</text>
-      <text class="upgrade-modal-body">该功能正在开发中，如需提前使用请联系管理员开通。</text>
+      <text class="upgrade-modal-title">功能还在准备中</text>
+      <text class="upgrade-modal-body">这个功能还在完善里。想提前使用的话，可以先联系管理员开通。</text>
       <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
         <text class="upgrade-modal-email">diamondiamon@163.com</text>
-        <text class="upgrade-modal-copy-hint">点击复制</text>
+        <text class="upgrade-modal-copy-hint">轻触复制</text>
       </view>
       <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
-        <text class="upgrade-modal-btn-text">我知道了</text>
+        <text class="upgrade-modal-btn-text">知道了</text>
       </view>
     </view>
   </view>
