@@ -3,3 +3,16 @@
 ######################
 
 **/target/**
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs
+backend/src/logs/
+**/*.log
+
+# Local tooling / IDE
+.claude/
+.idea/
+.vscode/
