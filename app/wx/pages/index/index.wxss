@@ -3,7 +3,7 @@
 /* 页面容器 */
 .page {
   height: 100vh;
-  background: #FAF4F1;
+  background: var(--md-bg-page-warm);
   display: flex;
   flex-direction: column;
 }
@@ -15,38 +15,38 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 104rpx 40rpx 20rpx;
+  gap: var(--md-space-2);
+  padding: 104rpx var(--md-space-5) var(--md-space-2);
 }
 
 /* Logo 图标：玫瑰粉圆角正方形，内有两个白色圆点 */
 .logo-icon {
   width: 64rpx;
   height: 64rpx;
-  background: #E45A7E;
-  border-radius: 16rpx;
+  background: var(--md-color-brand);
+  border-radius: var(--md-radius-md);
   position: relative;
   flex-shrink: 0;
 }
 
 .logo-dot-lg {
   position: absolute;
-  width: 20rpx;
-  height: 20rpx;
+  width: 16rpx;
+  height: 16rpx;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 50%;
-  top: 14rpx;
-  left: 16rpx;
+  border-radius: var(--md-radius-full);
+  top: var(--md-space-2);
+  left: var(--md-space-2);
 }
 
 .logo-dot-sm {
   position: absolute;
-  width: 12rpx;
-  height: 12rpx;
+  width: 8rpx;
+  height: 8rpx;
   background: rgba(255, 255, 255, 0.55);
-  border-radius: 50%;
-  bottom: 14rpx;
-  right: 14rpx;
+  border-radius: var(--md-radius-full);
+  bottom: var(--md-space-2);
+  right: var(--md-space-2);
 }
 
 /* Logo 右侧文字块 */
@@ -54,19 +54,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  gap: var(--md-space-1);
 }
 
 .brand-name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #1F1417;
+  font-size: var(--md-font-body);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
   line-height: 1.25;
 }
 
 .brand-tagline {
-  font-size: 20rpx;
-  color: #8F8589;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
   line-height: 1;
 }
 
@@ -81,62 +81,62 @@
 
 /* ── 问候区 ── */
 .greeting-wrap {
-  padding: 12rpx 40rpx 24rpx;
+  padding: var(--md-space-2) var(--md-space-5) var(--md-space-3);
 }
 
 .greeting-meta {
   display: block;
-  font-size: 24rpx;
-  color: #8F8589;
-  margin-bottom: 10rpx;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
+  margin-bottom: var(--md-space-1);
   line-height: 1.4;
 }
 
 .greeting-title {
   display: block;
-  font-size: 48rpx;
-  font-weight: 700;
-  color: #1F1417;
+  font-size: var(--md-font-display);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
   line-height: 1.25;
   letter-spacing: -1rpx;
 }
 
 .greeting-sub {
   display: block;
-  font-size: 26rpx;
-  color: #8F8589;
+  font-size: var(--md-font-caption);
+  color: var(--md-text-secondary);
   line-height: 1.5;
-  margin-top: 10rpx;
+  margin-top: var(--md-space-1);
 }
 
 /* ── 快速输入卡片 ── */
 .quick-card {
-  margin: 0 40rpx 24rpx;
-  background: #FFFFFF;
-  border-radius: 32rpx;
+  margin: 0 var(--md-space-5) var(--md-space-3);
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-lg);
   overflow: hidden;
-  border: 3rpx solid #EFE4E0;
+  border: 3rpx solid var(--md-border-light);
   transition: border-color 0.2s;
 }
 
 .quick-card-active {
-  border-color: #E45A7E;
+  border-color: var(--md-color-brand);
 }
 
 .quick-input {
   display: block;
   width: 100%;
   min-height: 112rpx;
-  padding: 28rpx 32rpx 16rpx;
-  font-size: 28rpx;
-  color: #1F1417;
+  padding: var(--md-space-3) var(--md-space-4) var(--md-space-2);
+  font-size: var(--md-font-body);
+  color: var(--md-text-primary);
   line-height: 1.65;
   box-sizing: border-box;
 }
 
 .quick-placeholder {
-  color: #BDB3B5;
-  font-size: 28rpx;
+  color: var(--md-text-tertiary);
+  font-size: var(--md-font-body);
 }
 
 /* 输入卡片底部操作栏 */
@@ -144,47 +144,50 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12rpx 20rpx 20rpx;
+  padding: var(--md-space-2) var(--md-space-3) var(--md-space-3);
 }
 
 .quick-bar-left {
   display: flex;
-  gap: 8rpx;
+  gap: var(--md-space-1);
 }
 
 .media-btn {
   width: 56rpx;
   height: 56rpx;
-  border-radius: 999rpx;
+  border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .media-hover {
-  background: #FAF4F1;
+  background: var(--md-bg-page-warm);
 }
 
 .media-icon {
-  font-size: 26rpx;
+  font-size: var(--md-font-caption);
 }
 
-/* 开始按钮 */
+/* 开始按钮：无内容时隐藏，有内容时淡入 */
 .start-btn {
-  height: 60rpx;
-  padding: 0 32rpx;
-  border-radius: 999rpx;
+  height: 64rpx;
+  padding: 0 var(--md-space-4);
+  border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--md-color-brand);
+  opacity: 0;
+  transform: scale(0.88);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.start-btn-off {
-  background: #EFE4E0;
-}
-
-.start-btn-on {
-  background: #E45A7E;
+.start-btn-visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
 }
 
 .start-hover {
@@ -192,98 +195,91 @@
 }
 
 .start-text {
-  font-size: 26rpx;
-  font-weight: 500;
-}
-
-.start-text-off {
-  color: #BDB3B5;
-}
-
-.start-text-on {
+  font-size: var(--md-font-caption);
+  font-weight: var(--md-weight-medium);
   color: #FFFFFF;
 }
 
 /* ── 评估结果摘要卡 ── */
 .assessment-card {
-  margin: 0 40rpx 24rpx;
-  background: #FFFFFF;
-  border-radius: 24rpx;
-  padding: 28rpx 32rpx 24rpx;
-  border: 1rpx solid #EFE4E0;
+  margin: 0 var(--md-space-5) var(--md-space-3);
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-lg);
+  padding: var(--md-space-3) var(--md-space-4) var(--md-space-3);
+  border: 1rpx solid var(--md-border-light);
 }
 
-.assessment-card-green  { border-color: rgba(61, 122, 90, 0.25);  background: #F7FBF9; }
-.assessment-card-yellow { border-color: rgba(160, 120, 48, 0.25); background: #FDFAF4; }
-.assessment-card-red    { border-color: rgba(155, 64, 64, 0.25);  background: #FBF7F7; }
+.assessment-card-green  { border-color: var(--md-assess-green-border);  background: var(--md-assess-green-card); }
+.assessment-card-yellow { border-color: var(--md-assess-yellow-border); background: var(--md-assess-yellow-card); }
+.assessment-card-red    { border-color: var(--md-assess-red-border);    background: var(--md-assess-red-card); }
 
 .acard-top {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: var(--md-space-2);
+  margin-bottom: var(--md-space-2);
 }
 
 .acard-score-block {
   display: flex;
   align-items: baseline;
-  gap: 4rpx;
+  gap: var(--md-space-1);
 }
 
 .acard-score {
-  font-size: 44rpx;
-  font-weight: 700;
-  color: #1F1417;
+  font-size: var(--md-font-display);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
   line-height: 1;
 }
 
 .acard-score-unit {
-  font-size: 22rpx;
-  color: #8F8589;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
 }
 
 .acard-badge {
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
+  padding: var(--md-space-1) var(--md-space-2);
+  border-radius: var(--md-radius-pill);
   flex-shrink: 0;
 }
 
-.acard-badge-green  { background: #EDF6F0; }
-.acard-badge-yellow { background: #FDF6E3; }
-.acard-badge-red    { background: #FBF0F0; }
+.acard-badge-green  { background: var(--md-assess-green-bg); }
+.acard-badge-yellow { background: var(--md-assess-yellow-bg); }
+.acard-badge-red    { background: var(--md-assess-red-bg); }
 
-.acard-badge-text { font-size: 20rpx; font-weight: 500; }
-.acard-badge-text-green  { color: #3D7A5A; }
-.acard-badge-text-yellow { color: #A07830; }
-.acard-badge-text-red    { color: #9B4040; }
+.acard-badge-text { font-size: var(--md-font-hint); font-weight: var(--md-weight-medium); }
+.acard-badge-text-green  { color: var(--md-assess-green); }
+.acard-badge-text-yellow { color: var(--md-assess-yellow); }
+.acard-badge-text-red    { color: var(--md-assess-red); }
 
 .acard-label {
   flex: 1;
-  font-size: 22rpx;
-  color: #8F8589;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
   text-align: right;
 }
 
 .acard-insight {
   display: block;
-  font-size: 24rpx;
-  color: #52464A;
+  font-size: var(--md-font-caption);
+  color: var(--md-text-mid);
   line-height: 1.6;
-  margin-bottom: 22rpx;
+  margin-bottom: var(--md-space-3);
   font-style: italic;
 }
 
 .acard-actions {
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: var(--md-space-3);
 }
 
 .acard-btn-primary {
   flex: 1;
-  height: 64rpx;
-  background: #E45A7E;
-  border-radius: 999rpx;
+  height: var(--md-space-8);
+  background: var(--md-color-brand);
+  border-radius: var(--md-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,34 +288,38 @@
 .acard-btn-primary-hover { opacity: 0.82; }
 
 .acard-btn-primary-text {
-  font-size: 26rpx;
-  font-weight: 500;
+  font-size: var(--md-font-caption);
+  font-weight: var(--md-weight-medium);
   color: #FFFFFF;
 }
 
 .acard-btn-ghost {
-  height: 64rpx;
-  padding: 0 8rpx;
+  height: var(--md-space-8);
+  padding: 0 var(--md-space-1);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.acard-ghost-hover {
+  opacity: 0.6;
+}
+
 .acard-btn-ghost-text {
-  font-size: 24rpx;
-  color: #8F8589;
+  font-size: var(--md-font-caption);
+  color: var(--md-text-secondary);
 }
 
 /* ── 续接条 ── */
 .resume-strip {
-  margin: 0 40rpx 24rpx;
-  padding: 20rpx 24rpx;
-  border-radius: 20rpx;
-  background: #FCE8EE;
-  border: 1rpx solid rgba(228, 90, 126, 0.2);
+  margin: 0 var(--md-space-5) var(--md-space-3);
+  padding: var(--md-space-3) var(--md-space-3);
+  border-radius: var(--md-radius-lg);
+  background: var(--md-color-brand-light);
+  border: 1rpx solid var(--md-color-brand-border);
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: var(--md-space-3);
 }
 
 .resume-hover {
@@ -327,10 +327,10 @@
 }
 
 .resume-dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  background: #E45A7E;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: var(--md-radius-full);
+  background: var(--md-color-brand);
   flex-shrink: 0;
 }
 
@@ -338,25 +338,25 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4rpx;
+  gap: var(--md-space-1);
 }
 
 .resume-title {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #C73E64;
+  font-size: var(--md-font-body);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-color-brand-deep);
   line-height: 1.4;
 }
 
 .resume-sub {
-  font-size: 22rpx;
-  color: #E45A7E;
+  font-size: var(--md-font-hint);
+  color: var(--md-color-brand);
   line-height: 1.4;
 }
 
 .resume-arrow {
-  font-size: 40rpx;
-  color: #E45A7E;
+  font-size: var(--md-font-h1);
+  color: var(--md-color-brand);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -366,18 +366,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4rpx 40rpx 16rpx;
+  padding: var(--md-space-1) var(--md-space-5) var(--md-space-2);
 }
 
 .section-hd-title {
-  font-size: 24rpx;
-  color: #52464A;
-  font-weight: 600;
+  font-size: var(--md-font-caption);
+  color: var(--md-text-mid);
+  font-weight: var(--md-weight-semibold);
 }
 
 .section-hd-more {
-  font-size: 22rpx;
-  color: #8F8589;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
 }
 
 .more-hover {
@@ -386,94 +386,174 @@
 
 /* ── 场景卡片列表 ── */
 .scenario-list {
-  margin: 0 40rpx;
+  margin: 0 var(--md-space-5);
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: var(--md-space-2);
 }
 
+/* 通用按下反馈（assessment-card、hero、普通卡共用） */
+.card-active {
+  opacity: 0.9;
+  transform: scale(0.985);
+}
+
+/* ── Hero 场景卡（第一张，差异化设计） ── */
+.scenario-hero {
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-lg);
+  border: 1rpx solid var(--md-border-light);
+  display: flex;
+  align-items: flex-start;
+  padding: var(--md-space-4);
+  gap: var(--md-space-3);
+  box-shadow: var(--md-shadow-md);
+}
+
+.hero-icon-bg {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--md-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-emoji {
+  font-size: 48rpx;
+}
+
+.hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-2);
+  margin-bottom: var(--md-space-1);
+  flex-wrap: wrap;
+}
+
+.hero-title {
+  font-size: var(--md-font-body);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
+  line-height: 1.4;
+}
+
+.hero-desc {
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--md-space-3);
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  background: var(--md-color-brand);
+  border-radius: var(--md-radius-pill);
+  height: 56rpx;
+  padding: 0 var(--md-space-4);
+  align-self: flex-start;
+}
+
+.hero-cta-text {
+  font-size: var(--md-font-caption);
+  font-weight: var(--md-weight-medium);
+  color: #FFFFFF;
+}
+
+/* ── 普通场景卡（第二张起，带圆角 emoji 图标区） ── */
 .scenario-card {
-  background: #FFFFFF;
-  border-radius: 24rpx;
-  border: 1rpx solid #EFE4E0;
+  background: var(--md-bg-card);
+  border-radius: var(--md-radius-lg);
+  border: 1rpx solid var(--md-border-light);
   display: flex;
   align-items: center;
   min-height: 144rpx;
   overflow: hidden;
+  padding-left: var(--md-space-3);
+  gap: var(--md-space-3);
+  box-shadow: var(--md-shadow-sm);
 }
 
-.card-active {
-  opacity: 0.86;
-}
-
-/* 左侧色条 */
-.accent-bar {
-  width: 8rpx;
-  border-radius: 999rpx;
+.card-icon-bg {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--md-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin: 32rpx 24rpx 32rpx 18rpx;
-  align-self: stretch;
+}
+
+.card-emoji {
+  font-size: 32rpx;
 }
 
 .card-body {
   flex: 1;
-  padding: 24rpx 0;
+  padding: var(--md-space-3) 0;
   min-width: 0;
 }
 
 .card-title-row {
   display: flex;
   align-items: center;
-  gap: 14rpx;
-  margin-bottom: 8rpx;
+  gap: var(--md-space-2);
+  margin-bottom: var(--md-space-1);
   flex-wrap: wrap;
 }
 
 .card-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1F1417;
+  font-size: var(--md-font-body);
+  font-weight: var(--md-weight-semibold);
+  color: var(--md-text-primary);
   line-height: 1.4;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
+  padding: var(--md-space-1) var(--md-space-2);
+  border-radius: var(--md-radius-pill);
   flex-shrink: 0;
 }
 
 .badge-text {
-  font-size: 20rpx;
-  font-weight: 500;
+  font-size: var(--md-font-hint);
+  font-weight: var(--md-weight-medium);
   line-height: 1;
 }
 
 .card-desc {
-  font-size: 22rpx;
-  color: #8F8589;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-secondary);
   line-height: 1.5;
 }
 
 .card-arrow {
-  font-size: 40rpx;
-  color: #BDB3B5;
+  font-size: var(--md-font-h1);
+  color: var(--md-text-tertiary);
   line-height: 1;
-  padding-right: 24rpx;
-  padding-left: 12rpx;
+  padding-right: var(--md-space-3);
   flex-shrink: 0;
 }
 
 /* ── 免责声明 ── */
 .disclaimer {
   text-align: center;
-  padding: 36rpx 40rpx 0;
+  padding: var(--md-space-5) var(--md-space-5) 0;
 }
 
 .disclaimer-text {
-  font-size: 20rpx;
-  color: #BDB3B5;
+  font-size: var(--md-font-hint);
+  color: var(--md-text-tertiary);
   line-height: 1.6;
 }
-

@@ -1,5 +1,5 @@
 /* app.wxss — 全局样式变量与基础组件 */
-
+@import "styles/tokens.wxss";
 page {
   background-color: #F5F3F0;
   font-family: PingFang SC, -apple-system, sans-serif;

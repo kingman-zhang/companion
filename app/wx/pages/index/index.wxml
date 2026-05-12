@@ -38,12 +38,12 @@
       <view class="quick-bar">
         <view class="quick-bar-left"></view>
         <view
-          class="start-btn {{quickText.length > 0 ? 'start-btn-on' : 'start-btn-off'}}"
+          class="start-btn {{quickText.length > 0 ? 'start-btn-visible' : ''}}"
           bindtap="startQuickChat"
           hover-class="{{quickText.length > 0 ? 'start-hover' : ''}}"
           hover-stay-time="80"
         >
-          <text class="start-text {{quickText.length > 0 ? 'start-text-on' : 'start-text-off'}}">开始 →</text>
+          <text class="start-text">开始 →</text>
         </view>
       </view>
     </view>
@@ -71,7 +71,7 @@
         <view class="acard-btn-primary" catchtap="goChat" hover-class="acard-btn-primary-hover" hover-stay-time="80">
           <text class="acard-btn-primary-text">继续聊天</text>
         </view>
-        <view class="acard-btn-ghost">
+        <view class="acard-btn-ghost" hover-class="acard-ghost-hover" hover-stay-time="80">
           <text class="acard-btn-ghost-text">查看详情 ›</text>
         </view>
       </view>
@@ -101,33 +101,69 @@
       </view>
     </view>
 
-    <!-- 场景卡片 -->
+    <!-- 场景卡片列表 -->
     <view class="scenario-list">
-      <view
-        wx:for="{{scenarios}}"
-        wx:key="scene"
-        class="scenario-card"
-        bindtap="selectScenario"
-        data-scene="{{item.scene}}"
-        hover-class="card-active"
-        hover-stay-time="80"
-      >
-        <view class="accent-bar" style="background-color: {{item.accentColor}};"></view>
-        <view class="card-body">
-          <view class="card-title-row">
-            <text class="card-title">{{item.title}}</text>
-            <view
-              wx:if="{{item.badge}}"
-              class="badge"
-              style="background-color: {{item.badgeBgColor}};"
-            >
-              <text class="badge-text" style="color: {{item.badgeTextColor}};">{{item.badge}}</text>
+      <block wx:for="{{scenarios}}" wx:key="scene">
+
+        <!-- Hero 卡（第一张，差异化设计） -->
+        <view
+          wx:if="{{index === 0}}"
+          class="scenario-hero"
+          bindtap="selectScenario"
+          data-scene="{{item.scene}}"
+          hover-class="card-active"
+          hover-stay-time="80"
+        >
+          <view class="hero-icon-bg" style="background-color: {{item.iconBg}};">
+            <text class="hero-emoji">{{item.emoji}}</text>
+          </view>
+          <view class="hero-content">
+            <view class="hero-title-row">
+              <text class="hero-title">{{item.title}}</text>
+              <view
+                wx:if="{{item.badge}}"
+                class="badge"
+                style="background-color: {{item.badgeBgColor}};"
+              >
+                <text class="badge-text" style="color: {{item.badgeTextColor}};">{{item.badge}}</text>
+              </view>
+            </view>
+            <text class="hero-desc">{{item.desc}}</text>
+            <view class="hero-cta">
+              <text class="hero-cta-text">立即开始 →</text>
             </view>
           </view>
-          <text class="card-desc">{{item.desc}}</text>
         </view>
-        <text class="card-arrow">›</text>
-      </view>
+
+        <!-- 普通卡（第二张起，带圆角 emoji 图标区） -->
+        <view
+          wx:else
+          class="scenario-card"
+          bindtap="selectScenario"
+          data-scene="{{item.scene}}"
+          hover-class="card-active"
+          hover-stay-time="80"
+        >
+          <view class="card-icon-bg" style="background-color: {{item.iconBg}};">
+            <text class="card-emoji">{{item.emoji}}</text>
+          </view>
+          <view class="card-body">
+            <view class="card-title-row">
+              <text class="card-title">{{item.title}}</text>
+              <view
+                wx:if="{{item.badge}}"
+                class="badge"
+                style="background-color: {{item.badgeBgColor}};"
+              >
+                <text class="badge-text" style="color: {{item.badgeTextColor}};">{{item.badge}}</text>
+              </view>
+            </view>
+            <text class="card-desc">{{item.desc}}</text>
+          </view>
+          <text class="card-arrow">›</text>
+        </view>
+
+      </block>
     </view>
 
     <!-- 免责声明 -->
