@@ -80,6 +80,7 @@ public class LlmGatewayImpl implements LlmGateway {
                 continue;
             }
 
+            long attemptStart = System.currentTimeMillis();
             try {
                 log.info("[AI] 调用: tier={}, provider={}, model={}, 历史消息={}条",
                         tier, config.provider(), config.modelId(), messages.size());
@@ -88,7 +89,10 @@ public class LlmGatewayImpl implements LlmGateway {
                 log.info("[AI] 回复 (耗时={}ms, model={}): {}", elapsed, config.modelId(), truncate(response, 500));
                 return response;
             } catch (Exception e) {
-                log.warn("模型调用失败，尝试下一个: model={}, reason={}", config.modelId(), e.getMessage());
+                long attemptElapsed = System.currentTimeMillis() - attemptStart;
+                log.warn("模型调用失败，尝试下一个: tier={}, provider={}, model={}, elapsed={}ms, errorType={}, reason={}",
+                        tier, config.provider(), config.modelId(), attemptElapsed,
+                        e.getClass().getSimpleName(), truncate(e.getMessage(), 300));
             }
         }
 
@@ -121,13 +125,17 @@ public class LlmGatewayImpl implements LlmGateway {
                 log.warn("未找到 provider，跳过: provider={}", config.provider());
                 continue;
             }
+            long attemptStart = System.currentTimeMillis();
             try {
                 log.info("[AI-Stream] 调用: tier={}, provider={}, model={}", tier, config.provider(), config.modelId());
                 provider.callStream(effectiveSystemPrompt, messages, config, onChunk);
                 log.info("[AI-Stream] 完成 (耗时={}ms, model={})", System.currentTimeMillis() - start, config.modelId());
                 return;
             } catch (Exception e) {
-                log.warn("流式模型失败，尝试下一个: model={}, reason={}", config.modelId(), e.getMessage());
+                long attemptElapsed = System.currentTimeMillis() - attemptStart;
+                log.warn("流式模型失败，尝试下一个: tier={}, provider={}, model={}, elapsed={}ms, errorType={}, reason={}",
+                        tier, config.provider(), config.modelId(), attemptElapsed,
+                        e.getClass().getSimpleName(), truncate(e.getMessage(), 300));
             }
         }
 
