@@ -95,8 +95,20 @@
           <view class="ai-avatar-dot-r"></view>
         </view>
         <view class="msg-bubble-wrap">
-          <view class="msg-bubble msg-bubble-ai">
-            <text class="msg-text">{{item.content}}</text>
+          <view class="msg-bubble msg-bubble-ai {{item.streaming ? 'msg-bubble-streaming' : ''}}">
+            <!-- 流式占位：内容为空时显示打字动效 -->
+            <block wx:if="{{item.streaming && !item.content}}">
+              <view class="msg-typing-inner">
+                <text class="typing-dot">·</text>
+                <text class="typing-dot">·</text>
+                <text class="typing-dot">·</text>
+              </view>
+            </block>
+            <block wx:else>
+              <text class="msg-text">{{item.content}}</text>
+              <!-- 流式光标 -->
+              <text wx:if="{{item.streaming}}" class="stream-cursor">▍</text>
+            </block>
           </view>
         </view>
       </block>
@@ -114,8 +126,8 @@
       </block>
     </view>
 
-    <!-- AI 正在输入 -->
-    <view class="msg-row msg-row-ai" wx:if="{{loading}}">
+    <!-- AI 正在输入（仅在流式气泡尚未出现时显示） -->
+    <view class="msg-row msg-row-ai" wx:if="{{loading && !streamingActive}}">
       <view class="ai-avatar">
         <view class="ai-avatar-dot-l"></view>
         <view class="ai-avatar-dot-r"></view>
@@ -149,17 +161,17 @@
     </view>
     <text class="micro-body">{{microIntervention.body}}</text>
     <view class="micro-actions">
-      <view class="micro-btn-primary" bindtap="closeMicro" hover-class="btn-hover" hover-stay-time="100">
-        <text class="micro-btn-text-white">{{microIntervention.action_label}}</text>
+      <view class="micro-btn-primary" bindtap="onMicroPrimary" hover-class="btn-hover" hover-stay-time="100">
+        <text class="micro-btn-text-white">{{microIntervention.actionLabel}}</text>
       </view>
       <view
-        wx:if="{{microIntervention.secondary_action_label}}"
+        wx:if="{{microIntervention.secondaryActionLabel}}"
         class="micro-btn-secondary"
-        bindtap="goRewrite"
+        bindtap="onMicroSecondary"
         hover-class="btn-hover"
         hover-stay-time="100"
       >
-        <text class="micro-btn-text-pink">{{microIntervention.secondary_action_label}}</text>
+        <text class="micro-btn-text-pink">{{microIntervention.secondaryActionLabel}}</text>
       </view>
     </view>
   </view>

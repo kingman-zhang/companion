@@ -14,12 +14,14 @@ import com.kingman.companion.module.chat.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,22 @@ public class ChatController {
     @SkipCheckLoginAuth
     public IResult<ChatResp> sendMessage(@Valid @RequestBody ChatReq req) {
         return IResult.success(chatService.sendMessage(req));
+    }
+
+    /**
+     * 流式发送消息（SSE）
+     *
+     * <p>返回 text/event-stream，每条事件的 data 为 JSON：
+     * <ul>
+     *   <li>{@code {"type":"delta","content":"..."}}</li>
+     *   <li>{@code {"type":"done","messageId":"...","emotionLabel":"...","emotionIntensity":N}}</li>
+     *   <li>{@code {"type":"error","message":"..."}}</li>
+     * </ul>
+     */
+    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @SkipCheckLoginAuth
+    public SseEmitter streamMessage(@Valid @RequestBody ChatReq req) {
+        return chatService.streamMessage(req);
     }
 
     /**

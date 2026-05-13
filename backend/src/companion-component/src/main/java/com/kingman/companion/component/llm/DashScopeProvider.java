@@ -15,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 阿里云百炼（DashScope）OpenAI 兼容接口 Provider
@@ -50,7 +51,7 @@ public class DashScopeProvider implements LlmProvider {
 
     @Override
     public String call(String systemPrompt, List<LlmMessage> messages, ModelConfig config) throws Exception {
-        String requestBody = buildRequestBody(systemPrompt, messages, config);
+        String requestBody = buildRequestBody(systemPrompt, messages, config, false);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(properties.getBaseUrl() + "/chat/completions"))
@@ -72,17 +73,65 @@ public class DashScopeProvider implements LlmProvider {
         return extractText(response.body());
     }
 
+    @Override
+    public void callStream(String systemPrompt, List<LlmMessage> messages, ModelConfig config,
+                           Consumer<String> onChunk) throws Exception {
+        String requestBody = buildRequestBody(systemPrompt, messages, config, true);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(properties.getBaseUrl() + "/chat/completions"))
+                .header("Authorization", "Bearer " + properties.getApiKey())
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofSeconds(config.timeoutSeconds()))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<java.util.stream.Stream<String>> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofLines());
+
+        if (response.statusCode() != 200) {
+          String body = response.body().reduce("", (a, b) -> a + b + "\n");
+          log.error("DashScope stream error: status={}, model={}, body={}",
+                  response.statusCode(), config.modelId(), body);
+          throw new RuntimeException("DashScope stream error: " + response.statusCode());
+        }
+
+        response.body().forEach(line -> {
+            if (!line.startsWith("data:")) return;
+            String data = line.substring(5).trim();
+            if (data.isEmpty() || "[DONE]".equals(data)) return;
+            try {
+                JsonNode root = MAPPER.readTree(data);
+                JsonNode delta = root.path("choices").path(0).path("delta");
+                String content = delta.path("content").asText("");
+                if (!content.isEmpty()) onChunk.accept(content);
+            } catch (Exception e) {
+                log.debug("DashScope stream parse skip: {}", e.getMessage());
+            }
+        });
+    }
+
     // ── 请求构造 ──────────────────────────────────────────────────────────────
 
     private String buildRequestBody(String systemPrompt,
                                     List<LlmMessage> messages,
                                     ModelConfig config) throws Exception {
+        return buildRequestBody(systemPrompt, messages, config, false);
+    }
+
+    private String buildRequestBody(String systemPrompt,
+                                    List<LlmMessage> messages,
+                                    ModelConfig config,
+                                    boolean stream) throws Exception {
         ObjectNode body = MAPPER.createObjectNode()
                 .put("model", config.modelId())
-                .put("max_tokens", config.maxTokens());
+                .put("max_tokens", config.maxTokens())
+                .put("stream", stream);
 
-        // 强制 JSON 输出，避免模型忽略 system prompt 中的格式指令
-        body.set("response_format", MAPPER.createObjectNode().put("type", "json_object"));
+        // 非流式接口仍要求 JSON 输出；流式接口需要返回纯文本 + 分隔符，不能强压 JSON object。
+        if (!stream) {
+            body.set("response_format", MAPPER.createObjectNode().put("type", "json_object"));
+        }
 
         ArrayNode msgsNode = MAPPER.createArrayNode();
 

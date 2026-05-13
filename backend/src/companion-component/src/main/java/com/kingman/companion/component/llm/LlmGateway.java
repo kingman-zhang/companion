@@ -1,6 +1,7 @@
 package com.kingman.companion.component.llm;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * LLM 调用统一入口（替代原 AnthropicClient）
@@ -31,4 +32,12 @@ public interface LlmGateway {
     default String complete(String systemPrompt, String userMessage, RoutingContext context) {
         return completeWithHistory(systemPrompt, List.of(LlmMessage.user(userMessage)), context);
     }
+
+    /**
+     * 流式多轮对话：逐 chunk 回调，在调用线程中同步执行。
+     *
+     * @param onChunk 每个文本 chunk 到来时的回调
+     */
+    void streamWithHistory(String systemPrompt, List<LlmMessage> messages, RoutingContext context,
+                           Consumer<String> onChunk);
 }

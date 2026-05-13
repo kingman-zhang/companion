@@ -163,6 +163,33 @@ class ChatServiceImplTest {
     }
 
     @Test
+    void sendMessage_does_not_trigger_delay_send_for_general_high_emotion_question() {
+        stubSession(0);
+        stubNoHistory();
+        stubLlm("{\"reply\":\"我听到你很难受。\",\"emotion_label\":\"SADNESS\",\"emotion_intensity\":9}");
+        stubMessageSave();
+
+        ChatResp resp = service.sendMessage(buildReq("他为什么这样"));
+
+        assertThat(resp.getMicroIntervention()).isNull();
+    }
+
+    @Test
+    void sendMessage_triggers_delay_send_for_high_emotion_reply_request() {
+        stubSession(0);
+        stubNoHistory();
+        stubLlm("{\"reply\":\"我来陪你一起整理。\",\"emotion_label\":\"OTHER\",\"emotion_intensity\":9}");
+        stubMessageSave();
+
+        ChatResp resp = service.sendMessage(buildReq("我现在真的很气，帮我写一句回他的消息"));
+
+        assertThat(resp.getMicroIntervention()).isNotNull();
+        assertThat(resp.getMicroIntervention().getType()).isEqualTo("delay_send");
+        assertThat(resp.getMicroIntervention().getActionTarget()).isEqualTo("/rewrite");
+        assertThat(resp.getMicroIntervention().getSecondaryActionTarget()).isEqualTo("close");
+    }
+
+    @Test
     void sendMessage_no_micro_intervention_when_intensity_lt_8() {
         stubSession(0);
         stubNoHistory();

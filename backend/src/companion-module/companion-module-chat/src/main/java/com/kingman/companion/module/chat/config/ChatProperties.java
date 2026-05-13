@@ -13,7 +13,12 @@ import org.springframework.stereotype.Component;
 public class ChatProperties {
 
     /**
-     * 聊天系统提示词，可在 application.yml 中覆盖，无需重新编译。
+     * 聊天系统提示词（非流式，JSON 输出格式），可在 application.yml 中覆盖。
      */
     private String systemPrompt = "";
+
+    /**
+     * 流式聊天系统提示词（文本 + ###METADATA### 分隔符格式），可在 application.yml 中覆盖。
+     */
+    private String streamSystemPrompt = "";
 }

@@ -4,6 +4,7 @@ import com.kingman.companion.module.chat.req.ChatReq;
 import com.kingman.companion.module.chat.resp.ChatMessageHistoryResp;
 import com.kingman.companion.module.chat.resp.ChatResp;
 import com.kingman.companion.module.chat.resp.ChatSessionSummaryResp;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -33,4 +34,15 @@ public interface ChatService {
      * 获取指定会话的消息历史
      */
     List<ChatMessageHistoryResp> getSessionMessages(String sessionId);
+
+    /**
+     * 流式发送消息，返回 SseEmitter。
+     * AI 回复以 SSE 事件形式推送：
+     * <ul>
+     *   <li>{@code {"type":"delta","content":"文字chunk"}}</li>
+     *   <li>{@code {"type":"done","messageId":"...","emotionLabel":"...","emotionIntensity":N}}</li>
+     *   <li>{@code {"type":"error","message":"..."}}</li>
+     * </ul>
+     */
+    SseEmitter streamMessage(ChatReq req);
 }

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * LLM Gateway 实现：路由 + Provider 分发 + Fallback
@@ -88,6 +89,45 @@ public class LlmGatewayImpl implements LlmGateway {
                 return response;
             } catch (Exception e) {
                 log.warn("模型调用失败，尝试下一个: model={}, reason={}", config.modelId(), e.getMessage());
+            }
+        }
+
+        log.error("所有模型均失败，tier={}", tier);
+        throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+    }
+
+    @Override
+    public void streamWithHistory(String systemPrompt, List<LlmMessage> messages,
+                                  RoutingContext context, Consumer<String> onChunk) {
+        ModelTier tier = router.route(context);
+        List<ModelConfig> chain = properties.getChain(tier);
+
+        if (chain.isEmpty()) {
+            log.error("路由配置缺失，tier={} 没有可用模型链", tier);
+            throw new ApiException(CodeEnum.AI_SERVICE_UNAVAILABLE);
+        }
+
+        String effectiveSystemPrompt = (tier == ModelTier.SAFETY)
+                ? SAFETY_SYSTEM_PREFIX + systemPrompt
+                : systemPrompt;
+
+        String lastUserMsg = messages.isEmpty() ? "" : messages.get(messages.size() - 1).content();
+        log.info("[AI-Stream] 用户问题: {}", truncate(lastUserMsg, 500));
+        long start = System.currentTimeMillis();
+
+        for (ModelConfig config : chain) {
+            LlmProvider provider = findProvider(config.provider());
+            if (provider == null) {
+                log.warn("未找到 provider，跳过: provider={}", config.provider());
+                continue;
+            }
+            try {
+                log.info("[AI-Stream] 调用: tier={}, provider={}, model={}", tier, config.provider(), config.modelId());
+                provider.callStream(effectiveSystemPrompt, messages, config, onChunk);
+                log.info("[AI-Stream] 完成 (耗时={}ms, model={})", System.currentTimeMillis() - start, config.modelId());
+                return;
+            } catch (Exception e) {
+                log.warn("流式模型失败，尝试下一个: model={}, reason={}", config.modelId(), e.getMessage());
             }
         }
 

@@ -36,7 +36,10 @@ public class ChatResp {
         /** breathe / step_away / delay_send */
         private String type;
         private String title;
+        private String body;
         private String actionLabel;
         private String actionTarget;
+        private String secondaryActionLabel;
+        private String secondaryActionTarget;
     }
 }

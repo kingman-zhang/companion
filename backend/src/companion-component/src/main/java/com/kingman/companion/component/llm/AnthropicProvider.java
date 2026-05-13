@@ -15,6 +15,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Anthropic Messages API Provider
@@ -72,14 +74,62 @@ public class AnthropicProvider implements LlmProvider {
         return extractText(response.body());
     }
 
+    @Override
+    public void callStream(String systemPrompt, List<LlmMessage> messages, ModelConfig config,
+                           Consumer<String> onChunk) throws Exception {
+        String requestBody = buildRequestBody(systemPrompt, messages, config, true);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(properties.getBaseUrl() + "/v1/messages"))
+                .header("x-api-key", properties.getApiKey())
+                .header("anthropic-version", ANTHROPIC_VERSION)
+                .header("content-type", "application/json")
+                .timeout(Duration.ofSeconds(config.timeoutSeconds()))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<java.util.stream.Stream<String>> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofLines());
+
+        if (response.statusCode() != 200) {
+            String body = response.body().collect(Collectors.joining("\n"));
+            log.error("Anthropic stream error: status={}, model={}, body={}",
+                    response.statusCode(), config.modelId(), body);
+            throw new RuntimeException("Anthropic stream error: " + response.statusCode());
+        }
+
+        response.body().forEach(line -> {
+            if (!line.startsWith("data: ")) return;
+            String data = line.substring(6).trim();
+            if (data.isEmpty() || "[DONE]".equals(data)) return;
+            try {
+                JsonNode node = MAPPER.readTree(data);
+                if ("content_block_delta".equals(node.path("type").asText())) {
+                    String text = node.path("delta").path("text").asText("");
+                    if (!text.isEmpty()) onChunk.accept(text);
+                }
+            } catch (Exception e) {
+                log.debug("Anthropic stream parse skip: {}", e.getMessage());
+            }
+        });
+    }
+
     // ── 请求构造 ──────────────────────────────────────────────────────────────
 
     private String buildRequestBody(String systemPrompt,
                                     List<LlmMessage> messages,
                                     ModelConfig config) throws Exception {
+        return buildRequestBody(systemPrompt, messages, config, false);
+    }
+
+    private String buildRequestBody(String systemPrompt,
+                                    List<LlmMessage> messages,
+                                    ModelConfig config,
+                                    boolean stream) throws Exception {
         ObjectNode body = MAPPER.createObjectNode()
                 .put("model", config.modelId())
                 .put("max_tokens", config.maxTokens())
+                .put("stream", stream)
                 .put("system", systemPrompt);
 
         ArrayNode msgsNode = MAPPER.createArrayNode();

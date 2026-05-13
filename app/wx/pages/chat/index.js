@@ -1,5 +1,6 @@
 // P3 情绪急救聊天页
 const app = getApp()
+const { requestStream } = require('../../utils/api')
 
 const EMOTION_TEXT_MAP = {
   ANGER: '愤怒', SADNESS: '难过', GUILT: '自责',
@@ -16,6 +17,35 @@ function emotionBadge(intensity) {
   return { text: `情绪弱 ${intensity}/10`, level: 'low' }
 }
 
+function normalizeMicroIntervention(micro) {
+  if (!micro) return null
+
+  const normalized = {
+    ...micro,
+    actionLabel: micro.actionLabel || micro.action_label || '',
+    actionTarget: micro.actionTarget || micro.action_target || '',
+    secondaryActionLabel: micro.secondaryActionLabel || micro.secondary_action_label || '',
+    secondaryActionTarget: micro.secondaryActionTarget || micro.secondary_action_target || '',
+    body: micro.body || '',
+  }
+
+  if (normalized.type === 'delay_send') {
+    if (!normalized.actionLabel) normalized.actionLabel = '帮我改写一下'
+    if (!normalized.actionTarget) normalized.actionTarget = '/rewrite'
+    if (!normalized.secondaryActionLabel) normalized.secondaryActionLabel = '我先收着'
+    if (!normalized.secondaryActionTarget) normalized.secondaryActionTarget = 'close'
+    if (!normalized.body) normalized.body = '这句话先别急着发。你可以先放在这里，等情绪落一点，再决定怎么表达。'
+  } else if (normalized.type === 'breathe') {
+    if (!normalized.actionLabel) normalized.actionLabel = '好，我先缓一下'
+    if (!normalized.body) normalized.body = '你不用立刻把一切想清楚，先把呼吸慢下来就可以。'
+  } else if (normalized.type === 'step_away') {
+    if (!normalized.actionLabel) normalized.actionLabel = '好，我先停一下'
+    if (!normalized.body) normalized.body = '先离开眼前这个刺激源一会儿，等身体和情绪都降一点再说。'
+  }
+
+  return normalized
+}
+
 let msgIdCounter = 0
 
 Page({
@@ -23,6 +53,7 @@ Page({
     messages: [],
     inputValue: '',
     loading: false,
+    streamingActive: false,        // 流式气泡是否在显示（控制 loading 打字指示器的显隐）
     sessionId: '',
     roundCount: 0,
     showPaywall: false,
@@ -76,11 +107,24 @@ Page({
   },
 
   onHide() {
+    this._abortStream()
     this._saveSession()
   },
 
   onUnload() {
+    this._abortStream()
     this._saveSession()
+  },
+
+  _abortStream() {
+    if (this._streamTask) {
+      try { this._streamTask.abort() } catch (e) {}
+      this._streamTask = null
+    }
+    if (this._streamTimeout) {
+      clearTimeout(this._streamTimeout)
+      this._streamTimeout = null
+    }
   },
 
   _loadExistingSession(sessionId) {
@@ -202,76 +246,108 @@ Page({
       }
     }
 
-    // 隐藏微干预
     if (this.data.showMicro) this.setData({ showMicro: false })
 
-    // 第一次发送：切换到聊天状态
-    const userMsg = {
-      id: `msg-${++msgIdCounter}`,
-      role: 'user',
-      content,
-    }
+    const prevMessages = this.data.messages.slice()
+    const userMsg = { id: `msg-${++msgIdCounter}`, role: 'user', content }
+    const aiMsgId = `msg-${++msgIdCounter}`
+    const aiPlaceholder = { id: aiMsgId, role: 'assistant', content: '', streaming: true }
+    const nextMessages = [...prevMessages, userMsg, aiPlaceholder]
 
-    const messages = [...this.data.messages, userMsg]
     this.setData({
-      messages,
+      messages: nextMessages,
       inputValue: '',
       loading: true,
+      streamingActive: true,
       userHasSent: true,
     })
     this._scrollToBottom()
 
-    try {
-      const res = await app.request({
-        url: '/api/v1/chat',
-        method: 'POST',
-        data: { session_id: this.data.sessionId, content },
-      })
+    const findAiMsgIdx = () => this.data.messages.findIndex(m => m.id === aiMsgId)
 
-      if (res.code === 200 && res.data) {
-        const data = res.data
-        const aiMsg = {
-          id: `msg-${++msgIdCounter}`,
-          role: 'assistant',
-          content: data.content,
-          emotion_label: data.emotion_label,
-          emotion_text: EMOTION_TEXT_MAP[data.emotion_label] || '',
+    // 30秒超时保护：防止后端无响应时 loading 永远不结束
+    this._streamTimeout = setTimeout(() => {
+      if (!this.data.loading) return
+      this._abortStream()
+      const msgs = this.data.messages.filter(m => m.id !== aiMsgId)
+      this.setData({ messages: msgs, loading: false, streamingActive: false })
+      wx.showToast({ title: '响应超时，请重试', icon: 'none' })
+    }, 30000)
+
+    this._streamTask = requestStream({
+      url: '/api/v1/chat/stream',
+      data: { session_id: this.data.sessionId, content },
+
+      onDelta: (chunk) => {
+        const aiMsgIdx = findAiMsgIdx()
+        if (aiMsgIdx < 0) return
+        const cur = this.data.messages[aiMsgIdx]
+        this.setData({ [`messages[${aiMsgIdx}].content`]: `${cur?.content || ''}${chunk || ''}` })
+        this._scrollToBottom()
+      },
+
+      onDone: (event) => {
+        this._streamTask = null
+        if (this._streamTimeout) { clearTimeout(this._streamTimeout); this._streamTimeout = null }
+        const aiMsgIdx = findAiMsgIdx()
+        if (aiMsgIdx < 0) {
+          this.setData({ loading: false, streamingActive: false })
+          return
         }
-
         const roundCount = this.data.roundCount + 1
-        const badge = emotionBadge(data.emotion_intensity)
-
+        const badge = emotionBadge(event.emotionIntensity)
         this.setData({
-          messages: [...this.data.messages, aiMsg],
+          [`messages[${aiMsgIdx}].streaming`]: false,
+          [`messages[${aiMsgIdx}].emotion_label`]: event.emotionLabel || '',
+          [`messages[${aiMsgIdx}].emotion_text`]: EMOTION_TEXT_MAP[event.emotionLabel] || '',
           roundCount,
           loading: false,
+          streamingActive: false,
           emotionBadge: badge ? badge.text : '',
           emotionLevel: badge ? badge.level : 'medium',
         })
         this._scrollToBottom()
 
-        // 微干预卡片（emotion_intensity >= 8）
-        if (data.micro_intervention) {
-          this.setData({ microIntervention: data.micro_intervention, showMicro: true })
+        const microIntervention = normalizeMicroIntervention(event.microIntervention)
+        if (microIntervention) {
+          this.setData({ microIntervention, showMicro: true })
         }
+      },
 
-        // 安全拦截由 api.js 全局处理（HTTP 451）
-      } else if (res.code === 429001) {
-        this.setData({ loading: false, showPaywall: true })
-      } else {
-        this.setData({ loading: false })
-        wx.showToast({ title: res.message || '发送失败，请重试', icon: 'none' })
-      }
-    } catch (e) {
-      this.setData({ loading: false })
-      if (!e.safety) {
-        wx.showToast({ title: '发送失败，请重试', icon: 'none' })
-      }
-    }
+      onError: (msg) => {
+        this._streamTask = null
+        if (this._streamTimeout) { clearTimeout(this._streamTimeout); this._streamTimeout = null }
+        const msgs = this.data.messages.filter(m => m.id !== aiMsgId)
+        if (msg && msg.includes('429')) {
+          this.setData({ messages: msgs, loading: false, streamingActive: false, showPaywall: true })
+          return
+        }
+        this.setData({ messages: msgs, loading: false, streamingActive: false })
+        wx.showToast({ title: msg || '发送失败，请重试', icon: 'none' })
+      },
+    })
   },
 
   closeMicro() {
     this.setData({ showMicro: false })
+  },
+
+  onMicroPrimary() {
+    const { microIntervention } = this.data
+    if (microIntervention?.actionTarget === '/rewrite') {
+      this.goRewrite()
+      return
+    }
+    this.closeMicro()
+  },
+
+  onMicroSecondary() {
+    const { microIntervention } = this.data
+    if (microIntervention?.secondaryActionTarget === '/rewrite') {
+      this.goRewrite()
+      return
+    }
+    this.closeMicro()
   },
 
   goRewrite() {
