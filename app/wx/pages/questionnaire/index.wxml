@@ -31,37 +31,38 @@
   <view wx:if="{{questionsReady}}" class="question-shell">
     <!-- 题目区域（可滚动） -->
     <scroll-view class="question-area" scroll-y>
+      <view class="question-content">
+        <text class="question-title">{{currentQuestion.title}}</text>
+        <text wx:if="{{currentQuestion.desc}}" class="question-desc">{{currentQuestion.desc}}</text>
 
-      <text class="question-title">{{currentQuestion.title}}</text>
-      <text wx:if="{{currentQuestion.desc}}" class="question-desc">{{currentQuestion.desc}}</text>
-
-      <!-- 选项列表 -->
-      <view class="options">
-        <view
-          wx:for="{{currentQuestion.options}}"
-          wx:key="value"
-          class="option {{currentAnswer === item.value ? 'option-selected' : ''}}"
-          bindtap="selectOption"
-          data-value="{{item.value}}"
-          hover-class="option-hover"
-          hover-stay-time="80"
-        >
-          <view class="radio {{currentAnswer === item.value ? 'radio-on' : ''}}">
-            <text wx:if="{{currentAnswer === item.value}}" class="radio-check">✓</text>
-          </view>
-          <view class="option-content">
-            <text class="option-label {{currentAnswer === item.value ? 'option-label-on' : ''}}">{{item.label}}</text>
-            <text wx:if="{{item.subDesc}}" class="option-subdesc">{{item.subDesc}}</text>
+        <!-- 选项列表 -->
+        <view class="options">
+          <view
+            wx:for="{{currentQuestion.options}}"
+            wx:key="value"
+            class="option {{currentAnswer === item.value ? 'option-selected' : ''}}"
+            bindtap="selectOption"
+            data-value="{{item.value}}"
+            hover-class="option-hover"
+            hover-stay-time="80"
+          >
+            <view class="radio {{currentAnswer === item.value ? 'radio-on' : ''}}">
+              <text wx:if="{{currentAnswer === item.value}}" class="radio-check">✓</text>
+            </view>
+            <view class="option-content">
+              <text class="option-label {{currentAnswer === item.value ? 'option-label-on' : ''}}">{{item.label}}</text>
+              <text wx:if="{{item.subDesc}}" class="option-subdesc">{{item.subDesc}}</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 跳过按钮 -->
-      <view class="skip-btn" bindtap="skipQuestion" hover-class="skip-hover" hover-stay-time="80">
-        <text class="skip-text">这题先跳过</text>
-      </view>
+        <!-- 跳过按钮 -->
+        <view class="skip-btn" bindtap="skipQuestion" hover-class="skip-hover" hover-stay-time="80">
+          <text class="skip-text">这题先跳过</text>
+        </view>
 
-      <view style="height: 24rpx;"></view>
+        <view class="question-content-spacer"></view>
+      </view>
     </scroll-view>
   </view>
 

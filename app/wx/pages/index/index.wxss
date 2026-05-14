@@ -17,8 +17,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--md-space-3);
+  gap: var(--md-space-2);
   padding: 104rpx var(--md-space-5) 20rpx;
 }
 
@@ -26,20 +25,7 @@
   display: flex;
   align-items: center;
   gap: var(--md-space-2);
-}
-
-.header-status {
-  padding: 12rpx 18rpx;
-  border-radius: var(--md-radius-pill);
-  background: rgba(255, 255, 255, 0.76);
-  border: 1rpx solid rgba(228, 90, 126, 0.14);
-  box-shadow: 0 8rpx 20rpx rgba(199, 62, 100, 0.08);
-}
-
-.header-status-text {
-  font-size: var(--md-font-hint);
-  color: var(--md-color-brand-deep);
-  line-height: 1;
+  min-width: 0;
 }
 
 /* Logo 图标：玫瑰粉圆角正方形，内有两个白色圆点 */

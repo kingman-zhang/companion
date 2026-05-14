@@ -2,8 +2,10 @@ package com.kingman.companion.framework.exception;
 
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.common.IResult;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -57,9 +59,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(result);
     }
 
+    @ExceptionHandler(ClientDisconnectedException.class)
+    public ResponseEntity<Void> handleClientDisconnected(ClientDisconnectedException e) {
+        log.info("客户端已断开流式连接: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<IResult<Void>> handleGeneral(Exception e) {
+    public ResponseEntity<?> handleGeneral(Exception e, HttpServletRequest request) {
         log.error("未处理异常", e);
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
+            log.warn("检测到 SSE 请求异常，跳过通用 JSON 错误响应，避免二次写回失败");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(IResult.fail(CodeEnum.INTERNAL_SERVER_ERROR));
     }

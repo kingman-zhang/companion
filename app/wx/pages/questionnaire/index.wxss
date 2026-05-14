@@ -102,6 +102,7 @@
 
 .question-shell {
   flex: 1;
+  min-height: 0;
   margin: 20rpx 24rpx 0;
   background: rgba(255, 255, 255, 0.72);
   border: 1rpx solid rgba(228, 210, 205, 0.84);
@@ -113,8 +114,15 @@
 
 /* ── 题目区域 ── */
 .question-area {
-  flex: 1;
-  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.question-content {
+  min-height: 100%;
+  box-sizing: border-box;
+  padding-top: 2rpx;
 }
 
 /* Display 级大标题：22px = 44rpx */
@@ -241,6 +249,10 @@
 .skip-text {
   font-size: 24rpx;
   color: #9B8A8E;
+}
+
+.question-content-spacer {
+  height: 24rpx;
 }
 
 /* ── 底部操作栏 ── */

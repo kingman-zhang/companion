@@ -732,10 +732,15 @@
 }
 
 .upgrade-modal-body {
+  display: block;
+  width: 100%;
   font-size: 26rpx;
   color: #666;
   text-align: center;
   line-height: 1.7;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 .upgrade-modal-email-wrap {

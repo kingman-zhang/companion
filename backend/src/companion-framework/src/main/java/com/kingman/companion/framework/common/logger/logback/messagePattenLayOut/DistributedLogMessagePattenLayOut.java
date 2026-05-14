@@ -31,6 +31,8 @@ import java.util.*;
  */
 public class DistributedLogMessagePattenLayOut extends LayoutBase<ILoggingEvent> {
 
+    private static final TimeZone LOG_TIME_ZONE = TimeZone.getTimeZone("Asia/Shanghai");
+
     /**
      * 单个日志打印的字符长度不超过 100*1024 个字符
      */
@@ -66,7 +68,7 @@ public class DistributedLogMessagePattenLayOut extends LayoutBase<ILoggingEvent>
         builder.ip(SystemUtils.getLocalIp());
 
         builder.createTimestamp(event.getTimeStamp());
-        builder.createTime(DateFormatUtils.format(new Date(event.getTimeStamp()), "yyyy-MM-dd HH:mm:ss.SSS", TimeZone.getDefault()));
+        builder.createTime(DateFormatUtils.format(new Date(event.getTimeStamp()), "yyyy-MM-dd HH:mm:ss.SSS", LOG_TIME_ZONE));
 
         // 解析当前日志的 flag
         LogFlag logFlag = getLogFlag(event);
@@ -157,13 +159,13 @@ public class DistributedLogMessagePattenLayOut extends LayoutBase<ILoggingEvent>
             Long requestTimestamp = webContext.getRequestTimestamp();
             String requestTime = null;
             if (requestTimestamp != null) {
-                requestTime = DateFormatUtils.format(new Date(requestTimestamp), "yyyy-MM-dd HH:mm:ss.SSS", TimeZone.getDefault());
+                requestTime = DateFormatUtils.format(new Date(requestTimestamp), "yyyy-MM-dd HH:mm:ss.SSS", LOG_TIME_ZONE);
             }
 
             // 获取响应时间戳
             // 假如响应时间为空的话，获取当前日志的时间戳
             long responseTimestamp = webContext.getResponseTimestamp() != null ? webContext.getResponseTimestamp() : event.getTimeStamp();
-            String responseTime = DateFormatUtils.format(new Date(responseTimestamp), "yyyy-MM-dd HH:mm:ss.SSS", TimeZone.getDefault());
+            String responseTime = DateFormatUtils.format(new Date(responseTimestamp), "yyyy-MM-dd HH:mm:ss.SSS", LOG_TIME_ZONE);
 
             // 假如请求时间不为空，则通过请求时间减去响应时间获取接口耗时
             long costTime = requestTimestamp != null ? (responseTimestamp - requestTimestamp) : 0L;

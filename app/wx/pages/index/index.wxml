@@ -13,9 +13,6 @@
         <text class="brand-tagline">陪你慢慢想清楚</text>
       </view>
     </view>
-    <view class="header-status">
-      <text class="header-status-text">私密对话空间</text>
-    </view>
   </view>
 
   <!-- ── 可滚动内容 ── -->

@@ -2,6 +2,8 @@
 const app = getApp()
 const { requestStream } = require('../../utils/api')
 
+const STREAM_TIMEOUT_MS = 60000
+
 const EMOTION_TEXT_MAP = {
   ANGER: '愤怒', SADNESS: '难过', GUILT: '自责',
   ANXIETY: '焦虑', FEAR: '恐惧', CALM: '平静',
@@ -265,14 +267,14 @@ Page({
 
     const findAiMsgIdx = () => this.data.messages.findIndex(m => m.id === aiMsgId)
 
-    // 30秒超时保护：防止后端无响应时 loading 永远不结束
+    // 60秒超时保护：给慢模型更充足的首包与输出时间
     this._streamTimeout = setTimeout(() => {
       if (!this.data.loading) return
       this._abortStream()
       const msgs = this.data.messages.filter(m => m.id !== aiMsgId)
       this.setData({ messages: msgs, loading: false, streamingActive: false })
-      wx.showToast({ title: '响应超时，请重试', icon: 'none' })
-    }, 30000)
+      wx.showToast({ title: '响应较慢，请重试', icon: 'none' })
+    }, STREAM_TIMEOUT_MS)
 
     this._streamTask = requestStream({
       url: '/api/v1/chat/stream',

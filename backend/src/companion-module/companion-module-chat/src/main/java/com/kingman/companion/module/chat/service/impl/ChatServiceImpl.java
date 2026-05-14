@@ -12,6 +12,7 @@ import com.kingman.companion.component.safety.SafetyLevel;
 import com.kingman.companion.component.safety.SafetyResult;
 import com.kingman.companion.framework.common.CodeEnum;
 import com.kingman.companion.framework.exception.ApiException;
+import com.kingman.companion.framework.exception.ClientDisconnectedException;
 import com.kingman.companion.framework.security.AuthContext;
 import com.kingman.companion.framework.util.DistributeID;
 import com.kingman.companion.module.chat.entity.ChatMessage;
@@ -393,12 +394,20 @@ public class ChatServiceImpl implements ChatService {
 
     private void runStream(SseEmitter emitter, ChatReq req, String systemPrompt,
                            List<LlmMessage> messages, RoutingContext context, ChatSession session) {
+        long streamStart = System.currentTimeMillis();
         StringBuilder accumulated = new StringBuilder();
         int[] sentUpTo = {0};
-        boolean[] hasError = {false};
+        boolean[] firstChunkLogged = {false};
 
         try {
+            log.info("[Chat-Stream] 开始请求模型: session={}, msgLen={}", req.getSessionId(), req.getContent().length());
             llmGateway.streamWithHistory(systemPrompt, messages, context, chunk -> {
+                if (!firstChunkLogged[0]) {
+                    firstChunkLogged[0] = true;
+                    long firstChunkElapsed = System.currentTimeMillis() - streamStart;
+                    log.info("[Chat-Stream] 收到首个chunk: session={}, firstChunkElapsed={}ms, chunkLen={}",
+                            req.getSessionId(), firstChunkElapsed, chunk != null ? chunk.length() : 0);
+                }
                 accumulated.append(chunk);
                 String full = accumulated.toString();
 
@@ -455,15 +464,19 @@ public class ChatServiceImpl implements ChatService {
             emitter.send(SseEmitter.event().data(doneJson, MediaType.TEXT_PLAIN));
             emitter.complete();
 
-            log.info("[Chat-Stream] 完成: session={}, emotion={}, intensity={}, replyLen={}",
-                    req.getSessionId(), result.emotionLabel(), result.emotionIntensity(), result.reply().length());
+            long totalElapsed = System.currentTimeMillis() - streamStart;
+            log.info("[Chat-Stream] 完成: session={}, emotion={}, intensity={}, replyLen={}, totalElapsed={}ms",
+                    req.getSessionId(), result.emotionLabel(), result.emotionIntensity(), result.reply().length(), totalElapsed);
 
         } catch (ApiException e) {
-            hasError[0] = true;
             sendError(emitter, e.getMessage() != null ? e.getMessage() : "服务暂时不可用");
             emitter.completeWithError(e);
+        } catch (ClientDisconnectedException e) {
+            long totalElapsed = System.currentTimeMillis() - streamStart;
+            log.info("[Chat-Stream] 客户端断开: session={}, elapsed={}ms, firstChunkReceived={}",
+                    req.getSessionId(), totalElapsed, firstChunkLogged[0]);
+            emitter.complete();
         } catch (Exception e) {
-            hasError[0] = true;
             log.error("[Chat-Stream] 流式失败: session={}", req.getSessionId(), e);
             sendError(emitter, "服务暂时不可用，请重试");
             emitter.completeWithError(e);
@@ -481,7 +494,7 @@ public class ChatServiceImpl implements ChatService {
             emitter.send(SseEmitter.event().data("{\"type\":\"delta\",\"content\":\"" + escaped + "\"}", MediaType.TEXT_PLAIN));
         } catch (IOException e) {
             log.debug("[Chat-Stream] 发送 delta 失败（客户端可能已断开）");
-            throw new RuntimeException("client_disconnected", e);
+            throw new ClientDisconnectedException("client_disconnected", e);
         }
     }
 
