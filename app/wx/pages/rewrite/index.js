@@ -101,16 +101,23 @@ Page({
     currentVariant: null,
     copied: false,
     navPaddingTop: '44px',
-    showUpgradeModal: false,
+    navPaddingRight: '200rpx',
     showHistory: false,
     history: [],
     historyFallback: false,
+    contentScrollTop: 0,
+    inputFocus: false,
   },
 
   onLoad() {
     try {
       const sysInfo = wx.getSystemInfoSync()
-      this.setData({ navPaddingTop: `${sysInfo.statusBarHeight + 10}px` })
+      const menuBtn = wx.getMenuButtonBoundingClientRect()
+      const capsuleRight = sysInfo.windowWidth - menuBtn.left
+      this.setData({
+        navPaddingTop: `${sysInfo.statusBarHeight + 10}px`,
+        navPaddingRight: `${capsuleRight}px`,
+      })
     } catch (e) {}
 
     // 根据评估结果个性化示例和目标 Tab
@@ -135,14 +142,13 @@ Page({
       const original = preload.original
       const risk = analyzeRisk(original)
 
-      const isPremium = app.isPremium()
       let variants = []
       if (preload.variants && preload.variants.length > 0) {
         variants = preload.variants.map((v, i) => ({
           ...v,
           version_label: VERSION_LABELS[v.version] || v.version,
           risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
-          locked: !isPremium && i > 0,
+          locked: false,
         }))
       } else if (preload.gentle_full) {
         variants = [{
@@ -237,7 +243,7 @@ Page({
           ...v,
           version_label: VERSION_LABELS[v.version] || v.version,
           risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
-          locked: index > 0,
+          locked: false,
         }))
 
         this.setData({
@@ -257,17 +263,6 @@ Page({
 
         // 保存到本地改写历史
         this._saveToHistory(msg, variants, res.data.rewrite_id)
-      } else if (res.code === 429001) {
-        wx.showModal({
-          title: '今日改写次数已用完',
-          content: '每日免费 1 次，升级会员可无限改写',
-          confirmText: '升级会员',
-          cancelText: '知道了',
-          showCancel: true,
-          success: ({ confirm }) => {
-            if (confirm) this.setData({ showUpgradeModal: true })
-          },
-        })
       } else {
         wx.showToast({ title: res.message || '改写失败，请重试', icon: 'none' })
       }
@@ -310,7 +305,6 @@ Page({
           const history = res.data.map(item => {
             const original = item.original_message || ''
             const gentle = item.gentle_content || ''
-            const isPremium = app.isPremium()
             const variants = Array.isArray(item.variants) && item.variants.length > 0
               ? item.variants.map((v, i) => ({
                   version: v.version,
@@ -318,7 +312,7 @@ Page({
                   version_label: VERSION_LABELS[v.version] || v.version,
                   risk_level: v.risk_level,
                   risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
-                  locked: !isPremium && i > 0,
+                  locked: false,
                 }))
               : []
             return {
@@ -353,11 +347,10 @@ Page({
     const original = item.original_full || item.original
     const risk = analyzeRisk(original)
 
-    const isPremium = app.isPremium()
     let variants = []
 
     if (item.variants && item.variants.length > 0) {
-      variants = item.variants.map((v, i) => ({ ...v, locked: !isPremium && i > 0 }))
+      variants = item.variants.map(v => ({ ...v, locked: false }))
     } else {
       // variants 为空，用 gentle_full 或 result 构造一个可复制的版本
       const gentleContent = item.gentle_full || item.result || ''
@@ -398,25 +391,19 @@ Page({
       activeTab: 0,
       currentVariant: null,
       copied: false,
+      contentScrollTop: 0,
+      inputFocus: true,
     })
-  },
-
-  showUpgrade() {
-    this.setData({ showUpgradeModal: true })
-  },
-
-  closeUpgradeModal() {
-    this.setData({ showUpgradeModal: false })
-  },
-
-  copyAdminEmail() {
-    wx.setClipboardData({
-      data: 'diamondiamon@163.com',
-      success: () => wx.showToast({ title: '邮箱已复制', icon: 'success' }),
-    })
+    setTimeout(() => {
+      this.setData({ inputFocus: false })
+    }, 300)
   },
 
   goBack() {
+    if (this.data.showHistory) {
+      this.closeHistory()
+      return
+    }
     wx.navigateBack()
   },
 

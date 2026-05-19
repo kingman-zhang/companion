@@ -33,6 +33,26 @@
       <text class="tool-arrow">›</text>
     </view>
 
+    <view class="tool-card" bindtap="goFeedback" hover-class="card-hover" hover-stay-time="80">
+      <view class="tool-icon-wrap rose">
+        <view class="feedback-icon">
+          <view class="feedback-icon-card">
+            <view class="feedback-line feedback-line-top"></view>
+            <view class="feedback-line feedback-line-mid"></view>
+            <view class="feedback-line feedback-line-btm"></view>
+          </view>
+          <view class="feedback-badge">
+            <view class="feedback-badge-dot"></view>
+          </view>
+        </view>
+      </view>
+      <view class="tool-body">
+        <text class="tool-name">反馈与联系我</text>
+        <text class="tool-desc">遇到问题可以反馈，想合作也可以通过邮件联系我</text>
+      </view>
+      <text class="tool-arrow">›</text>
+    </view>
+
   </view>
 
 </view>

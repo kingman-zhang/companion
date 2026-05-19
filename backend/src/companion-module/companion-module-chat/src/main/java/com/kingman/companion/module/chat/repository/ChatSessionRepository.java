@@ -12,5 +12,5 @@ public interface ChatSessionRepository extends MongoRepository<ChatSession, Stri
 
     Optional<ChatSession> findByIdAndDeletedFalse(String id);
 
-    List<ChatSession> findTop20ByUserIdAndDeletedFalseOrderByCreateTimeDesc(String userId);
+    List<ChatSession> findTop20ByUserIdAndDeletedFalseOrderByModifyTimeDesc(String userId);
 }

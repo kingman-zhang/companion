@@ -58,8 +58,6 @@ Page({
     streamingActive: false,        // 流式气泡是否在显示（控制 loading 打字指示器的显隐）
     sessionId: '',
     roundCount: 0,
-    showPaywall: false,
-    showUpgradeModal: false,
     scrollToId: '',
     microIntervention: null,
     showMicro: false,
@@ -239,7 +237,7 @@ Page({
 
   async sendMessage() {
     const content = this.data.inputValue.trim()
-    if (!content || this.data.loading || this.data.showPaywall) return
+    if (!content || this.data.loading) return
     if (!this.data.sessionId) {
       await this._createSession()
       if (!this.data.sessionId) {
@@ -320,10 +318,6 @@ Page({
         this._streamTask = null
         if (this._streamTimeout) { clearTimeout(this._streamTimeout); this._streamTimeout = null }
         const msgs = this.data.messages.filter(m => m.id !== aiMsgId)
-        if (msg && msg.includes('429')) {
-          this.setData({ messages: msgs, loading: false, streamingActive: false, showPaywall: true })
-          return
-        }
         this.setData({ messages: msgs, loading: false, streamingActive: false })
         wx.showToast({ title: msg || '发送失败，请重试', icon: 'none' })
       },
@@ -359,21 +353,6 @@ Page({
       wx.setStorageSync('rewritePreload', { original: lastUserMsg.content })
     }
     wx.navigateTo({ url: '/pages/rewrite/index' })
-  },
-
-  showUpgradeModal() {
-    this.setData({ showUpgradeModal: true })
-  },
-
-  closeUpgradeModal() {
-    this.setData({ showUpgradeModal: false })
-  },
-
-  copyAdminEmail() {
-    wx.setClipboardData({
-      data: 'diamondiamon@163.com',
-      success: () => wx.showToast({ title: '邮箱已复制', icon: 'success' }),
-    })
   },
 
   goBack() {

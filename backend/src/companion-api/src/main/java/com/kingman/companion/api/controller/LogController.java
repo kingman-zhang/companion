@@ -3,8 +3,10 @@ package com.kingman.companion.api.controller;
 import com.kingman.companion.framework.annotation.SkipCheckLoginAuth;
 import com.kingman.companion.framework.common.IResult;
 import com.kingman.companion.module.log.req.DailyLogReq;
+import com.kingman.companion.module.log.req.UserFeedbackReq;
 import com.kingman.companion.module.log.resp.DailyLogHistoryResp;
 import com.kingman.companion.module.log.resp.DailyLogResp;
+import com.kingman.companion.module.log.resp.UserFeedbackResp;
 import com.kingman.companion.module.log.service.LogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +58,12 @@ public class LogController {
     public IResult<Map<String, String>> getSuggestion(@PathVariable String logId) {
         String suggestion = logService.getSuggestion(logId);
         return IResult.success(Map.of("suggestion", suggestion));
+    }
+
+    /** 提交反馈 / 合作联系 */
+    @PostMapping("/feedback")
+    @SkipCheckLoginAuth
+    public IResult<UserFeedbackResp> submitFeedback(@Valid @RequestBody UserFeedbackReq req) {
+        return IResult.success(logService.submitFeedback(req));
     }
 }

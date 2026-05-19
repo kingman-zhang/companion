@@ -18,6 +18,7 @@ Page({
     localFallback: false,
     navPaddingTop: '44px',
     navCapsuleWidth: '200rpx',
+    navBarHeight: '120px',
   },
 
   onLoad() {
@@ -25,9 +26,11 @@ Page({
       const sysInfo = wx.getSystemInfoSync()
       const menuBtn = wx.getMenuButtonBoundingClientRect()
       const capsuleRight = sysInfo.windowWidth - menuBtn.left
+      const navHeight = menuBtn.bottom + 34 - sysInfo.statusBarHeight
       this.setData({
         navPaddingTop: `${sysInfo.statusBarHeight}px`,
         navCapsuleWidth: `${capsuleRight}px`,
+        navBarHeight: `${navHeight}px`,
       })
     } catch (e) {}
   },
@@ -50,8 +53,9 @@ Page({
             message_count: s.round_count || 0,
             date: formatDate(s.created_at),
             created_at: s.created_at,
+            updated_at: s.updated_at || s.created_at,
             from_server: true,
-          }))
+          })).sort((a, b) => (b.updated_at || b.created_at || '').localeCompare(a.updated_at || a.created_at || ''))
           this.setData({ sessions, loading: false, localFallback: false })
           return
         }
@@ -67,7 +71,7 @@ Page({
   _loadLocal() {
     const raw = wx.getStorageSync('chat_sessions') || []
     const sessions = raw.slice().sort((a, b) =>
-      (b.created_at || '').localeCompare(a.created_at || '')
+      (b.updated_at || b.created_at || '').localeCompare(a.updated_at || a.created_at || '')
     )
     this.setData({ sessions })
   },

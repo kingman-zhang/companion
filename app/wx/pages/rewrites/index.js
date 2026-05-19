@@ -20,6 +20,7 @@ Page({
     loading: false,
     navPaddingTop: '44px',
     navCapsuleWidth: '200rpx',
+    navBarHeight: '136px',
   },
 
   onLoad() {
@@ -27,9 +28,11 @@ Page({
       const sysInfo = wx.getSystemInfoSync()
       const menuBtn = wx.getMenuButtonBoundingClientRect()
       const capsuleRight = sysInfo.windowWidth - menuBtn.left
+      const navHeight = menuBtn.bottom + 50 - sysInfo.statusBarHeight
       this.setData({
         navPaddingTop: `${sysInfo.statusBarHeight}px`,
         navCapsuleWidth: `${capsuleRight}px`,
+        navBarHeight: `${navHeight}px`,
       })
     } catch (e) {}
   },
@@ -48,7 +51,6 @@ Page({
           const history = res.data.map(item => {
             const original = item.original_message || ''
             const gentle = item.gentle_content || ''
-            const isPremium = app.isPremium()
             const variants = Array.isArray(item.variants) && item.variants.length > 0
               ? item.variants.map((v, i) => ({
                   version: v.version,
@@ -56,7 +58,7 @@ Page({
                   version_label: VERSION_LABELS[v.version] || v.version,
                   risk_level: v.risk_level,
                   risk_text: RISK_TEXT[v.risk_level] || v.risk_level,
-                  locked: !isPremium && i > 0,
+                  locked: false,
                 }))
               : []
             return {

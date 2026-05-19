@@ -99,11 +99,6 @@ public class ChatServiceImpl implements ChatService {
                 req.getSessionId(), session.getUserId(), session.getRoundCount(),
                 safety.level(), req.getContent().length());
 
-        // 免费层轮次限制
-        if (session.getRoundCount() >= FREE_TIER_ROUND_LIMIT) {
-            throw new ApiException(CodeEnum.FREE_TIER_LIMIT_REACHED);
-        }
-
         // 加载历史（DESC → 反转为时间正序）
         List<ChatMessage> historyDesc = messageRepository.findTop10BySessionIdAndDeletedFalse(
                 req.getSessionId(), Sort.by(Sort.Direction.DESC, "createTime"));
@@ -350,13 +345,6 @@ public class ChatServiceImpl implements ChatService {
         log.info("[Chat-Stream] 收到消息: session={}, round={}, safety={}, msgLen={}",
                 req.getSessionId(), session.getRoundCount(), safety.level(), req.getContent().length());
 
-        if (session.getRoundCount() >= FREE_TIER_ROUND_LIMIT) {
-            SseEmitter emitter = new SseEmitter(30_000L);
-            sendStructuredError(emitter, CodeEnum.FREE_TIER_LIMIT_REACHED.getCode(), CodeEnum.FREE_TIER_LIMIT_REACHED.getMessage());
-            emitter.complete();
-            return emitter;
-        }
-
         List<ChatMessage> historyDesc = messageRepository.findTop10BySessionIdAndDeletedFalse(
                 req.getSessionId(), Sort.by(Sort.Direction.DESC, "createTime"));
         List<ChatMessage> history = new ArrayList<>(historyDesc);
@@ -560,13 +548,14 @@ public class ChatServiceImpl implements ChatService {
     public List<ChatSessionSummaryResp> listSessions() {
         String userId = AuthContext.getCurrentUserId();
         if (userId == null || userId.isBlank()) return Collections.emptyList();
-        return sessionRepository.findTop20ByUserIdAndDeletedFalseOrderByCreateTimeDesc(userId)
+        return sessionRepository.findTop20ByUserIdAndDeletedFalseOrderByModifyTimeDesc(userId)
                 .stream()
                 .map(s -> ChatSessionSummaryResp.builder()
                         .sessionId(s.getId())
                         .preview(s.getPreview() != null && !s.getPreview().isBlank() ? s.getPreview() : "新对话")
                         .roundCount(s.getRoundCount())
                         .createdAt(s.getCreateTime())
+                        .updatedAt(s.getModifyTime() != null ? s.getModifyTime() : s.getCreateTime())
                         .build())
                 .toList();
     }

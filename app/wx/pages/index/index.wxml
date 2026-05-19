@@ -21,7 +21,7 @@
     <!-- 问候语 -->
     <view class="greeting-wrap">
       <text class="greeting-meta">{{greeting}} · {{todayStr}}</text>
-      <text class="greeting-title">这段关系，让你有点撑不住了吗？</text>
+      <text class="greeting-title">先不用硬撑，我们慢慢来</text>
       <text class="greeting-sub">告诉我发生了什么，我们一起看看下一步</text>
       <view class="greeting-chips">
         <view class="greeting-chip">

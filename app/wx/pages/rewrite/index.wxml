@@ -2,7 +2,7 @@
 <view class="page">
 
   <!-- ── 顶部导航 ── -->
-  <view class="nav-bar" style="padding-top: {{navPaddingTop}};">
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navPaddingRight || '200rpx'}};">
     <view class="nav-back-btn" bindtap="goBack" hover-class="nav-btn-hover" hover-stay-time="100">
       <text class="nav-back-icon">‹</text>
     </view>
@@ -10,14 +10,14 @@
       <text class="nav-title">消息改写</text>
       <text class="nav-subtitle">{{hasResults ? goalLabels[selectedGoal] : (showHistory ? '过往改写' : '发出去前先过一遍')}}</text>
     </view>
-    <view class="nav-right">
-      <block wx:if="{{showHistory}}">
-        <text class="nav-action-text" bindtap="closeHistory" hover-class="nav-btn-hover" hover-stay-time="80">返回</text>
-      </block>
-      <block wx:else>
-        <text wx:if="{{hasResults}}" class="nav-action-text" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">重新写</text>
-        <text class="nav-action-text nav-history-text" bindtap="openHistory" hover-class="nav-btn-hover" hover-stay-time="80">历史</text>
-      </block>
+  </view>
+
+  <view class="top-action-strip" wx:if="{{!showHistory}}">
+    <view class="top-action-pill" wx:if="{{hasResults}}" bindtap="resetPage" hover-class="nav-btn-hover" hover-stay-time="80">
+      <text class="nav-action-text">重新写</text>
+    </view>
+    <view class="top-action-pill top-action-pill-primary" bindtap="openHistory" hover-class="nav-btn-hover" hover-stay-time="80">
+      <text class="nav-action-text nav-history-text">历史</text>
     </view>
   </view>
 
@@ -25,7 +25,7 @@
        输入状态（未生成结果）
   ══════════════════════ -->
   <block wx:if="{{!hasResults && !showHistory}}">
-    <scroll-view class="content" scroll-y>
+    <scroll-view class="content" scroll-y scroll-top="{{contentScrollTop}}">
 
       <!-- Hero -->
       <view class="hero">
@@ -73,6 +73,7 @@
             auto-height
             maxlength="500"
             adjust-position="{{true}}"
+            focus="{{inputFocus}}"
           />
           <view wx:if="{{originalMessage}}" class="input-footer">
             <view class="risk-hint">
@@ -182,38 +183,17 @@
 
     <!-- 当前结果卡 -->
     <view class="result-card">
+      <text class="result-text">{{currentVariant.content}}</text>
 
-      <!-- 锁定态：毛玻璃遮罩 -->
-      <view wx:if="{{currentVariant.locked}}" class="locked-container">
-        <!-- 内容占位（模糊显示，让用户知道有内容） -->
-        <text class="result-text result-text-blurred">{{currentVariant.content}}</text>
-        <!-- 遮罩层 -->
-        <view class="lock-overlay" bindtap="showUpgrade">
-          <view class="lock-badge">
-            <text class="lock-badge-icon">🔒</text>
-          </view>
-          <text class="lock-overlay-title">解锁完整版本</text>
-          <text class="lock-overlay-sub">升级后可查看全部 3 种改写方案</text>
-          <view class="lock-overlay-btn" hover-class="btn-hover" hover-stay-time="100">
-            <text class="lock-overlay-btn-text">立即升级</text>
-          </view>
+      <!-- 操作行 -->
+      <view class="result-actions">
+        <view class="action-copy {{copied ? 'action-copy-done' : ''}}" bindtap="copyResult" hover-class="btn-hover" hover-stay-time="80">
+          <text class="action-copy-text">{{copied ? '✓ 已复制' : '复制内容'}}</text>
+        </view>
+        <view class="action-icon-btn" bindtap="doRewrite" hover-class="btn-hover" hover-stay-time="80">
+          <text class="action-icon">↻</text>
         </view>
       </view>
-
-      <!-- 已解锁 -->
-      <block wx:else>
-        <text class="result-text">{{currentVariant.content}}</text>
-
-        <!-- 操作行 -->
-        <view class="result-actions">
-          <view class="action-copy {{copied ? 'action-copy-done' : ''}}" bindtap="copyResult" hover-class="btn-hover" hover-stay-time="80">
-            <text class="action-copy-text">{{copied ? '✓ 已复制' : '复制内容'}}</text>
-          </view>
-          <view class="action-icon-btn" bindtap="doRewrite" hover-class="btn-hover" hover-stay-time="80">
-            <text class="action-icon">↻</text>
-          </view>
-        </view>
-      </block>
     </view>
 
     <!-- 预测回复 Nudge -->
@@ -223,32 +203,14 @@
       </view>
       <view class="nudge-body">
         <text class="nudge-title">顺便想一想 TA 可能怎么回</text>
-        <text class="nudge-sub">进阶功能 · 帮你把后面的对话也想在前面</text>
+        <text class="nudge-sub">这个能力还没接上，后面会补成“后续对话预演”</text>
       </view>
-      <view class="nudge-btn" bindtap="showUpgrade" hover-class="btn-hover" hover-stay-time="80">
-        <text class="nudge-btn-text">看看</text>
+      <view class="nudge-btn" hover-class="btn-hover" hover-stay-time="80">
+        <text class="nudge-btn-text">即将开放</text>
       </view>
     </view>
 
     <view style="height: 60rpx;"></view>
   </scroll-view>
-
-  <!-- ── 升级引导弹窗 ── -->
-  <view wx:if="{{showUpgradeModal}}" class="upgrade-mask" bindtap="closeUpgradeModal">
-    <view class="upgrade-modal" catchtap="noop">
-      <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
-        <text class="upgrade-modal-close-icon">×</text>
-      </view>
-      <text class="upgrade-modal-title">功能还在准备中</text>
-      <text class="upgrade-modal-body">这个功能还在完善里。想提前使用的话，可以先联系管理员开通。</text>
-      <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
-        <text class="upgrade-modal-email">diamondiamon@163.com</text>
-        <text class="upgrade-modal-copy-hint">轻触复制</text>
-      </view>
-      <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
-        <text class="upgrade-modal-btn-text">知道了</text>
-      </view>
-    </view>
-  </view>
 
 </view>

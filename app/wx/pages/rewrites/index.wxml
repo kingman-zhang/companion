@@ -3,7 +3,10 @@
 
   <!-- 顶部导航（仅标题，右侧预留胶囊空间）-->
   <view class="nav-bar" style="padding-top: {{navPaddingTop}}; padding-right: {{navCapsuleWidth}};">
-    <text class="nav-title">消息改写</text>
+    <view class="nav-copy">
+      <text class="nav-title">消息改写</text>
+      <text class="nav-subtitle">先把语气放稳，再决定怎么说</text>
+    </view>
   </view>
 
   <!-- 有历史记录 -->
@@ -34,7 +37,7 @@
         <text class="result-text">{{item.result}}</text>
       </view>
     </view>
-    <view style="height: 120rpx;"></view>
+    <view class="list-bottom-spacer"></view>
   </scroll-view>
 
   <!-- 空状态 -->
@@ -49,9 +52,6 @@
       <text class="empty-cta-text">去写一版 →</text>
     </view>
   </view>
-
-  <!-- 底部遮罩：防止导航动画期间下层页面底栏穿透显示 -->
-  <view class="bottom-shield"></view>
 
   <!-- 右下角悬浮新建按钮 -->
   <view class="fab" bindtap="startNew" hover-class="fab-hover" hover-stay-time="80">

@@ -18,4 +18,8 @@ Page({
   goLog() {
     wx.navigateTo({ url: '/pages/log/index' })
   },
+
+  goFeedback() {
+    wx.navigateTo({ url: '/pages/contact/index' })
+  },
 })

@@ -139,15 +139,6 @@
       </view>
     </view>
 
-    <!-- Paywall 提示 -->
-    <view class="paywall-banner" wx:if="{{showPaywall}}">
-      <text class="paywall-title">已用完 10 轮免费对话</text>
-      <text class="paywall-sub">升级后，可以继续不限次聊下去</text>
-      <view class="paywall-btn" bindtap="showUpgradeModal" hover-class="btn-hover" hover-stay-time="100">
-        <text class="paywall-btn-text">立即升级</text>
-      </view>
-    </view>
-
     <view class="list-bottom" id="list-bottom"></view>
   </scroll-view>
 
@@ -177,7 +168,7 @@
   </view>
 
   <!-- ── 快捷回复条（对话进行中时展示）── -->
-  <scroll-view wx:if="{{userHasSent && !showPaywall}}" class="shortcuts-bar" scroll-x scroll-y="{{false}}">
+  <scroll-view wx:if="{{userHasSent}}" class="shortcuts-bar" scroll-x scroll-y="{{false}}">
     <view class="shortcuts-inner">
       <view
         wx:for="{{shortcuts}}"
@@ -195,7 +186,7 @@
   </scroll-view>
 
   <!-- ── 底部输入区 ── -->
-  <view class="input-bar" wx:if="{{!showPaywall}}">
+  <view class="input-bar">
     <view class="input-wrap {{inputValue ? 'input-wrap-active' : ''}}">
       <input
         class="chat-input"
@@ -217,24 +208,6 @@
       hover-stay-time="80"
     >
       <view class="send-icon-arrow"></view>
-    </view>
-  </view>
-
-  <!-- ── 升级引导弹窗 ── -->
-  <view wx:if="{{showUpgradeModal}}" class="upgrade-mask" bindtap="closeUpgradeModal">
-    <view class="upgrade-modal" catchtap="noop">
-      <view class="upgrade-modal-close" bindtap="closeUpgradeModal">
-        <text class="upgrade-modal-close-icon">×</text>
-      </view>
-      <text class="upgrade-modal-title">功能还在准备中</text>
-      <text class="upgrade-modal-body">这个功能还在完善里。想提前使用的话，可以先联系管理员开通。</text>
-      <view class="upgrade-modal-email-wrap" bindtap="copyAdminEmail" hover-class="email-hover" hover-stay-time="80">
-        <text class="upgrade-modal-email">diamondiamon@163.com</text>
-        <text class="upgrade-modal-copy-hint">轻触复制</text>
-      </view>
-      <view class="upgrade-modal-btn" bindtap="closeUpgradeModal" hover-class="btn-hover" hover-stay-time="80">
-        <text class="upgrade-modal-btn-text">知道了</text>
-      </view>
     </view>
   </view>
 

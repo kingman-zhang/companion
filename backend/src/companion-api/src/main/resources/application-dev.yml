@@ -6,11 +6,11 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://root:abc123456@localhost:27017/companion?authSource=admin&authMechanism=SCRAM-SHA-256&retryWrites=true&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000
+      uri: mongodb://root:abc123456@192.168.31.238:30001/companion?authSource=admin
       auto-index-creation: false
     redis:
-      host: 127.0.0.1
-      port: 6379
+      host: 192.168.31.238
+      port: 30002
       password: abc123456
       timeout: 5000ms
 

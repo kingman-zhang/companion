@@ -8,11 +8,15 @@ import com.kingman.companion.framework.security.AuthContext;
 import com.kingman.companion.module.log.config.LogProperties;
 import com.kingman.companion.module.log.entity.AssessmentSummary;
 import com.kingman.companion.module.log.entity.DailyLog;
+import com.kingman.companion.module.log.entity.UserFeedback;
 import com.kingman.companion.module.log.repository.AssessmentSummaryRepository;
 import com.kingman.companion.module.log.repository.DailyLogRepository;
 import com.kingman.companion.module.log.req.DailyLogReq;
+import com.kingman.companion.module.log.req.UserFeedbackReq;
 import com.kingman.companion.module.log.resp.DailyLogHistoryResp;
 import com.kingman.companion.module.log.resp.DailyLogResp;
+import com.kingman.companion.module.log.resp.UserFeedbackResp;
+import com.kingman.companion.module.log.repository.UserFeedbackRepository;
 import com.kingman.companion.module.log.service.LogService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,6 +36,7 @@ public class LogServiceImpl implements LogService {
 
     private final DailyLogRepository logRepository;
     private final AssessmentSummaryRepository assessmentSummaryRepository;
+    private final UserFeedbackRepository userFeedbackRepository;
     private final LlmGateway llmGateway;
     private final LogProperties logProperties;
 
@@ -121,6 +126,25 @@ public class LogServiceImpl implements LogService {
         }
     }
 
+    @Override
+    public UserFeedbackResp submitFeedback(UserFeedbackReq req) {
+        UserFeedback feedback = new UserFeedback();
+        feedback.setType(req.getType());
+        feedback.setContent(req.getContent().trim());
+        feedback.setContact(trimToNull(req.getContact()));
+        feedback.setSourcePage(trimToNull(req.getSourcePage()));
+        feedback.setUserId(AuthContext.getCurrentUserId());
+
+        UserFeedback saved = userFeedbackRepository.save(feedback);
+        return UserFeedbackResp.builder()
+                .feedbackId(saved.getId())
+                .type(saved.getType())
+                .content(saved.getContent())
+                .contact(saved.getContact())
+                .createdAt(saved.getCreateTime())
+                .build();
+    }
+
     private String buildSuggestionPrompt(DailyLog log, AssessmentSummary assessment) {
         StringBuilder sb = new StringBuilder();
 
@@ -188,5 +212,10 @@ public class LogServiceImpl implements LogService {
                 .notes(log.getNotes())
                 .aiSuggestion(log.getAiSuggestion())
                 .build();
+    }
+
+    private String trimToNull(String text) {
+        if (!StringUtils.hasText(text)) return null;
+        return text.trim();
     }
 }

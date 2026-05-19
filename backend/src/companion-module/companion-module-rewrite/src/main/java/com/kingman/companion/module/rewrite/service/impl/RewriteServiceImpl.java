@@ -62,11 +62,6 @@ public class RewriteServiceImpl implements RewriteService {
         // 安全检测（前置，命中则 HTTP 451）
         safetyChecker.check(req.getOriginalMessage()).throwIfBlocked();
 
-        // 免费层每日限额检查（登录用户时生效）
-        if (hasUserId()) {
-            checkDailyLimit(AuthContext.getCurrentUserId());
-        }
-
         log.info("[Rewrite] 收到改写请求: session={}, userId={}, originalLen={}",
                 req.getSessionId(), AuthContext.getCurrentUserId(), req.getOriginalMessage().length());
 
@@ -85,11 +80,6 @@ public class RewriteServiceImpl implements RewriteService {
         record.setOriginalMessage(req.getOriginalMessage());
         record.setVariants(variants);
         RewriteRecord saved = rewriteRepository.save(record);
-
-        // 限额内成功后记录使用
-        if (hasUserId()) {
-            recordUsage(AuthContext.getCurrentUserId());
-        }
 
         log.info("[Rewrite] 改写完成: id={}, gentle风险={}, direct风险={}, brief风险={}",
                 saved.getId(),

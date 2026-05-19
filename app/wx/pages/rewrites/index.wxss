@@ -12,12 +12,24 @@
 /* ── 导航栏 ── */
 .nav-bar {
   flex-shrink: 0;
-  padding: 0 32rpx 16rpx;
+  padding-left: 32rpx;
+  padding-right: 32rpx;
+  padding-bottom: 14rpx;
   display: flex;
   align-items: center;
+  gap: 16rpx;
   background: rgba(250, 241, 237, 0.92);
   border-bottom: 1rpx solid rgba(228, 210, 205, 0.84);
   backdrop-filter: blur(18rpx);
+  box-sizing: border-box;
+}
+
+.nav-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .nav-title {
@@ -27,12 +39,31 @@
   line-height: 1.3;
 }
 
+.nav-subtitle {
+  font-size: 20rpx;
+  color: #8F8589;
+  line-height: 1.2;
+}
+
+.nav-left-spacer,
+.nav-right-spacer {
+  width: 0;
+  height: 0;
+  flex-shrink: 0;
+}
+
 .nav-btn-hover { opacity: 0.75; }
 
 /* ── 列表 ── */
 .list {
   flex: 1;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+.list-bottom-spacer {
+  height: calc(84rpx + env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
 }
 
 .rewrite-card {
@@ -197,22 +228,16 @@
 
 /* ── 底部遮罩（防穿透）── */
 .bottom-shield {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 180rpx;
-  background: rgba(250, 241, 237, 0.96);
-  z-index: 10;
+  display: none;
 }
 
 /* ── 悬浮新建按钮 ── */
 .fab {
   position: fixed;
   right: 40rpx;
-  bottom: 40rpx;
-  width: 100rpx;
-  height: 100rpx;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40rpx);
+  width: 108rpx;
+  height: 108rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
   display: flex;
@@ -225,9 +250,9 @@
 .fab-hover { opacity: 0.82; }
 
 .fab-icon {
-  font-size: 52rpx;
+  font-size: 60rpx;
   color: #FFFFFF;
   font-weight: 300;
   line-height: 1;
-  margin-top: -4rpx;
+  margin-top: -2rpx;
 }

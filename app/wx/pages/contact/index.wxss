@@ -1,0 +1,233 @@
+page {
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, #FFF8F5 0%, #FAF1ED 48%, #F6EEEA 100%);
+}
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-bar {
+  padding: 0 28rpx 18rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex-shrink: 0;
+}
+
+.nav-back-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10rpx 24rpx rgba(117, 77, 76, 0.06);
+}
+
+.nav-btn-hover {
+  opacity: 0.76;
+}
+
+.nav-back-icon {
+  font-size: 46rpx;
+  font-weight: 600;
+  color: #1F1417;
+  line-height: 1;
+  transform: translateX(-2rpx);
+}
+
+.nav-center {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1F1417;
+  line-height: 1.2;
+}
+
+.nav-subtitle {
+  font-size: 22rpx;
+  color: #93868B;
+  line-height: 1.5;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  padding: 8rpx 24rpx 0;
+  box-sizing: border-box;
+}
+
+.content-bottom-spacer {
+  height: 220rpx;
+}
+
+.section-card {
+  margin-bottom: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  box-shadow: 0 16rpx 36rpx rgba(117, 77, 76, 0.06);
+}
+
+.section-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F1417;
+  margin-bottom: 10rpx;
+}
+
+.section-sub {
+  display: block;
+  font-size: 24rpx;
+  color: #93868B;
+  line-height: 1.6;
+  margin-bottom: 18rpx;
+}
+
+.type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.type-item {
+  padding: 24rpx;
+  border-radius: 22rpx;
+  border: 1.5rpx solid rgba(219, 200, 195, 0.84);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.type-item-on {
+  border-color: rgba(228, 90, 126, 0.42);
+  background: linear-gradient(180deg, #FFF4F7 0%, #FCE8EE 100%);
+  box-shadow: 0 12rpx 26rpx rgba(199, 62, 100, 0.08);
+}
+
+.type-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1F1417;
+  margin-bottom: 8rpx;
+}
+
+.type-desc {
+  display: block;
+  font-size: 23rpx;
+  color: #8F8589;
+  line-height: 1.55;
+}
+
+.feedback-textarea {
+  width: 100%;
+  min-height: 220rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #1F1417;
+  box-sizing: border-box;
+}
+
+.textarea-placeholder,
+.input-placeholder {
+  color: #B6AAAE;
+}
+
+.field-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.field-hint,
+.field-count {
+  font-size: 22rpx;
+  color: #A19398;
+}
+
+.contact-input {
+  height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 248, 246, 0.96);
+  border: 1rpx solid rgba(228, 210, 205, 0.84);
+  font-size: 26rpx;
+  color: #1F1417;
+  box-sizing: border-box;
+}
+
+.email-card {
+  padding: 26rpx 24rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(180deg, #FFF5F7 0%, #FDECEF 100%);
+  border: 1rpx solid rgba(228, 90, 126, 0.14);
+}
+
+.email-value {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #C73E64;
+  margin-bottom: 8rpx;
+}
+
+.email-hint {
+  display: block;
+  font-size: 22rpx;
+  color: #9A8D92;
+}
+
+.card-hover {
+  opacity: 0.94;
+  transform: translateY(-1rpx);
+}
+
+.submit-bar {
+  flex-shrink: 0;
+  padding: 14rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(246, 238, 234, 0) 0%, rgba(246, 238, 234, 0.96) 34%);
+  box-sizing: border-box;
+}
+
+.submit-btn {
+  height: 92rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-btn-on {
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
+  box-shadow: 0 16rpx 32rpx rgba(199, 62, 100, 0.2);
+}
+
+.submit-btn-off {
+  background: #E9DEDB;
+}
+
+.submit-btn-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.btn-hover {
+  opacity: 0.84;
+}

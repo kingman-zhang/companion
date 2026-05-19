@@ -1,0 +1,84 @@
+<view class="page">
+  <view class="nav-bar" style="padding-top: {{navPaddingTop}};">
+    <view class="nav-back-btn" bindtap="goBack" hover-class="nav-btn-hover" hover-stay-time="100">
+      <text class="nav-back-icon">‹</text>
+    </view>
+    <view class="nav-center">
+      <text class="nav-title">反馈与联系我</text>
+      <text class="nav-subtitle">遇到问题可以告诉我，想合作也欢迎来信</text>
+    </view>
+  </view>
+
+  <scroll-view class="content" scroll-y="true" enable-flex="true">
+    <view class="section-card">
+      <text class="section-title">你想反馈什么</text>
+      <view class="type-list">
+        <block wx:for="{{typeOptions}}" wx:key="id">
+          <view
+            class="type-item {{selectedType === item.id ? 'type-item-on' : ''}}"
+            bindtap="selectType"
+            data-id="{{item.id}}"
+            hover-class="card-hover"
+            hover-stay-time="80"
+          >
+            <text class="type-label">{{item.label}}</text>
+            <text class="type-desc">{{item.desc}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <text class="section-title">具体说说</text>
+      <textarea
+        class="feedback-textarea"
+        value="{{content}}"
+        bindinput="onContentInput"
+        placeholder="比如：我在哪一页做了什么，出现了什么问题；或者你想要我增加什么功能。"
+        placeholder-class="textarea-placeholder"
+        auto-height="true"
+        maxlength="1000"
+        adjust-position="true"
+      ></textarea>
+      <view class="field-footer">
+        <text class="field-hint">写得越具体，我越容易处理</text>
+        <text class="field-count">{{content.length}} / 1000</text>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <text class="section-title">留个联系方式</text>
+      <text class="section-sub">选填。方便我需要补充信息时联系你。</text>
+      <input
+        class="contact-input"
+        value="{{contact}}"
+        bindinput="onContactInput"
+        placeholder="邮箱 / 微信 / 手机号（选填）"
+        placeholder-class="input-placeholder"
+        maxlength="100"
+      />
+    </view>
+
+    <view class="section-card">
+      <text class="section-title">合作联系</text>
+      <text class="section-sub">如果你想谈合作，也可以直接发邮件给我。</text>
+      <view class="email-card" bindtap="copyEmail" hover-class="card-hover" hover-stay-time="80">
+        <text class="email-value">{{adminEmail}}</text>
+        <text class="email-hint">轻触复制邮箱地址</text>
+      </view>
+    </view>
+
+    <view class="content-bottom-spacer"></view>
+  </scroll-view>
+
+  <view class="submit-bar">
+    <view
+      class="submit-btn {{(!content || submitting) ? 'submit-btn-off' : 'submit-btn-on'}}"
+      bindtap="submitFeedback"
+      hover-class="{{(!content || submitting) ? '' : 'btn-hover'}}"
+      hover-stay-time="80"
+    >
+      <text class="submit-btn-text">{{submitting ? '提交中...' : '提交反馈'}}</text>
+    </view>
+  </view>
+</view>

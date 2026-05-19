@@ -79,9 +79,62 @@ page {
 
 .teal { background: linear-gradient(180deg, #FFF1F5 0%, #FCE8EE 100%); }
 .amber { background: linear-gradient(180deg, #FFF7EA 0%, #FDF6E3 100%); }
+.rose { background: linear-gradient(180deg, #FFF2F5 0%, #FCE7EE 100%); }
 
 .tool-icon {
   font-size: 44rpx;
+}
+
+.feedback-icon {
+  width: 56rpx;
+  height: 56rpx;
+  position: relative;
+}
+
+.feedback-icon-card {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border: 2rpx solid rgba(199, 62, 100, 0.22);
+  box-shadow: 0 8rpx 18rpx rgba(199, 62, 100, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5rpx;
+  padding: 0 10rpx;
+  box-sizing: border-box;
+}
+
+.feedback-line {
+  height: 4rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #E45A7E 0%, #C73E64 100%);
+}
+
+.feedback-line-top { width: 18rpx; }
+.feedback-line-mid { width: 24rpx; opacity: 0.78; }
+.feedback-line-btm { width: 14rpx; opacity: 0.58; }
+
+.feedback-badge {
+  position: absolute;
+  right: -2rpx;
+  bottom: -2rpx;
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E45A7E 0%, #C73E64 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 14rpx rgba(199, 62, 100, 0.2);
+}
+
+.feedback-badge-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .tool-img {

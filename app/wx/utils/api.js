@@ -2,7 +2,7 @@
 // 统一封装 wx.request，处理通用错误逻辑
 
 const ENV_CONFIG = {
-  develop: 'https://companion-api.lizigege.com',//'http://localhost:8080',   // 开发者工具本地调试
+  develop: 'http://localhost:8080',//'http://localhost:8080',   // 开发者工具本地调试
   trial:   'https://companion-api.lizigege.com',  // 体验版
   release: 'https://companion-api.lizigege.com',  // 正式版
 }

@@ -12,4 +12,5 @@ public class ChatSessionSummaryResp {
     private String preview;
     private int roundCount;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
