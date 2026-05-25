@@ -443,8 +443,9 @@ public class ChatServiceImpl implements ChatService {
 
             // Build done event
             String doneJson = String.format(
-                    "{\"type\":\"done\",\"messageId\":\"%s\",\"emotionLabel\":\"%s\",\"emotionIntensity\":%d%s}",
+                    "{\"type\":\"done\",\"messageId\":\"%s\",\"reply\":%s,\"emotionLabel\":\"%s\",\"emotionIntensity\":%d%s}",
                     savedAiMsg.getId(),
+                    MAPPER.writeValueAsString(result.reply()),
                     result.emotionLabel().name(),
                     result.emotionIntensity(),
                     buildMicroInterventionJson(result.emotionLabel(), result.emotionIntensity(), req.getContent())

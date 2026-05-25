@@ -40,7 +40,7 @@ public interface ChatService {
      * AI 回复以 SSE 事件形式推送：
      * <ul>
      *   <li>{@code {"type":"delta","content":"文字chunk"}}</li>
-     *   <li>{@code {"type":"done","messageId":"...","emotionLabel":"...","emotionIntensity":N}}</li>
+     *   <li>{@code {"type":"done","messageId":"...","reply":"...","emotionLabel":"...","emotionIntensity":N}}</li>
      *   <li>{@code {"type":"error","message":"..."}}</li>
      * </ul>
      */

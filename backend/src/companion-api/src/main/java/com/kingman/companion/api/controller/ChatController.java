@@ -55,7 +55,7 @@ public class ChatController {
      * <p>返回 text/event-stream，每条事件的 data 为 JSON：
      * <ul>
      *   <li>{@code {"type":"delta","content":"..."}}</li>
-     *   <li>{@code {"type":"done","messageId":"...","emotionLabel":"...","emotionIntensity":N}}</li>
+     *   <li>{@code {"type":"done","messageId":"...","reply":"...","emotionLabel":"...","emotionIntensity":N}}</li>
      *   <li>{@code {"type":"error","message":"..."}}</li>
      * </ul>
      */
