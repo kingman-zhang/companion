@@ -35,6 +35,11 @@ Page({
         navBarHeight: `${navHeight}px`,
       })
     } catch (e) {}
+
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
   },
 
   onShow() {
@@ -123,5 +128,13 @@ Page({
 
   startNew() {
     wx.navigateTo({ url: '/pages/rewrite/index' })
+  },
+
+  onShareAppMessage() {
+    return app.getDefaultSharePayload()
+  },
+
+  onShareTimeline() {
+    return app.getDefaultTimelineSharePayload()
   },
 })

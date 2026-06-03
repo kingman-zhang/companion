@@ -1,3 +1,5 @@
+const app = getApp()
+
 // 工具页
 Page({
   data: {
@@ -9,6 +11,11 @@ Page({
       const sysInfo = wx.getSystemInfoSync()
       this.setData({ navPaddingTop: `${sysInfo.statusBarHeight + 10}px` })
     } catch (e) {}
+
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
   },
 
   goLetgo() {
@@ -21,5 +28,13 @@ Page({
 
   goFeedback() {
     wx.navigateTo({ url: '/pages/contact/index' })
+  },
+
+  onShareAppMessage() {
+    return app.getDefaultSharePayload()
+  },
+
+  onShareTimeline() {
+    return app.getDefaultTimelineSharePayload()
   },
 })

@@ -86,6 +86,11 @@ Page({
       this.setData({ navPaddingTop: `${sysInfo.statusBarHeight + 10}px` })
     } catch (e) {}
 
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
+
     if (options.sessionId) {
       if (options.fromServer === '1') {
         this._loadServerSession(options.sessionId)
@@ -233,6 +238,14 @@ Page({
 
   goLetgo() {
     wx.navigateTo({ url: '/pages/letgo/index' })
+  },
+
+  onShareAppMessage() {
+    return app.getDefaultSharePayload()
+  },
+
+  onShareTimeline() {
+    return app.getDefaultTimelineSharePayload()
   },
 
   async sendMessage() {

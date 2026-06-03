@@ -23,6 +23,22 @@ App({
 
   request,
 
+  getDefaultSharePayload() {
+    return {
+      title: '来这里，把关系和情绪慢慢聊清楚',
+      path: '/pages/index/index',
+      imageUrl: '',
+    }
+  },
+
+  getDefaultTimelineSharePayload() {
+    const payload = this.getDefaultSharePayload()
+    return {
+      title: payload.title,
+      query: '',
+    }
+  },
+
   onLaunch() {
     // 恢复本地缓存的 token
     const cached = wx.getStorageSync('token')

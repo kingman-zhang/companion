@@ -1,5 +1,5 @@
-// P2 评估结果页
 const app = getApp()
+const { getAssessmentById } = require('../../utils/api')
 
 const LEVEL_CONFIG = {
   GREEN: {
@@ -33,9 +33,17 @@ function scoreClass(score) {
   return 'red'
 }
 
+function pick(result, camelKey, snakeKey) {
+  if (!result) return undefined
+  if (result[camelKey] !== undefined) return result[camelKey]
+  return result[snakeKey]
+}
+
 Page({
   data: {
     result: null,
+    viewResult: null,
+    loading: true,
     levelClass: 'yellow',
     levelBadge: '需谨慎',
     scoreTitle: '',
@@ -50,7 +58,7 @@ Page({
     navPaddingRight: '120px',
   },
 
-  onLoad() {
+  async onLoad(options) {
     try {
       const sysInfo = wx.getSystemInfoSync()
       const menuButton = wx.getMenuButtonBoundingClientRect()
@@ -60,30 +68,98 @@ Page({
       this.setData({ navPaddingTop, navBarHeight, navPaddingRight })
     } catch (e) {}
 
-    const result = app.getAssessmentResult()
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
+
+    const sharedAssessmentId = options.assessmentId || options.assessment_id || ''
+    let result = null
+
+    if (sharedAssessmentId) {
+      result = await this._loadSharedResult(sharedAssessmentId)
+    } else {
+      result = app.getAssessmentResult()
+    }
+
     if (!result) {
       wx.showToast({ title: '评估结果已过期，请重新评估', icon: 'none', duration: 2500 })
       setTimeout(() => wx.switchTab({ url: '/pages/index/index' }), 1500)
       return
     }
 
-    const level = result.level || 'YELLOW'
-    const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.YELLOW
-    const action1Title = ACTION1_MAP[result.recommended_action] || ACTION1_MAP.COOL_DOWN
+    this._applyResult(result)
+  },
 
-    const showLetgoAction = level === 'RED' || result.user_primary_intent === 'LEARN_GOODBYE'
+  async _loadSharedResult(assessmentId) {
+    try {
+      wx.showLoading({ title: '加载评估结果...' })
+      const result = await getAssessmentById(assessmentId)
+      app.setAssessmentResult(result)
+      return result
+    } catch (e) {
+      wx.showToast({ title: '分享内容已失效', icon: 'none', duration: 2500 })
+      return null
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  _applyResult(result) {
+    const level = pick(result, 'level', 'level') || 'YELLOW'
+    const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.YELLOW
+    const recommendedAction = pick(result, 'recommendedAction', 'recommended_action')
+    const userPrimaryIntent = pick(result, 'userPrimaryIntent', 'user_primary_intent')
+    const emotionalConnectionScore = pick(result, 'emotionalConnectionScore', 'emotional_connection_score')
+    const communicationScore = pick(result, 'communicationScore', 'communication_score')
+    const conflictScore = pick(result, 'conflictScore', 'conflict_score')
+    const action1Title = ACTION1_MAP[recommendedAction] || ACTION1_MAP.COOL_DOWN
+    const viewResult = {
+      score: pick(result, 'score', 'score') ?? '--',
+      emotionalConnectionScore: emotionalConnectionScore ?? 0,
+      communicationScore: communicationScore ?? 0,
+      conflictScore: conflictScore ?? 0,
+      coreInsight: pick(result, 'coreInsight', 'core_insight') || '',
+      llmReason: pick(result, 'llmReason', 'llm_reason') || '',
+    }
+
+    const showLetgoAction = level === 'RED' || userPrimaryIntent === 'LEARN_GOODBYE'
 
     this.setData({
       result,
+      viewResult,
       levelClass: cfg.cls,
       levelBadge: cfg.badge,
       scoreTitle: cfg.title,
       action1Title,
       showLetgoAction,
-      emoClass: scoreClass(result.emotional_connection_score),
-      commClass: scoreClass(result.communication_score),
-      conflictClass: scoreClass(result.conflict_score),
+      emoClass: scoreClass(emotionalConnectionScore),
+      commClass: scoreClass(communicationScore),
+      conflictClass: scoreClass(conflictScore),
+      loading: false,
     })
+  },
+
+  _getAssessmentId() {
+    const result = this.data.result || {}
+    return result.assessmentId || result.assessment_id || ''
+  },
+
+  _buildSharePayload() {
+    const result = this.data.result || {}
+    const score = pick(result, 'score', 'score') ?? '--'
+    const levelKey = pick(result, 'level', 'level') || 'YELLOW'
+    const level = levelKey === 'GREEN' ? '绿' : levelKey === 'RED' ? '红' : '黄'
+    const assessmentId = this._getAssessmentId()
+    const path = assessmentId
+      ? `/pages/assessment/index?assessmentId=${encodeURIComponent(assessmentId)}`
+      : '/pages/assessment/index'
+
+    return {
+      title: `我的关系评估结果是${level}色·${score}分`,
+      path,
+      imageUrl: '',
+    }
   },
 
   toggleAction(e) {
@@ -97,20 +173,24 @@ Page({
       itemList: ['分享评估结果', '重新评估'],
       success: (res) => {
         if (res.tapIndex === 0) {
-          const result = this.data.result
-          const level = result?.level === 'GREEN' ? '绿' : result?.level === 'YELLOW' ? '黄' : '红'
-          wx.showShareMenu({
-            withShareTicket: false,
-            menus: ['shareAppMessage'],
-          })
-          wx.shareAppMessage({
-            title: `我的关系评估结果是${level}色·${result?.score ?? '--'}分 — 用 AI 看清楚了一些`,
-            path: '/pages/index/index',
-          })
+          wx.showToast({ title: '请点击右上角转发给好友', icon: 'none', duration: 2200 })
         }
         if (res.tapIndex === 1) this.goRedo()
       },
     })
+  },
+
+  onShareAppMessage() {
+    return this._buildSharePayload()
+  },
+
+  onShareTimeline() {
+    const payload = this._buildSharePayload()
+    const assessmentId = this._getAssessmentId()
+    return {
+      title: payload.title,
+      query: assessmentId ? `assessmentId=${encodeURIComponent(assessmentId)}` : '',
+    }
   },
 
   goHome() {

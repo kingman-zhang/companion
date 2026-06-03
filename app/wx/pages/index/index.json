@@ -1,4 +1,6 @@
 {
   "navigationStyle": "custom",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true,
   "usingComponents": {}
 }

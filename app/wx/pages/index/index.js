@@ -74,6 +74,10 @@ Page({
   },
 
   onLoad() {
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
     this._refresh()
   },
 
@@ -148,5 +152,13 @@ Page({
 
   goChat() {
     wx.navigateTo({ url: '/pages/chat/index' })
+  },
+
+  onShareAppMessage() {
+    return app.getDefaultSharePayload()
+  },
+
+  onShareTimeline() {
+    return app.getDefaultTimelineSharePayload()
   },
 })

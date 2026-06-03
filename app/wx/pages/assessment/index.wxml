@@ -17,6 +17,8 @@
     </view>
   </view>
 
+  <button class="share-entry" open-type="share">分享这份结果</button>
+
   <!-- ── 评分总览卡片 ── -->
   <view class="score-card">
 
@@ -30,7 +32,7 @@
       </view>
       <view class="score-right">
         <view class="score-num-row">
-          <text class="score-num score-num-{{levelClass}}">{{result.score}}</text>
+          <text class="score-num score-num-{{levelClass}}">{{viewResult.score}}</text>
           <text class="score-unit">/100</text>
         </view>
         <text class="score-label">当前状态</text>
@@ -42,28 +44,28 @@
       <view class="dim-item">
         <view class="dim-row">
           <text class="dim-name">情感联结</text>
-          <text class="dim-score dim-score-{{emoClass}}">{{result.emotional_connection_score}}</text>
+          <text class="dim-score dim-score-{{emoClass}}">{{viewResult.emotionalConnectionScore}}</text>
         </view>
         <view class="dim-track">
-          <view class="dim-fill dim-fill-{{emoClass}}" style="width: {{result.emotional_connection_score}}%"></view>
+          <view class="dim-fill dim-fill-{{emoClass}}" style="width: {{viewResult.emotionalConnectionScore}}%"></view>
         </view>
       </view>
       <view class="dim-item">
         <view class="dim-row">
           <text class="dim-name">沟通质量</text>
-          <text class="dim-score dim-score-{{commClass}}">{{result.communication_score}}</text>
+          <text class="dim-score dim-score-{{commClass}}">{{viewResult.communicationScore}}</text>
         </view>
         <view class="dim-track">
-          <view class="dim-fill dim-fill-{{commClass}}" style="width: {{result.communication_score}}%"></view>
+          <view class="dim-fill dim-fill-{{commClass}}" style="width: {{viewResult.communicationScore}}%"></view>
         </view>
       </view>
       <view class="dim-item">
         <view class="dim-row">
           <text class="dim-name">冲突处理</text>
-          <text class="dim-score dim-score-{{conflictClass}}">{{result.conflict_score}}</text>
+          <text class="dim-score dim-score-{{conflictClass}}">{{viewResult.conflictScore}}</text>
         </view>
         <view class="dim-track">
-          <view class="dim-fill dim-fill-{{conflictClass}}" style="width: {{result.conflict_score}}%"></view>
+          <view class="dim-fill dim-fill-{{conflictClass}}" style="width: {{viewResult.conflictScore}}%"></view>
         </view>
       </view>
     </view>
@@ -73,8 +75,8 @@
   <!-- ── 核心洞察（粉色卡片）── -->
   <view class="insight-card">
     <text class="insight-label">先看到的重点</text>
-    <text class="insight-quote">"{{result.core_insight}}"</text>
-    <text class="insight-desc">{{result.llm_reason}}</text>
+    <text class="insight-quote">"{{viewResult.coreInsight}}"</text>
+    <text class="insight-desc">{{viewResult.llmReason}}</text>
     <view class="insight-foot">
       <text class="insight-foot-text">这份判断只是起点，接下来怎么做，才更重要。</text>
     </view>

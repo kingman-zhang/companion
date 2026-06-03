@@ -98,6 +98,22 @@ function getQuestionnaire() {
   })
 }
 
+/**
+ * 按 assessmentId 获取评估结果
+ * 供页面刷新、深链和分享回显使用
+ *
+ * @param {string} assessmentId
+ * @returns {Promise<object>}
+ */
+function getAssessmentById(assessmentId) {
+  return request({ url: `/api/v1/assessment/${assessmentId}` }).then(res => {
+    if (res.code !== 200 || !res.data) {
+      throw new Error('assessment_load_failed')
+    }
+    return res.data
+  })
+}
+
 // ── UTF-8 ArrayBuffer → JS string ────────────────────────────────────────────
 // WeChat miniprogram 不提供 TextDecoder，手动处理 UTF-8 解码
 function _ab2utf8(buffer) {
@@ -281,4 +297,4 @@ function _extractBusinessError(raw) {
   }
 }
 
-module.exports = { request, requestStream, getQuestionnaire, BASE_URL }
+module.exports = { request, requestStream, getQuestionnaire, getAssessmentById, BASE_URL }
